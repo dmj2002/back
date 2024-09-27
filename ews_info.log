@@ -1,0 +1,75 @@
+[2024-09-27 13:04:52.207] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarting:55 - Starting EwSystemApplication using Java 1.8.0_411 on PC-202402181027 with PID 16972 (D:\myfolder\myproject\EWSystem\target\classes started by Administrator in D:\myfolder\myproject\EWSystem)
+[2024-09-27 13:04:52.212] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
+[2024-09-27 13:04:52.888] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
+[2024-09-27 13:04:52.891] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2024-09-27 13:04:52.917] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 11 ms. Found 0 Redis repository interfaces.
+[2024-09-27 13:04:53.532] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.initialize:108 - Tomcat initialized with port(s): 8080 (http)
+[2024-09-27 13:04:53.552] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Initializing ProtocolHandler ["http-nio-8080"]
+[2024-09-27 13:04:53.554] INFO  [main] o.a.catalina.core.StandardService.log:173 - Starting service [Tomcat]
+[2024-09-27 13:04:53.554] INFO  [main] o.a.catalina.core.StandardEngine.log:173 - Starting Servlet engine: [Apache Tomcat/9.0.68]
+[2024-09-27 13:04:53.859] INFO  [main] o.a.c.c.C.[.[localhost].[/ews].log:173 - Initializing Spring embedded WebApplicationContext
+[2024-09-27 13:04:53.859] INFO  [main] o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:290 - Root WebApplicationContext: initialization completed in 1592 ms
+[2024-09-27 13:04:55.141] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Starting ProtocolHandler ["http-nio-8080"]
+[2024-09-27 13:04:55.160] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.start:220 - Tomcat started on port(s): 8080 (http) with context path '/ews'
+[2024-09-27 13:04:55.172] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarted:61 - Started EwSystemApplication in 3.5 seconds (JVM running for 4.374)
+[2024-09-27 13:05:41.921] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-0} closing ...
+[2024-09-27 13:05:45.406] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarting:55 - Starting EwSystemApplication using Java 1.8.0_411 on PC-202402181027 with PID 4724 (D:\myfolder\myproject\EWSystem\target\classes started by Administrator in D:\myfolder\myproject\EWSystem)
+[2024-09-27 13:05:45.410] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
+[2024-09-27 13:05:46.063] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
+[2024-09-27 13:05:46.065] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2024-09-27 13:05:46.093] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 11 ms. Found 0 Redis repository interfaces.
+[2024-09-27 13:05:46.646] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.initialize:108 - Tomcat initialized with port(s): 8080 (http)
+[2024-09-27 13:05:46.655] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Initializing ProtocolHandler ["http-nio-8080"]
+[2024-09-27 13:05:46.656] INFO  [main] o.a.catalina.core.StandardService.log:173 - Starting service [Tomcat]
+[2024-09-27 13:05:46.656] INFO  [main] o.a.catalina.core.StandardEngine.log:173 - Starting Servlet engine: [Apache Tomcat/9.0.68]
+[2024-09-27 13:05:46.811] INFO  [main] o.a.c.c.C.[.[localhost].[/ews].log:173 - Initializing Spring embedded WebApplicationContext
+[2024-09-27 13:05:46.811] INFO  [main] o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:290 - Root WebApplicationContext: initialization completed in 1352 ms
+[2024-09-27 13:05:47.837] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Starting ProtocolHandler ["http-nio-8080"]
+[2024-09-27 13:05:47.858] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.start:220 - Tomcat started on port(s): 8080 (http) with context path '/ews'
+[2024-09-27 13:05:47.869] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarted:61 - Started EwSystemApplication in 2.984 seconds (JVM running for 3.678)
+[2024-09-27 13:08:40.674] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-0} closing ...
+[2024-09-27 13:08:42.689] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarting:55 - Starting EwSystemApplication using Java 1.8.0_411 on PC-202402181027 with PID 14472 (D:\myfolder\myproject\EWSystem\target\classes started by Administrator in D:\myfolder\myproject\EWSystem)
+[2024-09-27 13:08:42.693] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
+[2024-09-27 13:08:43.341] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
+[2024-09-27 13:08:43.344] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2024-09-27 13:08:43.371] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 11 ms. Found 0 Redis repository interfaces.
+[2024-09-27 13:08:43.924] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.initialize:108 - Tomcat initialized with port(s): 8080 (http)
+[2024-09-27 13:08:43.933] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Initializing ProtocolHandler ["http-nio-8080"]
+[2024-09-27 13:08:43.934] INFO  [main] o.a.catalina.core.StandardService.log:173 - Starting service [Tomcat]
+[2024-09-27 13:08:43.934] INFO  [main] o.a.catalina.core.StandardEngine.log:173 - Starting Servlet engine: [Apache Tomcat/9.0.68]
+[2024-09-27 13:08:44.090] INFO  [main] o.a.c.c.C.[.[localhost].[/ews].log:173 - Initializing Spring embedded WebApplicationContext
+[2024-09-27 13:08:44.090] INFO  [main] o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:290 - Root WebApplicationContext: initialization completed in 1346 ms
+[2024-09-27 13:08:45.140] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Starting ProtocolHandler ["http-nio-8080"]
+[2024-09-27 13:08:45.159] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.start:220 - Tomcat started on port(s): 8080 (http) with context path '/ews'
+[2024-09-27 13:08:45.170] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarted:61 - Started EwSystemApplication in 2.991 seconds (JVM running for 3.693)
+[2024-09-27 13:10:45.618] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-0} closing ...
+[2024-09-27 13:10:47.662] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarting:55 - Starting EwSystemApplication using Java 1.8.0_411 on PC-202402181027 with PID 4276 (D:\myfolder\myproject\EWSystem\target\classes started by Administrator in D:\myfolder\myproject\EWSystem)
+[2024-09-27 13:10:47.668] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
+[2024-09-27 13:10:48.322] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
+[2024-09-27 13:10:48.324] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2024-09-27 13:10:48.351] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 11 ms. Found 0 Redis repository interfaces.
+[2024-09-27 13:10:48.903] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.initialize:108 - Tomcat initialized with port(s): 8080 (http)
+[2024-09-27 13:10:48.913] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Initializing ProtocolHandler ["http-nio-8080"]
+[2024-09-27 13:10:48.913] INFO  [main] o.a.catalina.core.StandardService.log:173 - Starting service [Tomcat]
+[2024-09-27 13:10:48.914] INFO  [main] o.a.catalina.core.StandardEngine.log:173 - Starting Servlet engine: [Apache Tomcat/9.0.68]
+[2024-09-27 13:10:49.070] INFO  [main] o.a.c.c.C.[.[localhost].[/ews].log:173 - Initializing Spring embedded WebApplicationContext
+[2024-09-27 13:10:49.070] INFO  [main] o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:290 - Root WebApplicationContext: initialization completed in 1350 ms
+[2024-09-27 13:10:50.118] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Starting ProtocolHandler ["http-nio-8080"]
+[2024-09-27 13:10:50.137] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.start:220 - Tomcat started on port(s): 8080 (http) with context path '/ews'
+[2024-09-27 13:10:50.148] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarted:61 - Started EwSystemApplication in 3.008 seconds (JVM running for 3.685)
+[2024-09-27 13:11:48.249] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-0} closing ...
+[2024-09-27 18:53:58.716] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarting:55 - Starting EwSystemApplication using Java 1.8.0_301 on LAPTOP-VJPU3JRJ with PID 22588 (C:\Users\丁梦杰\Documents\java\EWSystem\target\classes started by 丁梦杰 in C:\Users\丁梦杰\Documents\java\EWSystem)
+[2024-09-27 18:53:58.716] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
+[2024-09-27 18:53:59.299] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
+[2024-09-27 18:53:59.315] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2024-09-27 18:53:59.331] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 17 ms. Found 0 Redis repository interfaces.
+[2024-09-27 18:53:59.787] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.initialize:108 - Tomcat initialized with port(s): 8080 (http)
+[2024-09-27 18:53:59.803] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Initializing ProtocolHandler ["http-nio-8080"]
+[2024-09-27 18:53:59.803] INFO  [main] o.a.catalina.core.StandardService.log:173 - Starting service [Tomcat]
+[2024-09-27 18:53:59.803] INFO  [main] o.a.catalina.core.StandardEngine.log:173 - Starting Servlet engine: [Apache Tomcat/9.0.68]
+[2024-09-27 18:53:59.944] INFO  [main] o.a.c.c.C.[.[localhost].[/ews].log:173 - Initializing Spring embedded WebApplicationContext
+[2024-09-27 18:53:59.944] INFO  [main] o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:290 - Root WebApplicationContext: initialization completed in 1181 ms
+[2024-09-27 18:54:00.726] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Starting ProtocolHandler ["http-nio-8080"]
+[2024-09-27 18:54:00.741] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.start:220 - Tomcat started on port(s): 8080 (http) with context path '/ews'
+[2024-09-27 18:54:00.741] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarted:61 - Started EwSystemApplication in 2.419 seconds (JVM running for 3.234)
+[2024-09-27 18:54:12.064] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-0} closing ...
