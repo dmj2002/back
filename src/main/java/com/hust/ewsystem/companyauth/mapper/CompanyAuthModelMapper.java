@@ -14,6 +14,6 @@ import com.hust.ewsystem.companyauth.entity.CompanyAuthModel;
  */
 public interface CompanyAuthModelMapper extends BaseMapper<CompanyAuthModel> {
 
-    // 数据层的简单的增删改查直接调用mybatis-plus封装好的接口，对于mybatis-plus不能满足要求的自己定义接口 在mapper中写sql
+    // 自定义的复杂SQL查询可以在这里定义
 
 }

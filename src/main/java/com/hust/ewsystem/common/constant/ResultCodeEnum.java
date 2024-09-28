@@ -2,7 +2,10 @@ package com.hust.ewsystem.common.constant;
 
 /**
  * <p>PURPOSE:
- * <p>DESCRIPTION: 错误码
+ * <p>DESCRIPTION:
+ * 每个枚举值（如 SQL_ERROR, PARAM_ERROR 等）都有两个属性：
+ * 状态码（code）：表示特定错误或状态的整数值。
+ * 描述信息（desc）：提供该状态码的文本描述。
  * <p>CALLED BY:
  * <p>CREATE DATE: 2022/12/5 15:23 星期一
  * <p>UPDATE DATE:

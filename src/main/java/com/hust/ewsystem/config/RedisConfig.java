@@ -8,8 +8,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 
 /**
- * @BelongsProject: MarkDetectMgr
- * @BelongsPackage: com.hust.fastdev.config
+ * @BelongsProject: EWSystem
+ * @BelongsPackage: com.hust.ewsystem.config
  * @Author: xdy
  * @CreateTime: 2024-07-24  11:01
  * @Description:

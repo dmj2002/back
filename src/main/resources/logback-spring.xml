@@ -84,7 +84,7 @@
         <queueSize>512</queueSize>
         <!-- 添加附加的appender,最多只能添加一个 -->
         <appender-ref ref="file.info"/>
-    </appender>I do not 知道
+    </appender>
 
     <appender name="ASYNC-ERROR" class="ch.qos.logback.classic.AsyncAppender">
         <!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
