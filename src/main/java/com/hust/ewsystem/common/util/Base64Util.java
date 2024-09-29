@@ -5,12 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
- * @BelongsProject: Base64Util
- * @BelongsPackage: com.hust.ewsystem.common.util
- * @Author: xdy
- * @CreateTime: 2024-05-16  11:31
- * @Description:
- * @Version: 1.0
+ * Base64工具类
  */
 public class Base64Util {
 

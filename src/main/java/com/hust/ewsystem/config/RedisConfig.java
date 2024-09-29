@@ -7,14 +7,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 
-/**
- * @BelongsProject: EWSystem
- * @BelongsPackage: com.hust.ewsystem.config
- * @Author: xdy
- * @CreateTime: 2024-07-24  11:01
- * @Description:
- * @Version: 1.0
- */
 @Configuration
 public class RedisConfig {
 

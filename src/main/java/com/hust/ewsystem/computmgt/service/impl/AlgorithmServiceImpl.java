@@ -7,14 +7,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
-/**
- * @BelongsProject: EWSystem
- * @BelongsPackage: com.hust.ewsystem.computmgt.service.impl
- * @Author: xdy
- * @CreateTime: 2024-09-27  12:59
- * @Description:
- * @Version: 1.0
- */
+
 @Service
 public class AlgorithmServiceImpl implements AlgorithmService {
 

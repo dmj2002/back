@@ -8,14 +8,6 @@ import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 
-/**
- * @BelongsProject: MarkDetectMgr
- * @BelongsPackage: com.hust.fastdev.model
- * @Author: xdy
- * @CreateTime: 2024-05-15  10:01
- * @Description:
- * @Version: 1.0
- */
 
 @Data
 @EqualsAndHashCode(callSuper = false)

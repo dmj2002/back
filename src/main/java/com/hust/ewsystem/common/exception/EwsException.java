@@ -2,19 +2,9 @@ package com.hust.ewsystem.common.exception;
 
 
 /**
- * <p>PURPOSE:
- * <p>DESCRIPTION: 异常类
- * <p>CALLED BY:
- * <p>CREATE DATE: 2022/12/5 15:22 星期一
- * <p>UPDATE DATE:
- * <p>UPDATE USER:
- * <p>HISTORY:
- *
- * @author xdy
- * @version 1.0
- * @see
- * @since java 1.8
+ * 异常类
  */
+
 public class EwsException extends RuntimeException {
 
     public EwsException(Throwable cause) {

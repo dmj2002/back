@@ -3,14 +3,7 @@ package com.hust.ewsystem.computmgt.entity;
 import java.io.File;
 import java.util.Arrays;
 
-/**
- * @BelongsProject: FileSmart
- * @BelongsPackage: com.yssm.filesmart.model
- * @Author: xdy
- * @CreateTime: 2024-06-27  14:40
- * @Description:
- * @Version: 1.0
- */
+
 public class WkFileForm {
 
 

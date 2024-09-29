@@ -9,14 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
-/**
- * @BelongsProject: MarkDetectMgr
- * @BelongsPackage: com.hust.fastdev.controller
- * @Author: xdy
- * @CreateTime: 2024-05-16  11:31
- * @Description:
- * @Version: 1.0
- */
+
 @RestController
 @RequestMapping("/algorithm")
 public class AlgorithmController {

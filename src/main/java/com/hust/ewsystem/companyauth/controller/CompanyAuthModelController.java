@@ -17,14 +17,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * @BelongsProject: MarkDetectMgr
- * @BelongsPackage: com.hust.fastdev.controller
- * @Author: xdy
- * @CreateTime: 2024-05-16  11:31
- * @Description:
- * @Version: 1.0
- */
+
 @RestController
 @RequestMapping("/compAuthMgr")
 public class CompanyAuthModelController {

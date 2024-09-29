@@ -12,19 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
- * <p>PURPOSE:
- * <p>DESCRIPTION: jsckson工具类
- * <p>DESCRIPTION:
- * <p>CALLED BY:	ZhangShihua
- * <p>CREATE DATE: 2023年5月25日
- * <p>UPDATE DATE: 2023年5月25日
- * <p>UPDATE USER:
- * <p>HISTORY:		1.0
- * @version 1.0
- * @author ZhangShihua(张士华)
- * @since java 1.8.0
- * @see
+ * Json工具类
  */
 public class JsonUtil {
 

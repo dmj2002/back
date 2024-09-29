@@ -10,14 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * @BelongsProject: MarkDetectMgr
- * @BelongsPackage: com.hust.fastdev.service.impl
- * @Author: xdy
- * @CreateTime: 2024-05-16  10:46
- * @Description: 企业与授权模块关联关系Service实现
- * @Version: 1.0
- */
+
 @Service
 @Transactional
 public class CompanyAuthModelServiceImpl extends ServiceImpl<CompanyAuthModelMapper, CompanyAuthModel> implements CompanyAuthModelService {

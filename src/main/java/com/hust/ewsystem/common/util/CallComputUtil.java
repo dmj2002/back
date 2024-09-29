@@ -17,12 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @BelongsProject: EWSystem
- * @BelongsPackage: com.hust.ewsystem.common.util
- * @Author: xdy
- * @CreateTime: 2024-09-27  12:02
- * @Description:
- * @Version: 1.0
+ * 调用算法工具类
  */
 @Component
 public class CallComputUtil {

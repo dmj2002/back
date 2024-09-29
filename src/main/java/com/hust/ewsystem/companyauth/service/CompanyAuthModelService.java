@@ -5,14 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.hust.ewsystem.companyauth.entity.CompanyAuthModel;
 import java.util.List;
 
-/**
- * @BelongsProject: MarkDetectMgr
- * @BelongsPackage: com.hust.fastdev.service
- * @Author: xdy
- * @CreateTime: 2024-05-16  10:45
- * @Description: 企业与授权模块关联关系Service
- * @Version: 1.0
- */
+
 public interface CompanyAuthModelService extends IService<CompanyAuthModel> {
 
     /**

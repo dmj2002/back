@@ -4,18 +4,7 @@ import com.hust.ewsystem.common.constant.CommonConstant;
 import java.io.Serializable;
 
 /**
- * <p>PURPOSE:
- * <p>DESCRIPTION: 接口返回数据格式
- * <p>CALLED BY:
- * <p>CREATE DATE: 2023/3/1 14:49 星期三
- * <p>UPDATE DATE:
- * <p>UPDATE USER:
- * <p>HISTORY:
- *
- * @author xdy
- * @version 1.0
- * @see
- * @since java 1.8
+ *通用返回结果类
  */
 public class EwsResult<T> implements Serializable {
 

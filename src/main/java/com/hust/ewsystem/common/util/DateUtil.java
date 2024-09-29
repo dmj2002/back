@@ -20,12 +20,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 /**
- * @BelongsProject: Base64Util
- * @BelongsPackage: com.hust.ewsystem.common.util
- * @Author: xdy
- * @CreateTime: 2024-05-16  11:31
- * @Description:
- * @Version: 1.0
+ * 日期工具类
  */
 public class DateUtil {
 
@@ -115,7 +110,6 @@ public class DateUtil {
 
     /**
      * 字符串转换为Date
-     *
      * @param dateStr
      * @return
      */
@@ -149,7 +143,6 @@ public class DateUtil {
 
     /**
      * 字符串转换为Date
-     *
      * @param dateStr
      * @return
      */
@@ -184,7 +177,6 @@ public class DateUtil {
 
     /**
      * 取本地日期时间.
-     *
      * @return 格式化后的日期时间字符
      */
     public static String getCurrDateTime() {
@@ -193,7 +185,6 @@ public class DateUtil {
 
     /**
      * 取本地日期时间.
-     *
      * @return 格式化后的日期时间字符
      */
     public static String getCurrDate() {
@@ -226,7 +217,6 @@ public class DateUtil {
 
     /**
      * 格式化日期时间为.yyyyMMdd
-     *
      * @return 格式化后的日期时间字符
      */
     public static String formatDateTime(Date date, String format) {
