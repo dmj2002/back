@@ -1,79 +1,8 @@
-[2024-10-08 10:07:57.781] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarting:55 - Starting EwSystemApplication using Java 1.8.0_111 on DESKTOP-IGUT578 with PID 11308 (C:\Users\admin\Desktop\codes\back\target\classes started by admin in C:\Users\admin\Desktop\codes\back)
-[2024-10-08 10:07:57.796] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
-[2024-10-08 10:07:58.468] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
-[2024-10-08 10:07:58.468] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-[2024-10-08 10:07:58.499] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 12 ms. Found 0 Redis repository interfaces.
-[2024-10-08 10:07:59.296] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.initialize:108 - Tomcat initialized with port(s): 8080 (http)
-[2024-10-08 10:07:59.312] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Initializing ProtocolHandler ["http-nio-8080"]
-[2024-10-08 10:07:59.312] INFO  [main] o.a.catalina.core.StandardService.log:173 - Starting service [Tomcat]
-[2024-10-08 10:07:59.312] INFO  [main] o.a.catalina.core.StandardEngine.log:173 - Starting Servlet engine: [Apache Tomcat/9.0.68]
-[2024-10-08 10:07:59.515] INFO  [main] o.a.c.c.C.[.[localhost].[/ews].log:173 - Initializing Spring embedded WebApplicationContext
-[2024-10-08 10:07:59.515] INFO  [main] o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:290 - Root WebApplicationContext: initialization completed in 1672 ms
-[2024-10-08 10:08:00.471] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Starting ProtocolHandler ["http-nio-8080"]
-[2024-10-08 10:08:00.486] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.start:220 - Tomcat started on port(s): 8080 (http) with context path '/ews'
-[2024-10-08 10:08:00.486] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarted:61 - Started EwSystemApplication in 3.328 seconds (JVM running for 4.012)
-[2024-10-08 10:08:20.071] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-0} closing ...
-[2024-10-08 16:59:09.477] INFO  [main] c.h.e.u.c.UserControllerTest.logStarting:55 - Starting UserControllerTest using Java 1.8.0_111 on DESKTOP-IGUT578 with PID 4200 (started by admin in C:\Users\admin\Desktop\codes\back)
-[2024-10-08 16:59:09.477] INFO  [main] c.h.e.u.c.UserControllerTest.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
-[2024-10-08 16:59:09.492] INFO  [background-preinit] o.h.validator.internal.util.Version.<clinit>:21 - HV000001: Hibernate Validator 6.2.5.Final
-[2024-10-08 16:59:10.336] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
-[2024-10-08 16:59:10.336] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-[2024-10-08 16:59:10.367] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 15 ms. Found 0 Redis repository interfaces.
-[2024-10-08 16:59:12.425] INFO  [main] c.h.e.u.c.UserControllerTest.logStarted:61 - Started UserControllerTest in 3.361 seconds (JVM running for 4.253)
-[2024-10-08 16:59:12.733] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-0} closing ...
-[2024-10-08 17:02:20.889] INFO  [background-preinit] o.h.validator.internal.util.Version.<clinit>:21 - HV000001: Hibernate Validator 6.2.5.Final
-[2024-10-08 17:02:20.889] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarting:55 - Starting EwSystemApplication using Java 1.8.0_111 on DESKTOP-IGUT578 with PID 14148 (C:\Users\admin\Desktop\codes\back\target\classes started by admin in C:\Users\admin\Desktop\codes\back)
-[2024-10-08 17:02:20.889] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
-[2024-10-08 17:02:21.498] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
-[2024-10-08 17:02:21.498] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-[2024-10-08 17:02:21.530] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 11 ms. Found 0 Redis repository interfaces.
-[2024-10-08 17:02:22.254] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.initialize:108 - Tomcat initialized with port(s): 8080 (http)
-[2024-10-08 17:02:22.254] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Initializing ProtocolHandler ["http-nio-8080"]
-[2024-10-08 17:02:22.254] INFO  [main] o.a.catalina.core.StandardService.log:173 - Starting service [Tomcat]
-[2024-10-08 17:02:22.254] INFO  [main] o.a.catalina.core.StandardEngine.log:173 - Starting Servlet engine: [Apache Tomcat/9.0.68]
-[2024-10-08 17:02:22.363] INFO  [main] o.a.c.c.C.[.[localhost].[/ews].log:173 - Initializing Spring embedded WebApplicationContext
-[2024-10-08 17:02:22.363] INFO  [main] o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:290 - Root WebApplicationContext: initialization completed in 1427 ms
-[2024-10-08 17:02:23.263] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Starting ProtocolHandler ["http-nio-8080"]
-[2024-10-08 17:02:23.279] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.start:220 - Tomcat started on port(s): 8080 (http) with context path '/ews'
-[2024-10-08 17:02:23.279] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarted:61 - Started EwSystemApplication in 2.861 seconds (JVM running for 3.221)
-[2024-10-08 17:02:44.201] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-0} closing ...
-[2024-10-08 17:07:54.793] INFO  [main] c.h.e.u.c.UserControllerTest.logStarting:55 - Starting UserControllerTest using Java 1.8.0_111 on DESKTOP-IGUT578 with PID 16604 (started by admin in C:\Users\admin\Desktop\codes\back)
-[2024-10-08 17:07:54.794] INFO  [main] c.h.e.u.c.UserControllerTest.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
-[2024-10-08 17:07:54.800] INFO  [background-preinit] o.h.validator.internal.util.Version.<clinit>:21 - HV000001: Hibernate Validator 6.2.5.Final
-[2024-10-08 17:07:55.356] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
-[2024-10-08 17:07:55.361] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-[2024-10-08 17:07:55.388] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 13 ms. Found 0 Redis repository interfaces.
-[2024-10-08 17:07:57.324] INFO  [main] c.h.e.u.c.UserControllerTest.logStarted:61 - Started UserControllerTest in 2.916 seconds (JVM running for 3.828)
-[2024-10-08 17:07:57.553] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-0} closing ...
-[2024-10-08 17:11:35.036] INFO  [main] c.h.e.u.c.UserControllerTest.logStarting:55 - Starting UserControllerTest using Java 1.8.0_111 on DESKTOP-IGUT578 with PID 9900 (started by admin in C:\Users\admin\Desktop\codes\back)
-[2024-10-08 17:11:35.038] INFO  [main] c.h.e.u.c.UserControllerTest.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
-[2024-10-08 17:11:35.044] INFO  [background-preinit] o.h.validator.internal.util.Version.<clinit>:21 - HV000001: Hibernate Validator 6.2.5.Final
-[2024-10-08 17:11:35.771] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
-[2024-10-08 17:11:35.776] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-[2024-10-08 17:11:35.819] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 19 ms. Found 0 Redis repository interfaces.
-[2024-10-08 17:11:38.399] INFO  [main] c.h.e.u.c.UserControllerTest.logStarted:61 - Started UserControllerTest in 3.823 seconds (JVM running for 5.202)
-[2024-10-08 17:12:40.738] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-0} closing ...
-[2024-10-08 17:26:29.880] INFO  [main] c.h.e.u.c.UserControllerTest.logStarting:55 - Starting UserControllerTest using Java 1.8.0_111 on DESKTOP-IGUT578 with PID 13700 (started by admin in C:\Users\admin\Desktop\codes\back)
-[2024-10-08 17:26:29.882] INFO  [main] c.h.e.u.c.UserControllerTest.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
-[2024-10-08 17:26:29.886] INFO  [background-preinit] o.h.validator.internal.util.Version.<clinit>:21 - HV000001: Hibernate Validator 6.2.5.Final
-[2024-10-08 17:26:30.690] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
-[2024-10-08 17:26:30.700] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-[2024-10-08 17:26:30.740] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 18 ms. Found 0 Redis repository interfaces.
-[2024-10-08 17:26:32.835] INFO  [main] c.h.e.u.c.UserControllerTest.logStarted:61 - Started UserControllerTest in 3.337 seconds (JVM running for 4.23)
-[2024-10-08 17:26:33.188] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-0} closing ...
-[2024-10-08 17:27:25.059] INFO  [main] c.h.e.u.c.UserControllerTest.logStarting:55 - Starting UserControllerTest using Java 1.8.0_111 on DESKTOP-IGUT578 with PID 15620 (started by admin in C:\Users\admin\Desktop\codes\back)
-[2024-10-08 17:27:25.060] INFO  [main] c.h.e.u.c.UserControllerTest.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
-[2024-10-08 17:27:25.064] INFO  [background-preinit] o.h.validator.internal.util.Version.<clinit>:21 - HV000001: Hibernate Validator 6.2.5.Final
-[2024-10-08 17:27:25.594] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
-[2024-10-08 17:27:25.599] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-[2024-10-08 17:27:25.632] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 15 ms. Found 0 Redis repository interfaces.
-[2024-10-08 17:27:27.591] INFO  [main] c.h.e.u.c.UserControllerTest.logStarted:61 - Started UserControllerTest in 2.914 seconds (JVM running for 3.749)
-[2024-10-08 17:27:27.817] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-0} closing ...
-[2024-10-08 17:34:33.422] INFO  [main] c.h.e.u.c.UserControllerTest.logStarting:55 - Starting UserControllerTest using Java 1.8.0_111 on DESKTOP-IGUT578 with PID 7036 (started by admin in C:\Users\admin\Desktop\codes\back)
-[2024-10-08 17:34:33.423] INFO  [main] c.h.e.u.c.UserControllerTest.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
-[2024-10-08 17:34:33.427] INFO  [background-preinit] o.h.validator.internal.util.Version.<clinit>:21 - HV000001: Hibernate Validator 6.2.5.Final
-[2024-10-08 17:34:33.969] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
-[2024-10-08 17:34:33.973] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-[2024-10-08 17:34:34.004] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 14 ms. Found 0 Redis repository interfaces.
-[2024-10-08 17:34:35.918] INFO  [main] c.h.e.u.c.UserControllerTest.logStarted:61 - Started UserControllerTest in 2.869 seconds (JVM running for 3.7)
-[2024-10-08 17:34:36.141] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-0} closing ...
+[2024-10-08 18:55:38.539] INFO  [main] c.h.e.u.c.UserControllerTest.logStarting:55 - Starting UserControllerTest using Java 1.8.0_301 on LAPTOP-VJPU3JRJ with PID 22972 (started by 丁梦杰 in C:\Users\丁梦杰\Documents\java\EWSystem)
+[2024-10-08 18:55:38.542] INFO  [main] c.h.e.u.c.UserControllerTest.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
+[2024-10-08 18:55:38.546] INFO  [background-preinit] o.h.validator.internal.util.Version.<clinit>:21 - HV000001: Hibernate Validator 6.2.5.Final
+[2024-10-08 18:55:39.260] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
+[2024-10-08 18:55:39.264] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2024-10-08 18:55:39.301] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 22 ms. Found 0 Redis repository interfaces.
+[2024-10-08 18:55:41.804] INFO  [main] c.h.e.u.c.UserControllerTest.logStarted:61 - Started UserControllerTest in 3.726 seconds (JVM running for 5.067)
+[2024-10-08 18:55:42.186] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-0} closing ...

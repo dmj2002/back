@@ -21,8 +21,8 @@ public class User extends Model<User> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId
     @NotBlank(message = "用户id不能为空")
+    @TableId
     private String id; // 用户id
 
     @NotBlank(message = "用户名不能为空")
