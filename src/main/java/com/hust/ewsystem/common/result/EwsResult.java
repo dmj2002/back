@@ -35,6 +35,13 @@ public class EwsResult<T> implements Serializable {
         return r;
     }
 
+    public static<T> EwsResult<T> ok(String msg) {
+        EwsResult<T> r = new EwsResult<T>();
+        r.setCode(CommonConstant.NUM_COMMON_0);
+        r.setMessage(msg);
+        return r;
+    }
+
     public static<T> EwsResult<T> OK(String msg, T data) {
         EwsResult<T> r = new EwsResult<T>();
         r.setCode(CommonConstant.NUM_COMMON_0);

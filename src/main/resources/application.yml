@@ -12,9 +12,9 @@ server:
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://112.124.106.58:3306/fastdev?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://192.168.1.153:3306/windfarm
     username: root
-    password: HUST321
+    password: feiling
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   # Redis 连接集群
@@ -31,6 +31,7 @@ mybatis:
   mapper-locations: classpath:mapper/*.xml
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
 
 # Python 脚本位置
 algorithm:
