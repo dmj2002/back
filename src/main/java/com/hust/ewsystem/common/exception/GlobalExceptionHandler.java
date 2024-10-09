@@ -2,7 +2,7 @@ package com.hust.ewsystem.common.exception;
 
 
 import com.hust.ewsystem.common.result.EwsResult;
-import com.sun.xml.internal.ws.handler.HandlerException;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -12,8 +12,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public EwsResult<?> HandlerException(Exception e){
         e.printStackTrace();
-        String message = e.getMessage();
-        if(message != null) return EwsResult.error(message);
-        return EwsResult.error("操作失败");
+        return EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "操作失败");
     }
 }
