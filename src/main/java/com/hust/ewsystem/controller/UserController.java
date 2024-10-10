@@ -1,13 +1,14 @@
-package com.hust.ewsystem.usermanage.controller;
+package com.hust.ewsystem.controller;
 
 import com.hust.ewsystem.common.result.EwsResult;
-import com.hust.ewsystem.usermanage.entity.User;
-import com.hust.ewsystem.usermanage.service.UserService;
+import com.hust.ewsystem.entity.User;
+import com.hust.ewsystem.service.UserService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/user")
@@ -23,9 +24,9 @@ public class UserController {
     }
 
     @GetMapping("/get/{id}")
-    public EwsResult<User> getUser(@PathVariable String id) {
+    public EwsResult<?> getUser(@PathVariable String id) {
         User user = userService.getById(id);
-        return EwsResult.ok(user);
+        return Objects.isNull(user) ? EwsResult.error("未找到用户") : EwsResult.ok(user);
     }
 
     @PutMapping("/update")
@@ -41,10 +42,9 @@ public class UserController {
     }
 
     @GetMapping("/list")
-    public EwsResult<List<User>> listUsers() {
+    public EwsResult<List<User>> listUser() {
         List<User> users = userService.list();
         return EwsResult.ok(users);
     }
-
 
 }

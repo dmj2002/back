@@ -1,4 +1,4 @@
-package com.hust.ewsystem.usermanage.entity;
+package com.hust.ewsystem.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;

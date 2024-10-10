@@ -1,10 +1,12 @@
 package com.hust.ewsystem.usermanage.controller;
 
-import com.hust.ewsystem.usermanage.entity.User;
-import com.hust.ewsystem.usermanage.service.UserService;
+import com.hust.ewsystem.entity.User;
+import com.hust.ewsystem.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.Objects;
 
 @SpringBootTest
 class UserControllerTest {
@@ -14,8 +16,12 @@ class UserControllerTest {
 
     @Test
     void getUser() {
-        User user = userService.getById("001");
-        System.out.println(user);
+        User user = userService.getById("006");
+        if(Objects.isNull(user)) {
+            System.out.println("User not found");
+        } else {
+            System.out.println(user);
+        }
     }
 
     @Test
