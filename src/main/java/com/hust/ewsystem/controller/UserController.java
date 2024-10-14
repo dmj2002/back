@@ -18,7 +18,7 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/add")
-    public EwsResult<Boolean> addUser(@RequestBody @Validated User user) {
+    public EwsResult<?> addUser(@RequestBody @Validated User user) {
         boolean result = userService.save(user);
         return result ? EwsResult.ok("添加成功") : EwsResult.error("添加失败");
     }
@@ -30,13 +30,13 @@ public class UserController {
     }
 
     @PutMapping("/update")
-    public EwsResult<Boolean> updateUser(@RequestBody @Validated User user) {
+    public EwsResult<?> updateUser(@RequestBody @Validated User user) {
         boolean result = userService.updateById(user);
         return result ? EwsResult.ok("更新成功") : EwsResult.error("更新失败");
     }
 
     @DeleteMapping("/delete/{id}")
-    public EwsResult<Boolean> deleteUser(@PathVariable String id) {
+    public EwsResult<?> deleteUser(@PathVariable String id) {
         boolean result = userService.removeById(id);
         return result ? EwsResult.ok("删除成功") : EwsResult.error("删除失败");
     }
