@@ -44,7 +44,7 @@ public class CallComputUtil {
         // 把需要的参数放在集合中
         List<String> command = new ArrayList<>();
         command.add("python");
-        command.add(pythonFilePath + "/xxx.py");
+        command.add("/xxx.py");
         command.add(sourceFilePath);
         command.add(objectFilePath);
 
@@ -66,6 +66,7 @@ public class CallComputUtil {
      * @param command
      */
     public Object execCmd(String filePath, List<String> command) throws Exception {
+        //启动进程
         ProcessBuilder processBuilder = new ProcessBuilder();
         //定义命令内容
         processBuilder.directory(new File(filePath));
@@ -73,6 +74,14 @@ public class CallComputUtil {
         processBuilder.command(command);
         //将标准输入流和错误输入流合并，通过标准输入流读取信息
         processBuilder.redirectErrorStream(true);
+        //通过流输出到py文件
+//        try (OutputStreamWriter writer = new OutputStreamWriter(process.getOutputStream())) {
+//            // 将数据逐行传递给 Python
+//            for (DataEntity data : dataList) {
+//                writer.write(data.getId() + "," + data.getName() + "," + data.getValue() + "\n");
+//            }
+//            writer.flush();
+//        }
         StringBuilder outputString = null;
         try {
             //启动进程
