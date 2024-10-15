@@ -33,8 +33,6 @@ public class Models implements Serializable {
 
     private String modelParameters;  // 模型参数
 
-    private BigDecimal price;  // 价格
-
     private Integer modelStatus;  // 模型状态
 
     private Integer creatorId;  // 创建者id
