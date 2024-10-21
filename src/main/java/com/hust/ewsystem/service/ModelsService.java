@@ -5,6 +5,6 @@ import com.hust.ewsystem.entity.Models;
 
 import java.util.Map;
 
-public interface ModelService extends IService<Models> {
+public interface ModelsService extends IService<Models> {
     Map<String, Object> trainModel(Models model);
 }

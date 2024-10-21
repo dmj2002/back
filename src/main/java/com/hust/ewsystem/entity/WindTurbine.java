@@ -2,31 +2,31 @@ package com.hust.ewsystem.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.extension.activerecord.Model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-
 
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-public class Company implements Serializable {
+public class WindTurbine implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @TableId(type = IdType.AUTO)
-    private Integer companyId; // 公司id
+    private Integer turbineId; // 风机id
 
-    private String companyName; // 公司名
+    private String turbineNumber; // 风机编号
 
-    private String companyAddress; // 公司地址
+    private String turbineModel; // 风机型号
 
-    private String companyNumber; // 公司电话
+    private Double turbineCapacity; // 风机容量
 
-    private String remarks; // 备注
+    private Integer windFarmId; // 风场id
 
+    private Integer warningStatus; // 预警工况
+
+    private Integer currentStatus; // 当前工况
 }

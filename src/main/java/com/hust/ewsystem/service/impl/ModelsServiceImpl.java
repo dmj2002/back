@@ -2,8 +2,8 @@ package com.hust.ewsystem.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hust.ewsystem.entity.Models;
-import com.hust.ewsystem.mapper.ModelMapper;
-import com.hust.ewsystem.service.ModelService;
+import com.hust.ewsystem.mapper.ModelsMapper;
+import com.hust.ewsystem.service.ModelsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Service
 @Transactional
-public class ModelServiceImpl extends ServiceImpl<ModelMapper, Models> implements ModelService {
+public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> implements ModelsService {
 
     @Autowired
     private RestTemplate restTemplate;
