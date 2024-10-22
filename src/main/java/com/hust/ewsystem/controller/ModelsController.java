@@ -20,9 +20,9 @@ public class ModelsController {
     public EwsResult<?> train(@RequestBody Map<String, Object> FileForm) {
         // TODO 参数校验  业务参数补全  业务处理等 异常和日志看情况处理
         // 算法调用
-        modelsService.train(FileForm);
+        String result = modelsService.train(FileForm);
         // TODO 结果处理等
-        return EwsResult.OK(null);
+        return EwsResult.OK(result);
     }
 
 }
