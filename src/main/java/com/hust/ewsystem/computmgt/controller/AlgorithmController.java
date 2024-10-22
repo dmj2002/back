@@ -33,7 +33,7 @@ public class AlgorithmController {
         // 算法调用
         algorithmService.testAlgorithm(wkFileForm);
         // TODO 结果处理等
-        return EwsResult.ok(null);
+        return EwsResult.OK(null);
     }
 
 }

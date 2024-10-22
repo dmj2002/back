@@ -35,7 +35,7 @@ mybatis-plus:
 
 # Python 脚本位置
 algorithm:
-  pythonFilePath: /home
+  pythonFilePath: C:\data
 
 logging:
   level:

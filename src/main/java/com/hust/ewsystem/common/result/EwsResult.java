@@ -28,14 +28,14 @@ public class EwsResult<T> implements Serializable {
     public EwsResult() {
     }
 
-    public static<T> EwsResult<T> ok(T data) {
+    public static<T> EwsResult<T> OK(T data) {
         EwsResult<T> r = new EwsResult<T>();
         r.setCode(CommonConstant.NUM_COMMON_0);
         r.setResult(data);
         return r;
     }
 
-    public static<T> EwsResult<T> ok(String msg) {
+    public static<T> EwsResult<T> OK(String msg) {
         EwsResult<T> r = new EwsResult<T>();
         r.setCode(CommonConstant.NUM_COMMON_0);
         r.setMessage(msg);

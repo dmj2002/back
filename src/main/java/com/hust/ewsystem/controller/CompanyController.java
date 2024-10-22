@@ -21,30 +21,30 @@ public class CompanyController {
     @PostMapping("/add")
     public EwsResult<Boolean> addCompany(@RequestBody @Validated Company company) {
         boolean result = companyService.save(company);
-        return result ? EwsResult.ok("添加成功") : EwsResult.error("添加失败");
+        return result ? EwsResult.OK("添加成功") : EwsResult.error("添加失败");
     }
 
     @GetMapping("/get/{id}")
     public EwsResult<?> getCompany(@PathVariable String id) {
         Company company = companyService.getById(id);
-        return Objects.isNull(company) ? EwsResult.error("未找到公司") : EwsResult.ok(company);
+        return Objects.isNull(company) ? EwsResult.error("未找到公司") : EwsResult.OK(company);
     }
 
     @PutMapping("/update")
     public EwsResult<Boolean> updateCompany(@RequestBody @Validated Company company) {
         boolean result = companyService.updateById(company);
-        return result ? EwsResult.ok("更新成功") : EwsResult.error("更新失败");
+        return result ? EwsResult.OK("更新成功") : EwsResult.error("更新失败");
     }
 
     @DeleteMapping("/delete/{id}")
     public EwsResult<Boolean> deleteCompany(@PathVariable String id) {
         boolean result = companyService.removeById(id);
-        return result ? EwsResult.ok("删除成功") : EwsResult.error("删除失败");
+        return result ? EwsResult.OK("删除成功") : EwsResult.error("删除失败");
     }
 
     @GetMapping("/list")
     public EwsResult<List<Company>> listCompany() {
         List<Company> company = companyService.list();
-        return EwsResult.ok(company);
+        return EwsResult.OK(company);
     }
 }

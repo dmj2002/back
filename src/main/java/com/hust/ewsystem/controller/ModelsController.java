@@ -5,12 +5,10 @@ import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.Models;
 import com.hust.ewsystem.service.ModelsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/model")
@@ -19,12 +17,13 @@ public class ModelsController {
     @Autowired
     private ModelsService modelsService;
 
-    @GetMapping("/training")
-    public EwsResult<?> trainModel(@RequestBody Models model) {
-        Map<String, Object> result = modelsService.trainModel(model);
-        return (result != null && !result.isEmpty())
-                ? EwsResult.OK("训练成功", result)
-                : EwsResult.error("训练失败");
-
+    @GetMapping("/train")
+    public EwsResult<?> train(@RequestBody Map<String, Object> FileForm) {
+        // TODO 参数校验  业务参数补全  业务处理等 异常和日志看情况处理
+        // 算法调用
+        modelsService.train(FileForm);
+        // TODO 结果处理等
+        return EwsResult.OK(null);
     }
+
 }
