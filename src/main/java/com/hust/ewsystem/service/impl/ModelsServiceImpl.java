@@ -44,16 +44,13 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         List<String> command = new ArrayList<>();
         command.add("python");
         command.add("/001/train.py");
+//        command.add(String.format("%d/train.py", modelId));
         command.add(csvFilePath);
         command.add(saveModelPath);
-
 //      LOGGER.info("command: {}", JSON.toJSONString(command, SerializerFeature.WriteMapNullValue));
-
         // 调用算法
         Object result = execCmd(pythonFilePath, command);
-
         // TODO 实时计算结果数据格式我不知道，结果你自己处理了返回
-
         return null;
     }
 
