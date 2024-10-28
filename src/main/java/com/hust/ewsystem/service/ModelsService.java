@@ -7,4 +7,5 @@ import java.util.Map;
 
 public interface ModelsService extends IService<Models> {
     String train(Map<String, Object> FileForm);
+    String getTaskStatus(String taskId);
 }

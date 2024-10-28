@@ -1,8 +1,15 @@
 package com.hust.ewsystem.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.CommonData;
+import com.hust.ewsystem.entity.RealPoint;
+import com.hust.ewsystem.entity.StandPoint;
+import com.hust.ewsystem.entity.StandRealRelate;
+import com.hust.ewsystem.mapper.RealPointMapper;
+import com.hust.ewsystem.mapper.StandPointMapper;
+import com.hust.ewsystem.mapper.StandRealRelateMapper;
 import com.hust.ewsystem.service.CommonDataService;
 import com.hust.ewsystem.service.ModelsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +20,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -25,23 +33,48 @@ public class ModelsController {
     private ModelsService modelsService;
     @Autowired
     private CommonDataService commonDataService;
+    @Autowired
+    private StandRealRelateMapper standRealRelateMapper;
+    @Autowired
+    private StandPointMapper standPointMapper;
+    @Autowired
+    private RealPointMapper realPointMapper;
 
     @GetMapping("/train")
     public EwsResult<?> train(@RequestBody Map<String, Object> FileForm) {
-        // TODO 真实测点和标准测点的映射
-        List<String> standPoints = (List<String>) FileForm.get("tableNames");
+        Map<String, String> standToRealPointMap = new HashMap<>();
+        List<String> standPoints = (List<String>) FileForm.get("standPoints");
         // 参数校验
         if (standPoints == null || standPoints.isEmpty()) {
             return EwsResult.error("数据库名称缺失");
         }
+        //标准测点标签 -> 标准测点ID
+        Map<String, Integer> standPointMap = standPointMapper.selectList(
+                new QueryWrapper<StandPoint>().in("point_label", standPoints)
+        ).stream().collect(Collectors.toMap(StandPoint::getPointLabel, StandPoint::getPointId));
+         //标准测点ID -> 真实测点ID
+        Map<Integer, Integer> standToRealMap = standRealRelateMapper.selectList(
+                new QueryWrapper<StandRealRelate>().in("stand_point_id", standPointMap.values())
+        ).stream().collect(Collectors.toMap(StandRealRelate::getStandPointId, StandRealRelate::getRealPointId));
+        //真实测点ID -> 真实测点标签
+        Map<Integer,String> RealPointMap = realPointMapper.selectList(
+                new QueryWrapper<RealPoint>().in("point_id", standToRealMap.values())
+        ).stream().collect(Collectors.toMap(RealPoint::getPointId, RealPoint::getPointLabel));
+        //标准测点标签 -> 真实测点标签
+        for (String standPointLabel : standPoints) {
+            Integer standPointId = standPointMap.get(standPointLabel);
+            Integer realPointId = standToRealMap.get(standPointId);
+            String realPointLabel = RealPointMap.get(realPointId);
+            standToRealPointMap.put(standPointLabel, realPointLabel);
+        }
         // 查询数据并提取 datetime和value列
         Map<LocalDateTime, Map<String, Object>> alignedData = new TreeMap<>();
-        for (String standPoint : standPoints) {
-            List<CommonData> data = commonDataService.selectAllData(standPoint);
+        for (Map.Entry<String,String> entry : standToRealPointMap.entrySet()) {
+            List<CommonData> data = commonDataService.selectAllData(entry.getValue());
             for (CommonData record : data) {
                 LocalDateTime datetime = record.getDatetime();
                 Double value = record.getValue();
-                alignedData.computeIfAbsent(datetime, k -> new HashMap<>()).put(standPoint, value);
+                alignedData.computeIfAbsent(datetime, k -> new HashMap<>()).put(entry.getKey(), value);
             }
         }
         // 写入 CSV 文件
@@ -73,8 +106,14 @@ public class ModelsController {
             return EwsResult.error("写入 CSV 文件失败: " + e.getMessage());
         }
         // 算法调用
-//        String result = modelsService.train(FileForm);
+        String taskId = modelsService.train(FileForm);
         // TODO 结果处理等
-        return EwsResult.OK("666");
+        return EwsResult.OK(taskId);
+    }
+    // 查询任务状态
+    @GetMapping("/status/{taskId}")
+    public EwsResult<?>  getTaskStatus(@PathVariable String taskId) {
+        String taskStatus = modelsService.getTaskStatus(taskId);
+        return EwsResult.OK(taskStatus);
     }
 }
