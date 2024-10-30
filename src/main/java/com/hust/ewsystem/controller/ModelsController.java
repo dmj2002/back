@@ -87,20 +87,17 @@ public class ModelsController {
             csvWriter.append("\n");
             // 写入数据
             for (Map.Entry<LocalDateTime, Map<String, Object>> entry : alignedData.entrySet()) {
-                boolean allHaveValue = true;
+//                boolean allHaveValue = true;
                 StringBuilder line = new StringBuilder(entry.getKey().toString());
                 for (String standPoint : standPoints) {
                     Double value = (Double) entry.getValue().get(standPoint);
-                    if (value == null) {
-                        allHaveValue = false;
-                        break;
-                    }
+//                    if (value == null) {
+//                        allHaveValue = false;
+//                        break;
+//                    }
                     line.append(",").append(value);
                 }
-                if (allHaveValue) {
-                    csvWriter.append(line.toString()).append("\n");
-                }
-
+                csvWriter.append(line.toString()).append("\n");
             }
         } catch (IOException e) {
             return EwsResult.error("写入 CSV 文件失败: " + e.getMessage());
