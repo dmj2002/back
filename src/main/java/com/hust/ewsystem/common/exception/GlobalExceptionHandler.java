@@ -3,15 +3,23 @@ package com.hust.ewsystem.common.exception;
 
 import com.hust.ewsystem.common.result.EwsResult;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import javax.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public EwsResult<?> HandlerException(Exception e){
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public EwsResult<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         e.printStackTrace();
-        return EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "操作失败");
+        return EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "校验参数失败");
+    }
+    @ExceptionHandler(ConstraintViolationException.class)
+    public EwsResult<?> handleConstraintViolationException(ConstraintViolationException e) {
+        e.printStackTrace();
+        return EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "校验参数失败");
     }
 }
