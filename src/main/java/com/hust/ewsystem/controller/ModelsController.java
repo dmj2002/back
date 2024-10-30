@@ -40,7 +40,7 @@ public class ModelsController {
     @Autowired
     private RealPointMapper realPointMapper;
 
-    @GetMapping("/train")
+    @PostMapping("/train")
     public EwsResult<?> train(@RequestBody Map<String, Object> FileForm) {
         Map<String, String> standToRealPointMap = new HashMap<>();
         List<String> standPoints = (List<String>) FileForm.get("standPoints");
