@@ -5,8 +5,8 @@ server:
     uri-encoding: UTF-8
   ssl:
     enabled: false
-  servlet:
-    context-path: /ews
+#  servlet:
+#    context-path: /ews
 # 数据库连接配置
 spring:
   datasource:
@@ -16,13 +16,13 @@ spring:
       datasource:
         master:
           type: com.alibaba.druid.pool.DruidDataSource
-          url: jdbc:mysql://192.168.1.153:3306/Ewsystem?useSSL=false
+          url: jdbc:mysql://192.168.1.153:3306/EWSystem?useSSL=false
           username: root
           password: feiling
           driver-class-name: com.mysql.cj.jdbc.Driver
         slave:
           type: com.alibaba.druid.pool.DruidDataSource
-          url: jdbc:mysql://192.168.1.153:3306/EwsystemData?useSSL=false
+          url: jdbc:mysql://192.168.1.153:3306/EWSystemdata?useSSL=false
           username: root
           password: feiling
           driver-class-name: com.mysql.cj.jdbc.Driver

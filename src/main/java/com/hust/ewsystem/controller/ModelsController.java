@@ -70,7 +70,7 @@ public class ModelsController {
         // 查询数据并提取 datetime和value列
         Map<LocalDateTime, Map<String, Object>> alignedData = new TreeMap<>();
         for (Map.Entry<String,String> entry : standToRealPointMap.entrySet()) {
-            List<CommonData> data = commonDataService.selectAllData(entry.getValue());
+            List<CommonData> data = commonDataService.selectAllData(entry.getValue().toLowerCase());
             for (CommonData record : data) {
                 LocalDateTime datetime = record.getDatetime();
                 Double value = record.getValue();
@@ -90,7 +90,7 @@ public class ModelsController {
                 boolean allHaveValue = true;
                 StringBuilder line = new StringBuilder(entry.getKey().toString());
                 for (String standPoint : standPoints) {
-                    Integer value = (Integer) entry.getValue().get(standPoint);
+                    Double value = (Double) entry.getValue().get(standPoint);
                     if (value == null) {
                         allHaveValue = false;
                         break;
