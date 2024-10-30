@@ -116,4 +116,10 @@ public class ModelsController {
         String taskStatus = modelsService.getTaskStatus(taskId);
         return EwsResult.OK(taskStatus);
     }
+    @DeleteMapping("/kill/{taskId}")
+    public EwsResult<?> deleteTask(@PathVariable String taskId) {
+        String killTask = modelsService.killTask(taskId);
+        return EwsResult.OK(killTask);
+    }
+
 }
