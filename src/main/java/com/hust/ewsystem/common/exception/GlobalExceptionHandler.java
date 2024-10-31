@@ -22,4 +22,14 @@ public class GlobalExceptionHandler {
         e.printStackTrace();
         return EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "校验参数失败");
     }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public EwsResult<?> handleIllegalArgumentException(IllegalArgumentException e) {
+        e.printStackTrace();
+        return EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "校验参数失败");
+    }
+    @ExceptionHandler(FileSaveException.class)
+    public EwsResult<?> handleFileSaveException(FileSaveException e) {
+        e.printStackTrace();
+        return EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "文件保存失败");
+    }
 }

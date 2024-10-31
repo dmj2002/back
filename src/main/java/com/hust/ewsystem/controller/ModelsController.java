@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 
 @RestController
-@RequestMapping("/model")
+@RequestMapping("/api")
 public class ModelsController {
 
     @Value("${algorithm.pythonFilePath}")
@@ -108,10 +108,10 @@ public class ModelsController {
         return EwsResult.OK(taskId);
     }
     // 查询任务状态
-    @GetMapping("/status/{taskId}")
-    public EwsResult<?>  getTaskStatus(@PathVariable String taskId) {
-        String taskStatus = modelsService.getTaskStatus(taskId);
-        return EwsResult.OK(taskStatus);
+    @PostMapping("/queryTask")
+    public EwsResult<?>  getTaskStatus(@RequestBody Map<String,Object>request){
+        List<String> taskId = (List<String>) request.get("taskIdList");
+        return EwsResult.OK(null);
     }
     @DeleteMapping("/kill/{taskId}")
     public EwsResult<?> deleteTask(@PathVariable String taskId) {
