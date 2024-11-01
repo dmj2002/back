@@ -47,7 +47,7 @@ public class AlgorithmsController {
         if(save) {
             Integer algorithmId = algorithms.getAlgorithmId();
             // 定义文件保存路径
-            String algorithmDir = pythonFilePath + "/A" + String.format("%04d", algorithmId);;
+            String algorithmDir = pythonFilePath + "/A" + String.format("%04d", algorithmId);
             File dir = new File(algorithmDir);
             if (!dir.exists()) {
                 dir.mkdirs(); // 创建目录

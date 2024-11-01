@@ -26,14 +26,19 @@ public class ModelsController {
 
     @Value("${algorithm.pythonFilePath}")
     public String pythonFilePath;
+
     @Autowired
     private ModelsService modelsService;
+
     @Autowired
     private CommonDataService commonDataService;
+
     @Autowired
     private StandRealRelateMapper standRealRelateMapper;
+
     @Autowired
     private StandPointMapper standPointMapper;
+
     @Autowired
     private RealPointMapper realPointMapper;
 
@@ -122,7 +127,7 @@ public class ModelsController {
     @PostMapping("/queryTask")
     public EwsResult<?>  getTaskStatus(@RequestBody Map<String,Object> taskForm) {
         List<String> taskIdList = (List<String>) taskForm.get("taskIdList");
-        List<Map<String, Object>> taskStatus = new ArrayList<>();;
+        List<Map<String, Object>> taskStatus = new ArrayList<>();
         // 检查任务ID列表是否为空
         if (taskIdList == null || taskIdList.isEmpty()) {
             return EwsResult.error("任务ID列表不能为空");

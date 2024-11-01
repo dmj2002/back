@@ -2,7 +2,6 @@ package com.hust.ewsystem.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hust.ewsystem.common.exception.EwsException;
 import com.hust.ewsystem.entity.Models;
 import com.hust.ewsystem.mapper.ModelsMapper;
 import com.hust.ewsystem.service.ModelsService;
