@@ -3,10 +3,7 @@ package com.hust.ewsystem.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hust.ewsystem.common.result.EwsResult;
-import com.hust.ewsystem.entity.CommonData;
-import com.hust.ewsystem.entity.RealPoint;
-import com.hust.ewsystem.entity.StandPoint;
-import com.hust.ewsystem.entity.StandRealRelate;
+import com.hust.ewsystem.entity.*;
 import com.hust.ewsystem.mapper.RealPointMapper;
 import com.hust.ewsystem.mapper.StandPointMapper;
 import com.hust.ewsystem.mapper.StandRealRelateMapper;
@@ -29,16 +26,35 @@ public class ModelsController {
 
     @Value("${algorithm.pythonFilePath}")
     public String pythonFilePath;
+
     @Autowired
     private ModelsService modelsService;
+
     @Autowired
     private CommonDataService commonDataService;
+
     @Autowired
     private StandRealRelateMapper standRealRelateMapper;
+
     @Autowired
     private StandPointMapper standPointMapper;
+
     @Autowired
     private RealPointMapper realPointMapper;
+
+    @PostMapping("/add")
+    public EwsResult<?> addmodel(@RequestBody Models model){
+        List<Models> modelsList = new ArrayList<>();
+        for (String turbineId : model.getTurbineId()) {
+            Models newModel = new Models();
+            newModel.setModelName(model.getModelName());
+            newModel.setTurbineId(Arrays.asList(turbineId));
+            // TODO 其他字段映射
+            modelsList.add(newModel);
+        }
+        modelsService.saveBatch(modelsList);
+        return EwsResult.OK(null);
+    }
 
     @PostMapping("/train")
     public EwsResult<?> train(@RequestBody Map<String, Object> FileForm) {
@@ -87,7 +103,7 @@ public class ModelsController {
             csvWriter.append("\n");
             // 写入数据
             for (Map.Entry<LocalDateTime, Map<String, Object>> entry : alignedData.entrySet()) {
-                boolean allHaveValue = true;
+//                boolean allHaveValue = true;
                 StringBuilder line = new StringBuilder(entry.getKey().toString());
                 for (String standPoint : standPoints) {
                     Double value = (Double) entry.getValue().get(standPoint);
@@ -97,10 +113,7 @@ public class ModelsController {
 //                    }
                     line.append(",").append(value);
                 }
-                if (allHaveValue) {
-                    csvWriter.append(line.toString()).append("\n");
-                }
-
+                csvWriter.append(line.toString()).append("\n");
             }
         } catch (IOException e) {
             return EwsResult.error("写入 CSV 文件失败: " + e.getMessage());
@@ -111,9 +124,18 @@ public class ModelsController {
         return EwsResult.OK(taskId);
     }
     // 查询任务状态
-    @GetMapping("/status/{taskId}")
-    public EwsResult<?>  getTaskStatus(@PathVariable String taskId) {
-        String taskStatus = modelsService.getTaskStatus(taskId);
+    @PostMapping("/queryTask")
+    public EwsResult<?>  getTaskStatus(@RequestBody Map<String,Object> taskForm) {
+        List<String> taskIdList = (List<String>) taskForm.get("taskIdList");
+        List<Map<String, Object>> taskStatus = new ArrayList<>();
+        // 检查任务ID列表是否为空
+        if (taskIdList == null || taskIdList.isEmpty()) {
+            return EwsResult.error("任务ID列表不能为空");
+        }
+        for (String taskId : taskIdList) {
+            Map<String, Object> onetaskStatus = modelsService.getTaskStatus(taskId);
+            taskStatus.add(onetaskStatus);
+        }
         return EwsResult.OK(taskStatus);
     }
     @DeleteMapping("/kill/{taskId}")

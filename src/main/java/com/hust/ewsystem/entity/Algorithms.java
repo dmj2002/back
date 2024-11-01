@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 
@@ -18,12 +19,14 @@ public class Algorithms implements Serializable {
 
     @TableId(type = IdType.AUTO)
     private Integer algorithmId; // 算法id
-
+    @NotBlank(message = "算法名称不能为空")
     private String algorithmLabel; // 算法编号
 
-    private String algorithmName; // 算法名称
-
     private String algorithmVersion; // 算法版本
+
+    private String algorithmFilePath; // 算法文件路径
+
+    private Integer outputType; // 输出类型
 
     private String description; // 算法描述
 }
