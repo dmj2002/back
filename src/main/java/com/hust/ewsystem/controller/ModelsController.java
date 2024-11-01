@@ -3,10 +3,7 @@ package com.hust.ewsystem.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hust.ewsystem.common.result.EwsResult;
-import com.hust.ewsystem.entity.CommonData;
-import com.hust.ewsystem.entity.RealPoint;
-import com.hust.ewsystem.entity.StandPoint;
-import com.hust.ewsystem.entity.StandRealRelate;
+import com.hust.ewsystem.entity.*;
 import com.hust.ewsystem.mapper.RealPointMapper;
 import com.hust.ewsystem.mapper.StandPointMapper;
 import com.hust.ewsystem.mapper.StandRealRelateMapper;
@@ -24,7 +21,7 @@ import java.util.stream.Collectors;
 
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/model")
 public class ModelsController {
 
     @Value("${algorithm.pythonFilePath}")
@@ -39,6 +36,20 @@ public class ModelsController {
     private StandPointMapper standPointMapper;
     @Autowired
     private RealPointMapper realPointMapper;
+
+    @PostMapping("/add")
+    public EwsResult<?> addmodel(@RequestBody Models model){
+        List<Models> modelsList = new ArrayList<>();
+        for (String turbineId : model.getTurbineId()) {
+            Models newModel = new Models();
+            newModel.setModelName(model.getModelName());
+            newModel.setTurbineId(Arrays.asList(turbineId));
+            // TODO 其他字段映射
+            modelsList.add(newModel);
+        }
+        modelsService.saveBatch(modelsList);
+        return EwsResult.OK(null);
+    }
 
     @PostMapping("/train")
     public EwsResult<?> train(@RequestBody Map<String, Object> FileForm) {
@@ -109,9 +120,18 @@ public class ModelsController {
     }
     // 查询任务状态
     @PostMapping("/queryTask")
-    public EwsResult<?>  getTaskStatus(@RequestBody Map<String,Object>request){
-        List<String> taskId = (List<String>) request.get("taskIdList");
-        return EwsResult.OK(null);
+    public EwsResult<?>  getTaskStatus(@RequestBody Map<String,Object> taskForm) {
+        List<String> taskIdList = (List<String>) taskForm.get("taskIdList");
+        List<Map<String, Object>> taskStatus = new ArrayList<>();;
+        // 检查任务ID列表是否为空
+        if (taskIdList == null || taskIdList.isEmpty()) {
+            return EwsResult.error("任务ID列表不能为空");
+        }
+        for (String taskId : taskIdList) {
+            Map<String, Object> onetaskStatus = modelsService.getTaskStatus(taskId);
+            taskStatus.add(onetaskStatus);
+        }
+        return EwsResult.OK(taskStatus);
     }
     @DeleteMapping("/kill/{taskId}")
     public EwsResult<?> deleteTask(@PathVariable String taskId) {

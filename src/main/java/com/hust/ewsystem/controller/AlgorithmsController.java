@@ -1,7 +1,7 @@
 package com.hust.ewsystem.controller;
 
 
-import com.hust.ewsystem.common.exception.FileSaveException;
+import com.hust.ewsystem.common.exception.FileException;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.AlgForm;
 import com.hust.ewsystem.entity.Algorithms;
@@ -38,10 +38,10 @@ public class AlgorithmsController {
         MultipartFile predictFile = algForm.getPredict();
         // 额外检查文件是否为空
         if (trainFile.isEmpty()) {
-            throw new IllegalArgumentException("训练文件不能为空");
+            throw new FileException("训练文件不能为空");
         }
         if (predictFile.isEmpty()) {
-            throw new IllegalArgumentException("预测文件不能为空");
+            throw new FileException("预测文件不能为空");
         }
         boolean save = algorithmsService.save(algorithms);
         if(save) {
@@ -57,7 +57,7 @@ public class AlgorithmsController {
                 trainFile.transferTo(new File(dir, "train.py"));
                 predictFile.transferTo(new File(dir, "predict.py"));
             } catch (IOException e) {
-                throw new FileSaveException("文件保存失败: " + e.getMessage(), e);
+                throw new FileException("文件保存失败: " + e.getMessage());
             }
             Map<String, Object> result = new HashMap<>();
             result.put("algorithmId", algorithmId);

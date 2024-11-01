@@ -27,8 +27,8 @@ public class GlobalExceptionHandler {
         e.printStackTrace();
         return EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "校验参数失败");
     }
-    @ExceptionHandler(FileSaveException.class)
-    public EwsResult<?> handleFileSaveException(FileSaveException e) {
+    @ExceptionHandler(FileException.class)
+    public EwsResult<?> handleFileSaveException(FileException e) {
         e.printStackTrace();
         return EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "文件保存失败");
     }
