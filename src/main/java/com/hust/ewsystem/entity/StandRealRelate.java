@@ -1,5 +1,6 @@
 package com.hust.ewsystem.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,7 +11,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class StandRealRelate {
 
-    @TableId
+    @TableId(type = IdType.AUTO)
     private Integer id; // 记录id
 
     private Integer standPointId; // 标准测点id
