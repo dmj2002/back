@@ -151,7 +151,7 @@ public class ModelsController {
                     .filter(item -> !realPointIdSet.contains(item))
                     .collect(Collectors.toSet());
             //插入(不需要主键，最后统一插入)
-            if(insertSet != null && !insertSet.isEmpty()){
+            if(!insertSet.isEmpty()){
                 for(Integer realPointId : insertSet){
                     ModelRealRelate modelRealRelate = new ModelRealRelate();
                     modelRealRelate.setModelId(modelform.getModel().getModelId())
@@ -160,7 +160,7 @@ public class ModelsController {
                 }
             }
             //删除
-            if (deleteSet != null && !deleteSet.isEmpty()) {
+            if (!deleteSet.isEmpty()) {
                 boolean remove = modelRealRelateService.remove(
                         new QueryWrapper<ModelRealRelate>()
                                 .eq("model_id", modelform.getModel().getModelId())
@@ -171,7 +171,7 @@ public class ModelsController {
                 }
             }
         }
-        if(modelRealRelateList != null && !modelRealRelateList.isEmpty()){
+        if(!modelRealRelateList.isEmpty()){
             boolean saveBatch = modelRealRelateService.saveBatch(modelRealRelateList);
             if(!saveBatch){
                 throw new CrudException("修改模型失败");
