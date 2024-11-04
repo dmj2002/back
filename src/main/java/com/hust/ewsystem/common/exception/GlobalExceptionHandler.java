@@ -2,6 +2,8 @@ package com.hust.ewsystem.common.exception;
 
 
 import com.hust.ewsystem.common.result.EwsResult;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,23 +15,27 @@ import javax.validation.ConstraintViolationException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public EwsResult<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ResponseEntity<EwsResult<?>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         e.printStackTrace();
-        return EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "校验参数失败");
+        EwsResult<?> result = EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "校验参数失败");
+        return new ResponseEntity<>(result, HttpStatus.UNAUTHORIZED); // 401 状态码
     }
     @ExceptionHandler(ConstraintViolationException.class)
-    public EwsResult<?> handleConstraintViolationException(ConstraintViolationException e) {
+    public ResponseEntity<EwsResult<?>> handleConstraintViolationException(ConstraintViolationException e) {
         e.printStackTrace();
-        return EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "校验参数失败");
-    }
-    @ExceptionHandler(IllegalArgumentException.class)
-    public EwsResult<?> handleIllegalArgumentException(IllegalArgumentException e) {
-        e.printStackTrace();
-        return EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "校验参数失败");
+        EwsResult<?> result = EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "校验参数失败");
+        return new ResponseEntity<>(result, HttpStatus.UNAUTHORIZED); // 401 状态码
     }
     @ExceptionHandler(FileException.class)
-    public EwsResult<?> handleFileSaveException(FileException e) {
+    public ResponseEntity<EwsResult<?>> handleFileSaveException(FileException e) {
         e.printStackTrace();
-        return EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "文件保存失败");
+        EwsResult<?> result = EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "文件保存失败");
+        return new ResponseEntity<>(result, HttpStatus.UNAUTHORIZED); // 401 状态码
+    }
+    @ExceptionHandler(CrudException.class)
+    public ResponseEntity<EwsResult<?>> handleFileSaveException(CrudException e) {
+        e.printStackTrace();
+        EwsResult<?> result = EwsResult.error(StringUtils.hasLength(e.getMessage()) ? e.getMessage() : "文件保存失败");
+        return new ResponseEntity<>(result, HttpStatus.UNAUTHORIZED); // 401 状态码
     }
 }

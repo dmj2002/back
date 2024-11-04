@@ -4,18 +4,13 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.*;
 
 public class test {
     public static void main(String[] args) {
-        String pythonFilePath = "C:/data";
-        Integer algorithmId = 1000;
-        String algorithmDir = pythonFilePath + "/A" + String.format("%04d", algorithmId);;
-        System.out.println(algorithmDir);
+        List<String> stringList = Arrays.asList("apple");
+        System.out.println(stringList.get(0));  // Output: apple, banana, cherry
     }
 //    public static void main(String[] args) {
 //        final Map<String, String> taskStatusMap = new ConcurrentHashMap<>();

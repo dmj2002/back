@@ -8,7 +8,6 @@ import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -24,8 +23,6 @@ public class Models implements Serializable {
 
     private String modelLabel;  // 模型标签
 
-    private List<String> turbineId;  // 风机id
-
     private Integer algorithmId;  // 算法id
 
     private String modelVersion;  // 模型版本
@@ -35,6 +32,8 @@ public class Models implements Serializable {
     private Integer modelStatus;  // 模型状态
 
     private Integer creatorId;  // 创建者id
+
+    private Integer turbineId;  // 风机id
 
     private LocalDateTime createdTime;  // 创建时间
 
@@ -47,4 +46,5 @@ public class Models implements Serializable {
     private Integer moduleId;  // 模块id
 
     private Integer alertInterval;  // 每隔多少秒跑一次算法文件
+
 }

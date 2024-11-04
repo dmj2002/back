@@ -6,10 +6,11 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.springframework.web.multipart.MultipartFile;
 
+
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-public class AlgForm {
+public class AlgForm   {
 
     private Algorithms algorithms;
 

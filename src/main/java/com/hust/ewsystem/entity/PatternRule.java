@@ -6,25 +6,25 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-
 
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-public class Algorithms implements Serializable {
+public class PatternRule implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @TableId(type = IdType.AUTO)
-    private Integer algorithmId; // 算法id
-    @NotBlank(message = "算法名称不能为空")
-    private String algorithmLabel; // 算法编号
+    private Integer patternRuleId;  // 规则id
 
-    private String algorithmName; // 算法名称
+    private Integer patternId;  // 工况id
 
-    private String algorithmVersion; // 算法版本
+    private Integer pointId;  // 测点id
 
-    private String description; // 算法描述
+    private String operator;  // 操作符
+
+    private Double value;  // 阈值
+
+    private Integer logicSymbol;  // 逻辑符
 }

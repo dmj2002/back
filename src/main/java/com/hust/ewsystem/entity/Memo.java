@@ -6,15 +6,21 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
+
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-public class AlgorithmStandRelate{
+public class Memo implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @TableId(type = IdType.AUTO)
-    private Integer id; // 记录id
+    private Integer memoId;  // 备忘录id
 
-    private Integer algorithmId; // 算法id
+    private Integer reportId ;  // 备忘录内容
 
-    private Integer standPointId; // 标准测点id
+    private Integer employeeId;  // 创建者id
+
+    private String noteDetail;  // 备忘录内容
 }

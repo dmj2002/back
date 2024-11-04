@@ -21,11 +21,15 @@ public class Warnings implements Serializable {
 
     private Integer warningStatus; // 预警状态
 
+    private Integer modelId; // 模型id
+
     private LocalDateTime startTime; // 预警开始时间
 
     private LocalDateTime endTime; // 预警结束时间
 
     private Integer handlerId; // 处理人id
+
+    private LocalDateTime handledTime; // 处理时间
 
     private String warningDescription; // 预警描述
 

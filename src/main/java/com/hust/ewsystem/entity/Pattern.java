@@ -21,10 +21,4 @@ public class Pattern implements Serializable {
     private Integer patternStatus; // 工况状态
 
     private Integer patternPriority; // 工况优先级
-
-    private Integer applicablePointType; // 适用测点类型
-
-    private String operation; // 运算符
-
-    private Integer logicOperator; // 逻辑运算符
 }
