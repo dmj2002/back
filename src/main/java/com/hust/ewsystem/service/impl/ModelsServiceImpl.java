@@ -31,7 +31,9 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         String taskId = UUID.randomUUID().toString();
         File taskDir = new File(pythonFilePath + "/task_logs/" + taskId);
         if (!taskDir.exists()) {
-            taskDir.mkdirs();
+            if (!taskDir.mkdirs()) {
+                throw new FileException("创建任务目录失败");
+            }
         }
         //准备setting.json
         File settingFile = new File(taskDir, "setting.json");
@@ -101,7 +103,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             List<String> command = new ArrayList<>();
             command.add("python");
             command.add(String.format("%s/train.py", algorithmLabel));
-            command.add(String.format("%d/setting", taskId));
+            command.add(String.format("%s/setting", taskId));
             // 调用算法
             ProcessBuilder processBuilder = new ProcessBuilder();
             processBuilder.directory(new File(filepath));
