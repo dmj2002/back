@@ -28,15 +28,15 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     private final Map<String, Process> processMap = new ConcurrentHashMap<>();
 
     @Override
-    public String train(Map<String, Object> FileForm) {
+    public String train(String algorithmLabel) {
         String taskId = UUID.randomUUID().toString();
-        // 初始化任务状态
-        Map<String, Object> taskStatus = new HashMap<>();
-        taskStatus.put("taskId", taskId);
-        taskStatus.put("status", "训练中");
-        taskStatus.put("progress", 0);
-        taskStatusMap.put(taskId, taskStatus);
-        executeShellCmd(FileForm);
+        File taskDir = new File(pythonFilePath, taskId);
+        if (!taskDir.exists()) {
+            taskDir.mkdirs();
+        }
+        //TODO：准备setting.json
+
+        executeShellCmd(pythonFilePath,algorithmLabel,taskId);
         return taskId;
     }
     // 提供查询任务状态的接口
@@ -74,26 +74,31 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         else {
             result = "任务ID无效";
         }
-        taskStatusMap.remove(taskId);
         processMap.remove(taskId);
         return result;
     }
-
-    public Object executeShellCmd(Map<String, Object> FileForm) {
+    /**
+     *
+     * @param filepath 进程工作目录
+     * @param algorithmLabel 算法标签
+     * @param taskId 任务ID
+     * @return
+     */
+    public Object executeShellCmd(String filepath, String algorithmLabel, String taskId) {
         try {
             // 把需要的参数放在集合中
             List<String> command = new ArrayList<>();
             command.add("python");
-//            command.add(String.format("%s/train.py", modelLabel));
-            command.add("setting.json");
+            command.add(String.format("%s/train.py", algorithmLabel));
+            command.add(String.format("%d/setting", taskId));
             // 调用算法
             ProcessBuilder processBuilder = new ProcessBuilder();
-            processBuilder.directory(new File(pythonFilePath));
+            processBuilder.directory(new File(filepath));
             processBuilder.command(command);
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
-
-            // 更新任务状态
+            // 记录任务ID和进程的映射
+            processMap.put(taskId, process);
         } catch (Exception e) {
             e.printStackTrace();
         }

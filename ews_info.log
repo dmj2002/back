@@ -1,0 +1,192 @@
+[2024-11-06 10:32:17.945] INFO  [background-preinit] o.h.validator.internal.util.Version.<clinit>:21 - HV000001: Hibernate Validator 6.2.5.Final
+[2024-11-06 10:32:17.953] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarting:55 - Starting EwSystemApplication using Java 1.8.0_111 on DESKTOP-IGUT578 with PID 9884 (C:\Users\admin\Desktop\codes\back\target\classes started by admin in C:\Users\admin\Desktop\codes\back)
+[2024-11-06 10:32:17.955] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
+[2024-11-06 10:32:18.741] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
+[2024-11-06 10:32:18.746] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2024-11-06 10:32:18.779] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 16 ms. Found 0 Redis repository interfaces.
+[2024-11-06 10:32:19.904] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.initialize:108 - Tomcat initialized with port(s): 8080 (http)
+[2024-11-06 10:32:19.918] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Initializing ProtocolHandler ["http-nio-8080"]
+[2024-11-06 10:32:19.920] INFO  [main] o.a.catalina.core.StandardService.log:173 - Starting service [Tomcat]
+[2024-11-06 10:32:19.920] INFO  [main] o.a.catalina.core.StandardEngine.log:173 - Starting Servlet engine: [Apache Tomcat/9.0.68]
+[2024-11-06 10:32:20.072] INFO  [main] o.a.c.c.C.[Tomcat].[localhost].[/].log:173 - Initializing Spring embedded WebApplicationContext
+[2024-11-06 10:32:20.072] INFO  [main] o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:290 - Root WebApplicationContext: initialization completed in 2055 ms
+[2024-11-06 10:32:20.535] INFO  [main] c.a.druid.pool.DruidDataSource.init:990 - {dataSource-1,master} inited
+[2024-11-06 10:32:20.541] INFO  [main] c.a.druid.pool.DruidDataSource.init:990 - {dataSource-2,slave} inited
+[2024-11-06 10:32:20.543] INFO  [main] c.b.d.d.DynamicRoutingDataSource.addDataSource:158 - dynamic-datasource - add a datasource named [slave] success
+[2024-11-06 10:32:20.546] INFO  [main] c.b.d.d.DynamicRoutingDataSource.addDataSource:158 - dynamic-datasource - add a datasource named [master] success
+[2024-11-06 10:32:20.546] INFO  [main] c.b.d.d.DynamicRoutingDataSource.afterPropertiesSet:241 - dynamic-datasource initial loaded [2] datasource,primary datasource named [master]
+[2024-11-06 10:32:20.656] WARN  [main] c.b.m.c.injector.DefaultSqlInjector.getMethodList:56 - class com.hust.ewsystem.entity.CommonData ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+[2024-11-06 10:32:21.944] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Starting ProtocolHandler ["http-nio-8080"]
+[2024-11-06 10:32:21.974] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.start:220 - Tomcat started on port(s): 8080 (http) with context path ''
+[2024-11-06 10:32:21.985] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarted:61 - Started EwSystemApplication in 4.667 seconds (JVM running for 5.149)
+[2024-11-06 10:32:26.530] INFO  [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/].log:173 - Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2024-11-06 10:32:26.531] INFO  [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet.initServletBean:525 - Initializing Servlet 'dispatcherServlet'
+[2024-11-06 10:32:26.533] INFO  [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet.initServletBean:547 - Completed initialization in 2 ms
+[2024-11-06 10:34:27.441] INFO  [SpringApplicationShutdownHook] c.b.d.d.DynamicRoutingDataSource.destroy:215 - dynamic-datasource start closing ....
+[2024-11-06 10:34:27.444] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-2} closing ...
+[2024-11-06 10:34:27.445] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2116 - {dataSource-2} closed
+[2024-11-06 10:34:27.445] INFO  [SpringApplicationShutdownHook] c.b.d.d.d.DefaultDataSourceDestroyer.destroy:98 - dynamic-datasource close the datasource named [slave] success,
+[2024-11-06 10:34:27.445] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-1} closing ...
+[2024-11-06 10:34:27.445] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2116 - {dataSource-1} closed
+[2024-11-06 10:34:27.445] INFO  [SpringApplicationShutdownHook] c.b.d.d.d.DefaultDataSourceDestroyer.destroy:98 - dynamic-datasource close the datasource named [master] success,
+[2024-11-06 10:34:27.446] INFO  [SpringApplicationShutdownHook] c.b.d.d.DynamicRoutingDataSource.destroy:219 - dynamic-datasource all closed success,bye
+[2024-11-06 10:34:35.178] INFO  [background-preinit] o.h.validator.internal.util.Version.<clinit>:21 - HV000001: Hibernate Validator 6.2.5.Final
+[2024-11-06 10:34:35.191] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarting:55 - Starting EwSystemApplication using Java 1.8.0_111 on DESKTOP-IGUT578 with PID 11976 (C:\Users\admin\Desktop\codes\back\target\classes started by admin in C:\Users\admin\Desktop\codes\back)
+[2024-11-06 10:34:35.193] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
+[2024-11-06 10:34:35.886] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
+[2024-11-06 10:34:35.890] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2024-11-06 10:34:35.921] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 15 ms. Found 0 Redis repository interfaces.
+[2024-11-06 10:34:36.834] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.initialize:108 - Tomcat initialized with port(s): 8080 (http)
+[2024-11-06 10:34:36.843] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Initializing ProtocolHandler ["http-nio-8080"]
+[2024-11-06 10:34:36.844] INFO  [main] o.a.catalina.core.StandardService.log:173 - Starting service [Tomcat]
+[2024-11-06 10:34:36.844] INFO  [main] o.a.catalina.core.StandardEngine.log:173 - Starting Servlet engine: [Apache Tomcat/9.0.68]
+[2024-11-06 10:34:36.963] INFO  [main] o.a.c.c.C.[Tomcat].[localhost].[/].log:173 - Initializing Spring embedded WebApplicationContext
+[2024-11-06 10:34:36.963] INFO  [main] o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:290 - Root WebApplicationContext: initialization completed in 1699 ms
+[2024-11-06 10:34:37.348] INFO  [main] c.a.druid.pool.DruidDataSource.init:990 - {dataSource-1,master} inited
+[2024-11-06 10:34:37.355] INFO  [main] c.a.druid.pool.DruidDataSource.init:990 - {dataSource-2,slave} inited
+[2024-11-06 10:34:37.355] INFO  [main] c.b.d.d.DynamicRoutingDataSource.addDataSource:158 - dynamic-datasource - add a datasource named [slave] success
+[2024-11-06 10:34:37.358] INFO  [main] c.b.d.d.DynamicRoutingDataSource.addDataSource:158 - dynamic-datasource - add a datasource named [master] success
+[2024-11-06 10:34:37.358] INFO  [main] c.b.d.d.DynamicRoutingDataSource.afterPropertiesSet:241 - dynamic-datasource initial loaded [2] datasource,primary datasource named [master]
+[2024-11-06 10:34:37.464] WARN  [main] c.b.m.c.injector.DefaultSqlInjector.getMethodList:56 - class com.hust.ewsystem.entity.CommonData ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+[2024-11-06 10:34:38.731] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Starting ProtocolHandler ["http-nio-8080"]
+[2024-11-06 10:34:38.752] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.start:220 - Tomcat started on port(s): 8080 (http) with context path ''
+[2024-11-06 10:34:38.760] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarted:61 - Started EwSystemApplication in 4.21 seconds (JVM running for 4.645)
+[2024-11-06 10:35:45.717] INFO  [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/].log:173 - Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2024-11-06 10:35:45.717] INFO  [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet.initServletBean:525 - Initializing Servlet 'dispatcherServlet'
+[2024-11-06 10:35:45.719] INFO  [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet.initServletBean:547 - Completed initialization in 1 ms
+[2024-11-06 10:37:21.667] INFO  [SpringApplicationShutdownHook] c.b.d.d.DynamicRoutingDataSource.destroy:215 - dynamic-datasource start closing ....
+[2024-11-06 10:37:21.671] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-2} closing ...
+[2024-11-06 10:37:21.673] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2116 - {dataSource-2} closed
+[2024-11-06 10:37:21.673] INFO  [SpringApplicationShutdownHook] c.b.d.d.d.DefaultDataSourceDestroyer.destroy:98 - dynamic-datasource close the datasource named [slave] success,
+[2024-11-06 10:37:21.673] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-1} closing ...
+[2024-11-06 10:37:21.677] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2116 - {dataSource-1} closed
+[2024-11-06 10:37:21.677] INFO  [SpringApplicationShutdownHook] c.b.d.d.d.DefaultDataSourceDestroyer.destroy:98 - dynamic-datasource close the datasource named [master] success,
+[2024-11-06 10:37:21.677] INFO  [SpringApplicationShutdownHook] c.b.d.d.DynamicRoutingDataSource.destroy:219 - dynamic-datasource all closed success,bye
+[2024-11-06 10:43:00.952] INFO  [background-preinit] o.h.validator.internal.util.Version.<clinit>:21 - HV000001: Hibernate Validator 6.2.5.Final
+[2024-11-06 10:43:00.962] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarting:55 - Starting EwSystemApplication using Java 1.8.0_111 on DESKTOP-IGUT578 with PID 7832 (C:\Users\admin\Desktop\codes\back\target\classes started by admin in C:\Users\admin\Desktop\codes\back)
+[2024-11-06 10:43:00.963] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
+[2024-11-06 10:43:01.689] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
+[2024-11-06 10:43:01.694] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2024-11-06 10:43:01.732] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 20 ms. Found 0 Redis repository interfaces.
+[2024-11-06 10:43:02.631] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.initialize:108 - Tomcat initialized with port(s): 8080 (http)
+[2024-11-06 10:43:02.642] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Initializing ProtocolHandler ["http-nio-8080"]
+[2024-11-06 10:43:02.643] INFO  [main] o.a.catalina.core.StandardService.log:173 - Starting service [Tomcat]
+[2024-11-06 10:43:02.643] INFO  [main] o.a.catalina.core.StandardEngine.log:173 - Starting Servlet engine: [Apache Tomcat/9.0.68]
+[2024-11-06 10:43:02.771] INFO  [main] o.a.c.c.C.[Tomcat].[localhost].[/].log:173 - Initializing Spring embedded WebApplicationContext
+[2024-11-06 10:43:02.771] INFO  [main] o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:290 - Root WebApplicationContext: initialization completed in 1747 ms
+[2024-11-06 10:43:03.162] INFO  [main] c.a.druid.pool.DruidDataSource.init:990 - {dataSource-1,master} inited
+[2024-11-06 10:43:03.168] INFO  [main] c.a.druid.pool.DruidDataSource.init:990 - {dataSource-2,slave} inited
+[2024-11-06 10:43:03.169] INFO  [main] c.b.d.d.DynamicRoutingDataSource.addDataSource:158 - dynamic-datasource - add a datasource named [slave] success
+[2024-11-06 10:43:03.170] INFO  [main] c.b.d.d.DynamicRoutingDataSource.addDataSource:158 - dynamic-datasource - add a datasource named [master] success
+[2024-11-06 10:43:03.170] INFO  [main] c.b.d.d.DynamicRoutingDataSource.afterPropertiesSet:241 - dynamic-datasource initial loaded [2] datasource,primary datasource named [master]
+[2024-11-06 10:43:03.276] WARN  [main] c.b.m.c.injector.DefaultSqlInjector.getMethodList:56 - class com.hust.ewsystem.entity.CommonData ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+[2024-11-06 10:43:04.614] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Starting ProtocolHandler ["http-nio-8080"]
+[2024-11-06 10:43:04.639] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.start:220 - Tomcat started on port(s): 8080 (http) with context path ''
+[2024-11-06 10:43:04.647] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarted:61 - Started EwSystemApplication in 4.262 seconds (JVM running for 4.725)
+[2024-11-06 10:43:09.197] INFO  [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/].log:173 - Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2024-11-06 10:43:09.197] INFO  [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet.initServletBean:525 - Initializing Servlet 'dispatcherServlet'
+[2024-11-06 10:43:09.199] INFO  [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet.initServletBean:547 - Completed initialization in 1 ms
+[2024-11-06 10:45:04.195] INFO  [SpringApplicationShutdownHook] c.b.d.d.DynamicRoutingDataSource.destroy:215 - dynamic-datasource start closing ....
+[2024-11-06 10:45:04.198] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-2} closing ...
+[2024-11-06 10:45:04.199] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2116 - {dataSource-2} closed
+[2024-11-06 10:45:04.199] INFO  [SpringApplicationShutdownHook] c.b.d.d.d.DefaultDataSourceDestroyer.destroy:98 - dynamic-datasource close the datasource named [slave] success,
+[2024-11-06 10:45:04.199] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-1} closing ...
+[2024-11-06 10:45:04.203] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2116 - {dataSource-1} closed
+[2024-11-06 10:45:04.204] INFO  [SpringApplicationShutdownHook] c.b.d.d.d.DefaultDataSourceDestroyer.destroy:98 - dynamic-datasource close the datasource named [master] success,
+[2024-11-06 10:45:04.204] INFO  [SpringApplicationShutdownHook] c.b.d.d.DynamicRoutingDataSource.destroy:219 - dynamic-datasource all closed success,bye
+[2024-11-06 10:45:27.890] INFO  [background-preinit] o.h.validator.internal.util.Version.<clinit>:21 - HV000001: Hibernate Validator 6.2.5.Final
+[2024-11-06 10:45:27.907] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarting:55 - Starting EwSystemApplication using Java 1.8.0_111 on DESKTOP-IGUT578 with PID 9204 (C:\Users\admin\Desktop\codes\back\target\classes started by admin in C:\Users\admin\Desktop\codes\back)
+[2024-11-06 10:45:27.909] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
+[2024-11-06 10:45:28.739] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
+[2024-11-06 10:45:28.742] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2024-11-06 10:45:28.775] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 16 ms. Found 0 Redis repository interfaces.
+[2024-11-06 10:45:29.627] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.initialize:108 - Tomcat initialized with port(s): 8080 (http)
+[2024-11-06 10:45:29.639] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Initializing ProtocolHandler ["http-nio-8080"]
+[2024-11-06 10:45:29.639] INFO  [main] o.a.catalina.core.StandardService.log:173 - Starting service [Tomcat]
+[2024-11-06 10:45:29.640] INFO  [main] o.a.catalina.core.StandardEngine.log:173 - Starting Servlet engine: [Apache Tomcat/9.0.68]
+[2024-11-06 10:45:29.765] INFO  [main] o.a.c.c.C.[Tomcat].[localhost].[/].log:173 - Initializing Spring embedded WebApplicationContext
+[2024-11-06 10:45:29.766] INFO  [main] o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:290 - Root WebApplicationContext: initialization completed in 1783 ms
+[2024-11-06 10:45:30.155] INFO  [main] c.a.druid.pool.DruidDataSource.init:990 - {dataSource-1,master} inited
+[2024-11-06 10:45:30.163] INFO  [main] c.a.druid.pool.DruidDataSource.init:990 - {dataSource-2,slave} inited
+[2024-11-06 10:45:30.163] INFO  [main] c.b.d.d.DynamicRoutingDataSource.addDataSource:158 - dynamic-datasource - add a datasource named [slave] success
+[2024-11-06 10:45:30.165] INFO  [main] c.b.d.d.DynamicRoutingDataSource.addDataSource:158 - dynamic-datasource - add a datasource named [master] success
+[2024-11-06 10:45:30.165] INFO  [main] c.b.d.d.DynamicRoutingDataSource.afterPropertiesSet:241 - dynamic-datasource initial loaded [2] datasource,primary datasource named [master]
+[2024-11-06 10:45:30.268] WARN  [main] c.b.m.c.injector.DefaultSqlInjector.getMethodList:56 - class com.hust.ewsystem.entity.CommonData ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+[2024-11-06 10:45:31.504] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Starting ProtocolHandler ["http-nio-8080"]
+[2024-11-06 10:45:31.526] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.start:220 - Tomcat started on port(s): 8080 (http) with context path ''
+[2024-11-06 10:45:31.535] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarted:61 - Started EwSystemApplication in 4.254 seconds (JVM running for 4.755)
+[2024-11-06 10:45:35.490] INFO  [http-nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/].log:173 - Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2024-11-06 10:45:35.490] INFO  [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet.initServletBean:525 - Initializing Servlet 'dispatcherServlet'
+[2024-11-06 10:45:35.491] INFO  [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet.initServletBean:547 - Completed initialization in 1 ms
+[2024-11-06 10:46:08.071] INFO  [SpringApplicationShutdownHook] c.b.d.d.DynamicRoutingDataSource.destroy:215 - dynamic-datasource start closing ....
+[2024-11-06 10:46:08.073] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-2} closing ...
+[2024-11-06 10:46:08.074] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2116 - {dataSource-2} closed
+[2024-11-06 10:46:08.074] INFO  [SpringApplicationShutdownHook] c.b.d.d.d.DefaultDataSourceDestroyer.destroy:98 - dynamic-datasource close the datasource named [slave] success,
+[2024-11-06 10:46:08.074] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-1} closing ...
+[2024-11-06 10:46:08.074] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2116 - {dataSource-1} closed
+[2024-11-06 10:46:08.075] INFO  [SpringApplicationShutdownHook] c.b.d.d.d.DefaultDataSourceDestroyer.destroy:98 - dynamic-datasource close the datasource named [master] success,
+[2024-11-06 10:46:08.075] INFO  [SpringApplicationShutdownHook] c.b.d.d.DynamicRoutingDataSource.destroy:219 - dynamic-datasource all closed success,bye
+[2024-11-06 10:46:27.908] INFO  [background-preinit] o.h.validator.internal.util.Version.<clinit>:21 - HV000001: Hibernate Validator 6.2.5.Final
+[2024-11-06 10:46:27.922] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarting:55 - Starting EwSystemApplication using Java 1.8.0_111 on DESKTOP-IGUT578 with PID 13188 (C:\Users\admin\Desktop\codes\back\target\classes started by admin in C:\Users\admin\Desktop\codes\back)
+[2024-11-06 10:46:27.924] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
+[2024-11-06 10:46:28.695] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
+[2024-11-06 10:46:28.699] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2024-11-06 10:46:28.741] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 20 ms. Found 0 Redis repository interfaces.
+[2024-11-06 10:46:29.586] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.initialize:108 - Tomcat initialized with port(s): 8080 (http)
+[2024-11-06 10:46:29.597] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Initializing ProtocolHandler ["http-nio-8080"]
+[2024-11-06 10:46:29.597] INFO  [main] o.a.catalina.core.StandardService.log:173 - Starting service [Tomcat]
+[2024-11-06 10:46:29.598] INFO  [main] o.a.catalina.core.StandardEngine.log:173 - Starting Servlet engine: [Apache Tomcat/9.0.68]
+[2024-11-06 10:46:29.725] INFO  [main] o.a.c.c.C.[Tomcat].[localhost].[/].log:173 - Initializing Spring embedded WebApplicationContext
+[2024-11-06 10:46:29.726] INFO  [main] o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:290 - Root WebApplicationContext: initialization completed in 1722 ms
+[2024-11-06 10:46:30.092] INFO  [main] c.a.druid.pool.DruidDataSource.init:990 - {dataSource-1,master} inited
+[2024-11-06 10:46:30.099] INFO  [main] c.a.druid.pool.DruidDataSource.init:990 - {dataSource-2,slave} inited
+[2024-11-06 10:46:30.100] INFO  [main] c.b.d.d.DynamicRoutingDataSource.addDataSource:158 - dynamic-datasource - add a datasource named [slave] success
+[2024-11-06 10:46:30.102] INFO  [main] c.b.d.d.DynamicRoutingDataSource.addDataSource:158 - dynamic-datasource - add a datasource named [master] success
+[2024-11-06 10:46:30.102] INFO  [main] c.b.d.d.DynamicRoutingDataSource.afterPropertiesSet:241 - dynamic-datasource initial loaded [2] datasource,primary datasource named [master]
+[2024-11-06 10:46:30.227] WARN  [main] c.b.m.c.injector.DefaultSqlInjector.getMethodList:56 - class com.hust.ewsystem.entity.CommonData ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+[2024-11-06 10:46:31.470] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Starting ProtocolHandler ["http-nio-8080"]
+[2024-11-06 10:46:31.516] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.start:220 - Tomcat started on port(s): 8080 (http) with context path ''
+[2024-11-06 10:46:31.525] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarted:61 - Started EwSystemApplication in 4.181 seconds (JVM running for 4.596)
+[2024-11-06 10:46:35.004] INFO  [http-nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/].log:173 - Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2024-11-06 10:46:35.004] INFO  [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet.initServletBean:525 - Initializing Servlet 'dispatcherServlet'
+[2024-11-06 10:46:35.006] INFO  [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet.initServletBean:547 - Completed initialization in 1 ms
+[2024-11-06 10:46:58.210] INFO  [SpringApplicationShutdownHook] c.b.d.d.DynamicRoutingDataSource.destroy:215 - dynamic-datasource start closing ....
+[2024-11-06 10:46:58.212] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-2} closing ...
+[2024-11-06 10:46:58.213] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2116 - {dataSource-2} closed
+[2024-11-06 10:46:58.213] INFO  [SpringApplicationShutdownHook] c.b.d.d.d.DefaultDataSourceDestroyer.destroy:98 - dynamic-datasource close the datasource named [slave] success,
+[2024-11-06 10:46:58.213] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-1} closing ...
+[2024-11-06 10:46:58.213] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2116 - {dataSource-1} closed
+[2024-11-06 10:46:58.213] INFO  [SpringApplicationShutdownHook] c.b.d.d.d.DefaultDataSourceDestroyer.destroy:98 - dynamic-datasource close the datasource named [master] success,
+[2024-11-06 10:46:58.213] INFO  [SpringApplicationShutdownHook] c.b.d.d.DynamicRoutingDataSource.destroy:219 - dynamic-datasource all closed success,bye
+[2024-11-06 11:01:21.855] INFO  [background-preinit] o.h.validator.internal.util.Version.<clinit>:21 - HV000001: Hibernate Validator 6.2.5.Final
+[2024-11-06 11:01:21.871] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarting:55 - Starting EwSystemApplication using Java 1.8.0_111 on DESKTOP-IGUT578 with PID 3044 (C:\Users\admin\Desktop\codes\back\target\classes started by admin in C:\Users\admin\Desktop\codes\back)
+[2024-11-06 11:01:21.872] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStartupProfileInfo:645 - No active profile set, falling back to 1 default profile: "default"
+[2024-11-06 11:01:22.600] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:262 - Multiple Spring Data modules found, entering strict repository configuration mode
+[2024-11-06 11:01:22.605] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:132 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2024-11-06 11:01:22.635] INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:201 - Finished Spring Data repository scanning in 15 ms. Found 0 Redis repository interfaces.
+[2024-11-06 11:01:23.492] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.initialize:108 - Tomcat initialized with port(s): 8080 (http)
+[2024-11-06 11:01:23.502] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Initializing ProtocolHandler ["http-nio-8080"]
+[2024-11-06 11:01:23.503] INFO  [main] o.a.catalina.core.StandardService.log:173 - Starting service [Tomcat]
+[2024-11-06 11:01:23.503] INFO  [main] o.a.catalina.core.StandardEngine.log:173 - Starting Servlet engine: [Apache Tomcat/9.0.68]
+[2024-11-06 11:01:23.629] INFO  [main] o.a.c.c.C.[Tomcat].[localhost].[/].log:173 - Initializing Spring embedded WebApplicationContext
+[2024-11-06 11:01:23.630] INFO  [main] o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:290 - Root WebApplicationContext: initialization completed in 1689 ms
+[2024-11-06 11:01:24.064] INFO  [main] c.a.druid.pool.DruidDataSource.init:990 - {dataSource-1,master} inited
+[2024-11-06 11:01:24.072] INFO  [main] c.a.druid.pool.DruidDataSource.init:990 - {dataSource-2,slave} inited
+[2024-11-06 11:01:24.072] INFO  [main] c.b.d.d.DynamicRoutingDataSource.addDataSource:158 - dynamic-datasource - add a datasource named [slave] success
+[2024-11-06 11:01:24.075] INFO  [main] c.b.d.d.DynamicRoutingDataSource.addDataSource:158 - dynamic-datasource - add a datasource named [master] success
+[2024-11-06 11:01:24.075] INFO  [main] c.b.d.d.DynamicRoutingDataSource.afterPropertiesSet:241 - dynamic-datasource initial loaded [2] datasource,primary datasource named [master]
+[2024-11-06 11:01:24.181] WARN  [main] c.b.m.c.injector.DefaultSqlInjector.getMethodList:56 - class com.hust.ewsystem.entity.CommonData ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+[2024-11-06 11:01:25.468] INFO  [main] o.a.coyote.http11.Http11NioProtocol.log:173 - Starting ProtocolHandler ["http-nio-8080"]
+[2024-11-06 11:01:25.494] INFO  [main] o.s.b.w.e.tomcat.TomcatWebServer.start:220 - Tomcat started on port(s): 8080 (http) with context path ''
+[2024-11-06 11:01:25.503] INFO  [main] c.hust.ewsystem.EwSystemApplication.logStarted:61 - Started EwSystemApplication in 4.234 seconds (JVM running for 4.704)
+[2024-11-06 11:01:35.847] INFO  [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/].log:173 - Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2024-11-06 11:01:35.847] INFO  [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet.initServletBean:525 - Initializing Servlet 'dispatcherServlet'
+[2024-11-06 11:01:35.849] INFO  [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet.initServletBean:547 - Completed initialization in 2 ms
+[2024-11-06 11:03:35.210] INFO  [SpringApplicationShutdownHook] c.b.d.d.DynamicRoutingDataSource.destroy:215 - dynamic-datasource start closing ....
+[2024-11-06 11:03:35.212] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-2} closing ...
+[2024-11-06 11:03:35.213] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2116 - {dataSource-2} closed
+[2024-11-06 11:03:35.213] INFO  [SpringApplicationShutdownHook] c.b.d.d.d.DefaultDataSourceDestroyer.destroy:98 - dynamic-datasource close the datasource named [slave] success,
+[2024-11-06 11:03:35.213] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2043 - {dataSource-1} closing ...
+[2024-11-06 11:03:35.216] INFO  [SpringApplicationShutdownHook] c.a.druid.pool.DruidDataSource.close:2116 - {dataSource-1} closed
+[2024-11-06 11:03:35.216] INFO  [SpringApplicationShutdownHook] c.b.d.d.d.DefaultDataSourceDestroyer.destroy:98 - dynamic-datasource close the datasource named [master] success,
+[2024-11-06 11:03:35.216] INFO  [SpringApplicationShutdownHook] c.b.d.d.DynamicRoutingDataSource.destroy:219 - dynamic-datasource all closed success,bye

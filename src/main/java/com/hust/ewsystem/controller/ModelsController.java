@@ -6,6 +6,7 @@ import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.common.util.DateUtil;
 import com.hust.ewsystem.entity.*;
+import com.hust.ewsystem.mapper.AlgorithmsMapper;
 import com.hust.ewsystem.mapper.RealPointMapper;
 import com.hust.ewsystem.mapper.StandPointMapper;
 import com.hust.ewsystem.mapper.StandRealRelateMapper;
@@ -49,6 +50,9 @@ public class ModelsController {
     @Autowired
     private ModelRealRelateService modelRealRelateService;
 
+    @Autowired
+    private AlgorithmsMapper algorithmsMapper;
+
     @PostMapping("/add")
     @Transactional
     public EwsResult<?> addmodel(@RequestBody ModelForm modelform){
@@ -56,16 +60,23 @@ public class ModelsController {
         List<Models> modelsList = new ArrayList<>();
         for (Integer turbineId : modelform.getTurbineList()) {
             //先写传入的模型参数
-            Models newModel = modelform.getModel();
+            Models newModel = new Models();
+            newModel.setModelName(modelform.getModel().getModelName() + "_" + turbineId)
+                    .setAlgorithmId(modelform.getModel().getAlgorithmId())
+                    .setModelParameters(modelform.getModel().getModelParameters())
+                    .setPatternId(modelform.getModel().getPatternId())
+                    .setModuleId(modelform.getModel().getModuleId())
+                    .setAlertInterval(modelform.getModel().getAlertInterval() != null ? modelform.getModel().getAlertInterval() : 10);
             //后端自己生成的模型参数
             newModel.setTurbineId(turbineId)
-                    .setModelName(newModel.getModelName() + "_" + turbineId)
                     .setModelVersion("V1.0")
-                    .setModelStatus(0)
-                    .setAlertInterval(newModel.getAlertInterval() != null ? newModel.getAlertInterval() : 10);
+                    .setModelStatus(0);
             modelsList.add(newModel);
         }
-        boolean saveBatch1 = modelsService.saveBatch(modelsList);
+//        boolean saveBatch1 = modelsService.saveBatch(modelsList);
+//        if(!saveBatch1){
+//            throw new CrudException("模型批量保存失败");
+//        }
         //model_real_relate表插入
         List<String> standpointList = modelform.getPointList();
         Map<String, Integer> standToRealIdMap = standToRealId(standpointList);
@@ -80,24 +91,21 @@ public class ModelsController {
             }
         }
         boolean saveBatch2 = modelRealRelateService.saveBatch(modelRealRelateList);
-        if(saveBatch1 && saveBatch2){
-            List<Map<String,Object>> result = new ArrayList<>();
-            //返回值
-            for (Models models : modelsList) {
-                Map<String,Object> map = new HashMap<>();
-                map.put("modelId",models.getModelId());
-                map.put("modelName",models.getModelName());
-                map.put("modelVersion",models.getModelVersion());
-                map.put("modelStatus",models.getModelStatus());
-                map.put("turbinId",models.getTurbineId());
-                result.add(map);
-            }
-            return EwsResult.OK(result);
-        }
-        else{
-            //添加失败事务回滚
+        if(!saveBatch2){
             throw new CrudException("模型关联批量保存失败");
         }
+        //返回值
+        List<Map<String,Object>> result = new ArrayList<>();
+        for (Models models : modelsList) {
+            Map<String,Object> map = new HashMap<>();
+            map.put("modelId",models.getModelId());
+            map.put("modelName",models.getModelName());
+            map.put("modelVersion",models.getModelVersion());
+            map.put("modelStatus",models.getModelStatus());
+            map.put("turbinId",models.getTurbineId());
+            result.add(map);
+        }
+        return EwsResult.OK(result);
     }
     @PostMapping("/change")
     @Transactional
@@ -107,8 +115,8 @@ public class ModelsController {
         for(ModelForm modelform : model){
             //传过来的参数直接修改
             Models newModel = modelform.getModel();
-            String oldVersion = modelsService.getById(newModel.getModelId()).getModelVersion();
-            String[] versionParts = oldVersion.split("\\.");
+//            String oldVersion = modelsService.getById(newModel.getModelId()).getModelVersion();
+            String[] versionParts = newModel.getModelVersion().split("\\.");
             int majorVersion = Integer.parseInt(versionParts[0].substring(1)); //去掉v
             int minorVersion = Integer.parseInt(versionParts[1]);
             if (minorVersion < 9) {
@@ -237,10 +245,12 @@ public class ModelsController {
                     }
                 }
             }
-            // 写入 CSV 文件
+            // 写入CSV文件
             toCSV(alignedData, realToStandLabel, modelLabel);
+            Integer algorithmId = modelsService.getById(modelId).getAlgorithmId();
+            String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
             // 算法调用
-            String taskId = modelsService.train(FileForm);
+            String taskId = modelsService.train(algorithmLabel);
             Map<Integer,String> map = new HashMap<>();
             map.put(modelId,taskId);
             taskIdList.add(map);

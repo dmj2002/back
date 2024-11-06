@@ -6,7 +6,7 @@ import com.hust.ewsystem.entity.Models;
 import java.util.Map;
 
 public interface ModelsService extends IService<Models> {
-    String train(Map<String, Object> FileForm);
+    String train(String algorithmLabel);
     Map<String, Object> getTaskStatus(String taskId);
     String killTask(String taskId);
 }
