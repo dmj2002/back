@@ -250,13 +250,18 @@ public class ModelsController {
             Integer algorithmId = modelsService.getById(modelId).getAlgorithmId();
             String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
             // 算法调用
-            String taskId = modelsService.train(algorithmLabel);
+            String taskId = modelsService.train(algorithmLabel, modelLabel);
             Map<Integer,String> map = new HashMap<>();
             map.put(modelId,taskId);
             taskIdList.add(map);
         }
         // TODO 结果处理等
         return EwsResult.OK(taskIdList);
+    }
+    @PostMapping("/predict")
+    public EwsResult<?> predict(){
+
+        return EwsResult.OK(null);
     }
     // 查询任务状态
     @PostMapping("/queryTask")

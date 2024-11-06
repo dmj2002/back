@@ -1,7 +1,9 @@
 package com.hust.ewsystem.service.impl;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hust.ewsystem.common.exception.FileException;
 import com.hust.ewsystem.entity.Models;
 import com.hust.ewsystem.mapper.ModelsMapper;
 import com.hust.ewsystem.service.ModelsService;
@@ -10,10 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -28,14 +27,26 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     private final Map<String, Process> processMap = new ConcurrentHashMap<>();
 
     @Override
-    public String train(String algorithmLabel) {
+    public String train(String algorithmLabel, String modelLabel) {
         String taskId = UUID.randomUUID().toString();
-        File taskDir = new File(pythonFilePath, taskId);
+        File taskDir = new File(pythonFilePath + "/task_logs/" + taskId);
         if (!taskDir.exists()) {
             taskDir.mkdirs();
         }
-        //TODO：准备setting.json
-
+        //准备setting.json
+        File settingFile = new File(taskDir, "setting.json");
+        JSONObject settings = new JSONObject();
+        settings.put("modelPath", pythonFilePath + "/" + modelLabel);
+        settings.put("trainDataPath", pythonFilePath + "/" + modelLabel + "/trai.csv");
+        settings.put("predictDataPath", pythonFilePath + "/task_logs/" + taskId + "/predict.csv");
+        settings.put("resultDataPath", pythonFilePath + "/task_logs/" + taskId + "/result.json");
+        settings.put("logPath", pythonFilePath + "/task_logs/" + taskId + "/" + taskId + ".log");
+        // 写入 setting.json 文件
+        try (FileWriter fileWriter = new FileWriter(settingFile)) {
+            fileWriter.write(settings.toJSONString());
+        } catch (IOException e) {
+            throw new FileException("setting.json文件配置失败",e);
+        }
         executeShellCmd(pythonFilePath,algorithmLabel,taskId);
         return taskId;
     }
