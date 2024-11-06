@@ -28,26 +28,15 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     private final Map<String, Process> processMap = new ConcurrentHashMap<>();
 
     @Override
-    public String train(Map<String, Object> FileForm) {
+    public String train(String algorithmLabel) {
         String taskId = UUID.randomUUID().toString();
-        // 初始化任务状态
-        Map<String, Object> taskStatus = new HashMap<>();
-        taskStatus.put("taskId", taskId);
-        taskStatus.put("status", "训练中");
-        taskStatus.put("progress", 0);
-        taskStatusMap.put(taskId, taskStatus);
-        //启动一个新线程执行训练任务
-        new Thread(()->{
-            try {
-                executeShellCmd(FileForm, taskId);
-                taskStatus.put("status", "训练完成");
-                taskStatus.put("progress", 100);
-            } catch (Exception e) {
-                taskStatus.put("status", "训练失败: " + e.getMessage());
-                taskStatus.put("progress", -1);
-            }
-        }).start();
+        File taskDir = new File(pythonFilePath, taskId);
+        if (!taskDir.exists()) {
+            taskDir.mkdirs();
+        }
+        //TODO：准备setting.json
 
+        executeShellCmd(pythonFilePath,algorithmLabel,taskId);
         return taskId;
     }
     // 提供查询任务状态的接口
@@ -85,79 +74,34 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         else {
             result = "任务ID无效";
         }
-        taskStatusMap.remove(taskId);
         processMap.remove(taskId);
         return result;
     }
-
-    public Object executeShellCmd(Map<String, Object> FileForm, String taskId) throws Exception {
+    /**
+     *
+     * @param filepath 进程工作目录
+     * @param algorithmLabel 算法标签
+     * @param taskId 任务ID
+     * @return
+     */
+    public Object executeShellCmd(String filepath, String algorithmLabel, String taskId) {
         try {
-            String csvFilePath = (String) FileForm.get("trainDataPath");
-            String saveModelPath = (String) FileForm.get("saveModelPath");
-
             // 把需要的参数放在集合中
             List<String> command = new ArrayList<>();
             command.add("python");
-            command.add("/001/train.py");
-//        command.add(String.format("%d/train.py", modelId));
-            command.add(csvFilePath);
-            command.add(saveModelPath);
-//      LOGGER.info("command: {}", JSON.toJSONString(command, SerializerFeature.WriteMapNullValue));
+            command.add(String.format("%s/train.py", algorithmLabel));
+            command.add(String.format("%d/setting", taskId));
             // 调用算法
-            Object result = execCmd(pythonFilePath, command, taskId);
-            // 更新任务状态
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            processBuilder.directory(new File(filepath));
+            processBuilder.command(command);
+            processBuilder.redirectErrorStream(true);
+            Process process = processBuilder.start();
+            // 记录任务ID和进程的映射
+            processMap.put(taskId, process);
         } catch (Exception e) {
-            // 更新任务状态
-            throw new Exception();
+            e.printStackTrace();
         }
         return null;
-    }
-    //可以阻塞线程等待运行结果
-    public Object execCmd(String filePath, List<String> command, String taskId) throws Exception {
-        //启动进程
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        //定义命令内容
-        processBuilder.directory(new File(filePath));
-        //LOGGER.debug("命令执行目录: {}", processBuilder.directory());
-        processBuilder.command(command);
-        //将标准输入流和错误输入流合并，通过标准输入流读取信息
-        processBuilder.redirectErrorStream(true);
-        StringBuilder outputString = null;
-        try {
-            //启动进程
-            Process start = processBuilder.start();
-            processMap.put(taskId, start);
-            //获取输入流
-            InputStream inputStream = start.getInputStream();
-            //转成字符输入流
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-
-            int len = -1;
-            char[] c = new char[2048];
-            outputString = new StringBuilder();
-            //读取进程输入流中的内容
-            while ((len = inputStreamReader.read(c)) != -1) {
-                String s = new String(c, 0, len);
-                outputString.append(s);
-            }
-            // TODO 实时计算结果数据格式我不知道，算法输出你自己解析了返回
-
-            inputStream.close();
-            inputStreamReader.close();
-            //阻塞当前线程，直到进程退出为止
-            start.waitFor();
-            int exitValue = start.exitValue();
-            if (exitValue == 0) {
-                System.out.println("进程正常结束");
-                Map<String, Object> taskStatus = taskStatusMap.get(taskId);
-                taskStatus.put("data", outputString);
-            } else {
-                System.out.println("进程异常结束");
-            }
-        } catch (Exception e) {
-            throw new Exception("算法调用异常,原因："+e.getMessage());
-        }
-        return null;
-
     }
 }
