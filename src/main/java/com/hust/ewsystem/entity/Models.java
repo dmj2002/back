@@ -37,9 +37,9 @@ public class Models implements Serializable {
 
     private LocalDateTime createdTime;  // 创建时间
 
-    private Integer lastActiviatedId;  // 最后使用id
+    private Integer lastActivatedId;  // 最后使用id
 
-    private LocalDateTime lastActiviatedTime;  // 最后使用时间
+    private LocalDateTime lastActivatedTime;  // 最后使用时间
 
     private Integer patternId;  // 工况id
 
