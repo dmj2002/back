@@ -2,14 +2,12 @@ package com.hust.ewsystem.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.common.util.DateUtil;
 import com.hust.ewsystem.entity.*;
-import com.hust.ewsystem.mapper.AlgorithmsMapper;
-import com.hust.ewsystem.mapper.RealPointMapper;
-import com.hust.ewsystem.mapper.StandPointMapper;
-import com.hust.ewsystem.mapper.StandRealRelateMapper;
+import com.hust.ewsystem.mapper.*;
 import com.hust.ewsystem.service.CommonDataService;
 import com.hust.ewsystem.service.ModelRealRelateService;
 import com.hust.ewsystem.service.ModelsService;
@@ -52,6 +50,8 @@ public class ModelsController {
 
     @Autowired
     private AlgorithmsMapper algorithmsMapper;
+    @Autowired
+    private ModelsMapper modelsMapper;
 
     @PostMapping("/add")
     @Transactional
@@ -250,13 +250,47 @@ public class ModelsController {
             Integer algorithmId = modelsService.getById(modelId).getAlgorithmId();
             String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
             // 算法调用
-            String taskId = modelsService.train(algorithmLabel);
+            String taskId = modelsService.train(algorithmLabel, modelLabel);
             Map<Integer,String> map = new HashMap<>();
             map.put(modelId,taskId);
             taskIdList.add(map);
         }
         // TODO 结果处理等
         return EwsResult.OK(taskIdList);
+    }
+
+    @GetMapping("/list")
+    public EwsResult<?> listModel(@RequestParam(value = "page", required = true, defaultValue = "1") int page,
+                                  @RequestParam(value = "page_size", required = true, defaultValue = "20") int pageSize,
+                                  @RequestParam(value = "company_id", required = false) Integer companyId,
+                                  @RequestParam(value = "windfarm_id", required = false) Integer windfarmId,
+                                  @RequestParam(value = "module_id", required = false) Integer moduleId,
+                                  @RequestParam(value = "turbine_id", required = false) Integer turbineId) {
+        Page<Models> modelsPage = new Page<>(page, pageSize);
+        QueryWrapper<Models> queryWrapper = new QueryWrapper<>();
+        if (companyId != null) {
+            queryWrapper.eq("company_id", companyId);
+        }
+        if (windfarmId != null) {
+            queryWrapper.eq("windfarm_id", windfarmId);
+        }
+        if (moduleId != null) {
+            queryWrapper.eq("module_id", moduleId);
+        }
+        if (turbineId != null) {
+            queryWrapper.eq("turbine_id", turbineId);
+        }
+        Page<Models> page1 = modelsService.page(modelsPage, queryWrapper);
+        if (page1.getRecords().isEmpty()) {
+            throw new CrudException("查询结果为空");
+        }
+        Map<String,Object> result = new HashMap<>();
+        result.put("total_count",page1.getTotal());
+        result.put("page",page1.getCurrent());
+        result.put("page_size",page1.getSize());
+        result.put("total_pages",page1.getPages());
+        result.put("modelList",page1.getRecords());
+        return EwsResult.OK("查询成功", result);
     }
     // 查询任务状态
     @PostMapping("/queryTask")
