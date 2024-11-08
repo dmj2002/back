@@ -107,6 +107,7 @@ public class ModelsController {
         for (Models models : modelsList) {
             Map<String,Object> map = new HashMap<>();
             map.put("modelId",models.getModelId());
+            map.put("modellabel",models.getModelLabel());
             map.put("modelName",models.getModelName());
             map.put("modelVersion",models.getModelVersion());
             map.put("modelStatus",models.getModelStatus());

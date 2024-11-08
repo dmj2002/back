@@ -1,7 +1,8 @@
 package com.hust.ewsystem.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
+@TableName(autoResultMap = true)
 public class Models implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -27,7 +29,8 @@ public class Models implements Serializable {
 
     private String modelVersion;  // 模型版本
 
-    private String modelParameters;  // 模型参数
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private JsonNode modelParameters;  // 模型参数
 
     private Integer modelStatus;  // 模型状态
 
@@ -35,10 +38,12 @@ public class Models implements Serializable {
 
     private Integer turbineId;  // 风机id
 
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdTime;  // 创建时间
 
     private Integer lastActivatedId;  // 最后使用id
 
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime lastActivatedTime;  // 最后使用时间
 
     private Integer patternId;  // 工况id
