@@ -73,10 +73,18 @@ public class ModelsController {
                     .setModelStatus(0);
             modelsList.add(newModel);
         }
-//        boolean saveBatch1 = modelsService.saveBatch(modelsList);
-//        if(!saveBatch1){
-//            throw new CrudException("模型批量保存失败");
-//        }
+        boolean saveBatch1 = modelsService.saveBatch(modelsList);
+        if(!saveBatch1){
+            throw new CrudException("模型批量保存失败");
+        }
+        for (Models models : modelsList) {
+            //插入后才有modelId
+            models.setModelLabel("M" + String.format("%04d", models.getModelId()));
+        }
+        boolean updateBatch = modelsService.updateBatchById(modelsList);
+        if(!updateBatch){
+            throw new CrudException("模型批量保存失败");
+        }
         //model_real_relate表插入
         List<String> standpointList = modelform.getPointList();
         Map<String, Integer> standToRealIdMap = standToRealId(standpointList);
