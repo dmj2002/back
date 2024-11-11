@@ -102,8 +102,8 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             // 把需要的参数放在集合中
             List<String> command = new ArrayList<>();
             command.add("python");
-            command.add(String.format("%s/train.py", algorithmLabel));
-            command.add(String.format("%s/setting", taskId));
+            command.add(String.format("alg/%s/train.py", algorithmLabel));
+            command.add(String.format("tasks_logs/%s/setting", taskId));
             // 调用算法
             ProcessBuilder processBuilder = new ProcessBuilder();
             processBuilder.directory(new File(filepath));
