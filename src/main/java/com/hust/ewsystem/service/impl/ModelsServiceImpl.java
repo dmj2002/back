@@ -11,7 +11,6 @@ import com.hust.ewsystem.mapper.ModelsMapper;
 import com.hust.ewsystem.service.ModelsService;
 
 import com.hust.ewsystem.service.WarningService;
-import lombok.var;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -160,17 +159,12 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
      * @param filepath 进程工作目录
      * @param algorithmLabel 算法标签
      * @param taskId 任务ID
-     * @return
      */
     public void executeTrain(String filepath, String algorithmLabel, String taskId) {
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
             Process process = null;
             try {
-                // 检查线程在启动进程前是否被中断
-                if (Thread.currentThread().isInterrupted()) {
-                    return;
-                }
                 // 准备命令
                 List<String> command = new ArrayList<>();
                 command.add("python");
@@ -184,13 +178,9 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 process = processBuilder.start();
                 System.out.println("Started Python process for task: " + taskId);
                 // 等待进程完成
-                while (process.isAlive()) {
-                    if (Thread.currentThread().isInterrupted()) {
-                        process.destroy();
-                        return;
-                    }
-                    Thread.sleep(1000); // 睡眠一小段时间后再检查
-                }
+                process.waitFor();
+            } catch(InterruptedException e) {
+                process.destroy();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -203,11 +193,8 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
             Process process = null;
+            boolean interrupted = false;  // 用于标记是否被中断
             try {
-                // 检查线程在启动进程前是否被中断
-                if (Thread.currentThread().isInterrupted()) {
-                    return;
-                }
                 // 准备命令
                 List<String> command = new ArrayList<>();
                 command.add("python");
@@ -220,17 +207,17 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 processBuilder.redirectErrorStream(true);
                 process = processBuilder.start();
                 System.out.println("Started Python process for task: " + taskId);
-                while (process.isAlive()) {
-                    if (Thread.currentThread().isInterrupted()) {
-                        process.destroy();
-                        return;
-                    }
-                    Thread.sleep(1000); // Sleep for a short period before checking again
-                }
+                // 等待进程完成
+                process.waitFor();
+            } catch (InterruptedException e) {
+                interrupted = true;  // 记录中断状态
+                process.destroy();
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                readAndSaveResults(filepath, taskId);
+                if(!interrupted) {
+                    readAndSaveResults(filepath, taskId);
+                }
             }
         };
         // 定期调度任务
