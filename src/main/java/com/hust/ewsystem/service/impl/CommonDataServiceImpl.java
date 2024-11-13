@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.StringReader;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -28,7 +29,7 @@ public class CommonDataServiceImpl extends ServiceImpl<CommonDataMapper, CommonD
 
     @Override
     @DS("slave")
-    public List<CommonData> selectDataByTime(String tableName, LocalDateTime startTime, LocalDateTime endTime) {
+    public List<CommonData> selectDataByTime(String tableName, String startTime, String endTime) {
         return commonDataMapper.selectDataByTime(tableName, startTime, endTime);
     }
 }

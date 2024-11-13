@@ -12,5 +12,5 @@ public interface CommonDataMapper extends BaseMapper<CommonData> {
 
     List<CommonData> selectAllData(@Param("tableName")String tableName);
 
-    List<CommonData> selectDataByTime(@Param("tableName")String tableName, @Param("startTime") LocalDateTime startTime, @Param("endTime")LocalDateTime endTime);
+    List<CommonData> selectDataByTime(@Param("tableName")String tableName, @Param("startTime") String startTime, @Param("endTime")String endTime);
 }
