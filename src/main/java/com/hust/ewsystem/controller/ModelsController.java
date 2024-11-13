@@ -4,6 +4,7 @@ package com.hust.ewsystem.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.common.exception.CrudException;
+import com.hust.ewsystem.common.exception.FileException;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.*;
 import com.hust.ewsystem.mapper.*;
@@ -342,7 +343,7 @@ public class ModelsController {
         File modelDir = new File(String.format("%s/%s", pythonFilePath, modelLabel));
         if (!modelDir.exists()) {
             if (!modelDir.mkdirs()) {
-                throw new RuntimeException("创建文件目录失败");
+                throw new FileException("创建文件目录失败");
             }
         }
         // 写入 CSV 文件
@@ -363,7 +364,7 @@ public class ModelsController {
                 csvWriter.append(line.toString()).append("\n");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new FileException("写入CSV文件失败", e);
         }
     }
     //标准测点标签 -> 真实测点标签
