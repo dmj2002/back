@@ -134,7 +134,6 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         } else {
             statusMap.put("status", "任务进行中");
         }
-
         return statusMap;
     }
 

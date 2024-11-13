@@ -242,8 +242,8 @@ public class ModelsController {
             // 查询数据并提取 datetime和value列
             Map<LocalDateTime, Map<String, Object>> alignedData = new TreeMap<>();
             for (Map<String, Object> period : timePeriods) {
-                LocalDateTime startTime = DateUtil.getLocalDateTime((String) period.get("startTime"));
-                LocalDateTime endTime = DateUtil.getLocalDateTime((String) period.get("endTime"));
+                String startTime = (String) period.get("startTime");
+                String endTime = (String) period.get("endTime");
                 for (Map.Entry<String,String> entry : realToStandLabel.entrySet()) {
                     List<CommonData> data = commonDataService.selectDataByTime(entry.getKey().toLowerCase(), startTime, endTime);
                     for (CommonData record : data) {

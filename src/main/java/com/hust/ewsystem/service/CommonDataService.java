@@ -10,5 +10,5 @@ import java.util.List;
 public interface CommonDataService extends IService<CommonData> {
     List<CommonData> selectAllData(String tableName);
 
-    List<CommonData> selectDataByTime(String tableName, LocalDateTime startTime, LocalDateTime endTime);
+    List<CommonData> selectDataByTime(String tableName, String startTime, String endTime);
 }

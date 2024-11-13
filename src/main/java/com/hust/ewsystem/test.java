@@ -14,31 +14,12 @@ import java.time.format.DateTimeFormatter;
 public class test {
 
     public static void main(String[] args) {
-        try {
-            String resultFilePath =  "C:/result.json";
-            String content = new String(Files.readAllBytes(Paths.get(resultFilePath)));
-            System.out.println(content);
-            JSONObject jsonObject = JSONObject.parseObject(content);
-            // Extract modelId
-            Integer modelId = jsonObject.getIntValue("modelId");
-            // Extract alertList
-            JSONArray alertList = jsonObject.getJSONArray("alertList");
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            for (int i = 0; i < alertList.size(); i++) {
-                JSONObject alert = alertList.getJSONObject(i);
-                String alertInfo = alert.getString("alertInfo");
-                LocalDateTime startTime = LocalDateTime.parse(alert.getString("startTime"), formatter);
-                LocalDateTime endTime = LocalDateTime.parse(alert.getString("endTime"), formatter);
-                // Save to database
-                Warnings warning = new Warnings();
-                warning.setModelId(modelId);
-                warning.setWarningDescription(alertInfo);
-                warning.setStartTime(startTime);
-                warning.setEndTime(endTime);
-                System.out.println(warning);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String time = "2021-06-01 00:00:00";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime startTime = LocalDateTime.parse((String) time, formatter);
+        // 使用格式化器输出，不带 "T"
+        String formattedTime = startTime.format(formatter);
+
+        System.out.println(formattedTime); // 输出为 "2021-06-01 00:00:00"
     }
 }
