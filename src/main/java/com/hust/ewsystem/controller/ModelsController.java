@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -50,8 +51,6 @@ public class ModelsController {
 
     @Autowired
     private AlgorithmsMapper algorithmsMapper;
-    @Autowired
-    private ModelsMapper modelsMapper;
 
     @PostMapping("/add")
     @Transactional
@@ -255,7 +254,7 @@ public class ModelsController {
                 }
             }
             // 写入CSV文件
-            toCSV(alignedData, realToStandLabel, modelLabel);
+            toTrainCsv(alignedData, realToStandLabel, modelLabel);
             Integer algorithmId = modelsService.getById(modelId).getAlgorithmId();
             String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
             // 算法调用
@@ -264,7 +263,25 @@ public class ModelsController {
             map.put(modelId,taskId);
             taskIdList.add(map);
         }
-        // TODO 结果处理等
+        return EwsResult.OK(taskIdList);
+    }
+
+    @PostMapping("/predict")
+    public EwsResult<?> predict(@RequestBody List<Integer> modelList){
+        List<Map<Integer,String>> taskIdList = new ArrayList<>();
+        for(Integer modelId : modelList) {
+            //获取返回值
+            Models model = modelsService.getById(modelId);
+            Integer alertInterval = model.getAlertInterval();
+            String modelLabel = model.getModelLabel();
+            Integer algorithmId = model.getAlgorithmId();
+            String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
+            // 算法调用
+            String taskId = modelsService.predict(alertInterval,modelLabel,algorithmLabel);
+            Map<Integer,String> map = new HashMap<>();
+            map.put(modelId,taskId);
+            taskIdList.add(map);
+        }
         return EwsResult.OK(taskIdList);
     }
 
@@ -321,7 +338,14 @@ public class ModelsController {
         String killTask = modelsService.killTask(taskId);
         return EwsResult.OK(killTask);
     }
-    public void toCSV(Map<LocalDateTime, Map<String, Object>> alignedData,Map<String, String> realToStandLabel,String modelLabel){
+    public void toTrainCsv(Map<LocalDateTime, Map<String, Object>> alignedData,Map<String, String> realToStandLabel,String modelLabel){
+        // 创建目标目录（如果不存在）
+        File modelDir = new File(String.format("%s/%s", pythonFilePath, modelLabel));
+        if (!modelDir.exists()) {
+            if (!modelDir.mkdirs()) {
+                throw new RuntimeException("创建文件目录失败");
+            }
+        }
         // 写入 CSV 文件
         try (FileWriter csvWriter = new FileWriter(String.format("%s/%s/train.csv", pythonFilePath, modelLabel))) {
             // 写入表头
