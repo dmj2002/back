@@ -229,8 +229,8 @@ public class ModelsController {
     public EwsResult<?> train(@RequestBody Map<String, Object> FileForm) {
         List<Integer> modelIds =(List<Integer>) FileForm.get("modelIds");
         List<Map<String, Object>> timePeriods = (List<Map<String, Object>>)FileForm.get("timePeriods");
-        //返回值：模型id->任务id
-        List<Map<Integer,String>> taskIdList = new ArrayList<>();
+        //返回值
+        List<Map<String,Object>> taskIdList = new ArrayList<>();
         //传入的每个模型测点不一定相同，所以需要分别处理
         for(Integer modelId : modelIds){
             String modelLabel = modelsService.getById(modelId).getModelLabel();
@@ -259,8 +259,9 @@ public class ModelsController {
             String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
             // 算法调用
             String taskId = modelsService.train(algorithmLabel, modelLabel);
-            Map<Integer,String> map = new HashMap<>();
-            map.put(modelId,taskId);
+            Map<String,Object> map= new HashMap<>();
+            map.put("modelId",modelId);
+            map.put("taskId",taskId);
             taskIdList.add(map);
         }
         return EwsResult.OK(taskIdList);
@@ -268,7 +269,7 @@ public class ModelsController {
 
     @PostMapping("/predict")
     public EwsResult<?> predict(@RequestBody List<Integer> modelList){
-        List<Map<Integer,String>> taskIdList = new ArrayList<>();
+        List<Map<String,Object>> taskIdList = new ArrayList<>();
         for(Integer modelId : modelList) {
             //获取返回值
             Models model = modelsService.getById(modelId);
@@ -278,8 +279,9 @@ public class ModelsController {
             String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
             // 算法调用
             String taskId = modelsService.predict(alertInterval,modelLabel,algorithmLabel);
-            Map<Integer,String> map = new HashMap<>();
-            map.put(modelId,taskId);
+            Map<String,Object> map= new HashMap<>();
+            map.put("modelId",modelId);
+            map.put("taskId",taskId);
             taskIdList.add(map);
         }
         return EwsResult.OK(taskIdList);
