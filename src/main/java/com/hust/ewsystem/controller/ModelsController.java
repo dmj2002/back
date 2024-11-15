@@ -52,6 +52,12 @@ public class ModelsController {
     @Autowired
     private AlgorithmsMapper algorithmsMapper;
 
+    @Autowired
+    private WindFarmMapper windFarmMapper;
+
+    @Autowired
+    private WindTurbineMapper windTurbineMapper;
+
     @PostMapping("/add")
     @Transactional
     public EwsResult<?> addmodel(@RequestBody ModelForm modelform){
@@ -291,6 +297,8 @@ public class ModelsController {
     public EwsResult<?> listModel(@RequestParam(value = "page", required = true, defaultValue = "1") int page,
                                   @RequestParam(value = "page_size", required = true, defaultValue = "20") int pageSize,
                                   @RequestParam(value = "module_id", required = false) Integer moduleId,
+                                  @RequestParam(value = "company_id", required = false) Integer companyId,
+                                  @RequestParam(value = "windfarm_id", required = false) Integer windfarmId,
                                   @RequestParam(value = "turbine_id", required = false) Integer turbineId) {
         Page<Models> modelsPage = new Page<>(page, pageSize);
         QueryWrapper<Models> queryWrapper = new QueryWrapper<>();
@@ -299,6 +307,27 @@ public class ModelsController {
         }
         if (turbineId != null) {
             queryWrapper.eq("turbine_id", turbineId);
+        }
+        else{
+            List<Integer> turbineList = new ArrayList<>();
+            if (companyId != null) {
+                if (windfarmId != null) {
+                    turbineList = windTurbineMapper.selectList(
+                            new QueryWrapper<WindTurbine>().eq("wind_farm_id", windfarmId)
+                    ).stream().map(WindTurbine::getTurbineId).collect(Collectors.toList());
+                }
+                else {
+                    List<Integer> windfarmList = windFarmMapper.selectList(
+                            new QueryWrapper<WindFarm>().eq("company_id", companyId)
+                    ).stream().map(WindFarm::getWindFarmId).collect(Collectors.toList());
+                    turbineList = windTurbineMapper.selectList(
+                            new QueryWrapper<WindTurbine>().in("wind_farm_id", windfarmList)
+                    ).stream().map(WindTurbine::getTurbineId).collect(Collectors.toList());
+                }
+            }
+            if (!turbineList.isEmpty()) {
+                queryWrapper.in("turbine_id", turbineList);
+            }
         }
         Page<Models> page1 = modelsService.page(modelsPage, queryWrapper);
         if (page1.getRecords().isEmpty()) {
