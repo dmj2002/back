@@ -290,18 +290,10 @@ public class ModelsController {
     @GetMapping("/list")
     public EwsResult<?> listModel(@RequestParam(value = "page", required = true, defaultValue = "1") int page,
                                   @RequestParam(value = "page_size", required = true, defaultValue = "20") int pageSize,
-                                  @RequestParam(value = "company_id", required = false) Integer companyId,
-                                  @RequestParam(value = "windfarm_id", required = false) Integer windfarmId,
                                   @RequestParam(value = "module_id", required = false) Integer moduleId,
                                   @RequestParam(value = "turbine_id", required = false) Integer turbineId) {
         Page<Models> modelsPage = new Page<>(page, pageSize);
         QueryWrapper<Models> queryWrapper = new QueryWrapper<>();
-        if (companyId != null) {
-            queryWrapper.eq("company_id", companyId);
-        }
-        if (windfarmId != null) {
-            queryWrapper.eq("windfarm_id", windfarmId);
-        }
         if (moduleId != null) {
             queryWrapper.eq("module_id", moduleId);
         }
@@ -310,7 +302,7 @@ public class ModelsController {
         }
         Page<Models> page1 = modelsService.page(modelsPage, queryWrapper);
         if (page1.getRecords().isEmpty()) {
-            throw new CrudException("查询结果为空");
+            return EwsResult.error("查询结果为空");
         }
         Map<String,Object> result = new HashMap<>();
         result.put("total_count",page1.getTotal());
