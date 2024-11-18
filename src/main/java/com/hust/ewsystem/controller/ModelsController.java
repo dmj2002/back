@@ -294,8 +294,8 @@ public class ModelsController {
     }
 
     @GetMapping("/list")
-    public EwsResult<?> listModel(@RequestParam(value = "page", required = true, defaultValue = "1") int page,
-                                  @RequestParam(value = "page_size", required = true, defaultValue = "20") int pageSize,
+    public EwsResult<?> listModel(@RequestParam(value = "page", required = true) int page,
+                                  @RequestParam(value = "page_size", required = true) int pageSize,
                                   @RequestParam(value = "module_id", required = false) Integer moduleId,
                                   @RequestParam(value = "company_id", required = false) Integer companyId,
                                   @RequestParam(value = "windfarm_id", required = false) Integer windfarmId,

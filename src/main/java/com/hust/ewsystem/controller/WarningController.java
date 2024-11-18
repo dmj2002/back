@@ -39,8 +39,8 @@ public class WarningController {
     @Autowired
     private ModelsService modelsService;
     @GetMapping("/List")
-    public EwsResult<?> getWarningList(@RequestParam(value = "page", required = true, defaultValue = "1") int page,
-                                       @RequestParam(value = "page_size", required = true, defaultValue = "20") int pageSize,
+    public EwsResult<?> getWarningList(@RequestParam(value = "page", required = true) int page,
+                                       @RequestParam(value = "page_size", required = true) int pageSize,
                                        @RequestParam(value = "start_date", required = true) String startDate,
                                        @RequestParam(value = "end_date", required = false) String endDate,
                                        @RequestParam(value = "warning_level", required = false) Integer warningLevel,
