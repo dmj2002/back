@@ -41,7 +41,7 @@ public class WarningController {
     @GetMapping("/List")
     public EwsResult<?> getWarningList(@RequestParam(value = "page") int page,
                                        @RequestParam(value = "page_size") int pageSize,
-                                       @RequestParam(value = "start_date", required = true) String startDate,
+                                       @RequestParam(value = "start_date") String startDate,
                                        @RequestParam(value = "end_date", required = false) String endDate,
                                        @RequestParam(value = "warning_level", required = false) Integer warningLevel,
                                        @RequestParam(value = "company_id", required = false) Integer companyId,
