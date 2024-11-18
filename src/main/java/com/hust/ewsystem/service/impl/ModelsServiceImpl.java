@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -72,7 +73,6 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 throw new FileException("创建任务目录失败");
             }
         }
-        //TODO:生成predict.csv文件
         //读取train.csv的最后100行并写入predict.csv(无api)
         String trainFilePath = pythonFilePath + "/" + modelLabel + "/train.csv"; // 训练数据路径
         String predictFilePath = taskDir.getAbsolutePath() + "/predict.csv"; // 预测文件路径
@@ -191,6 +191,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     public void executePredict(String filepath, Integer alertInterval, String algorithmLabel, String taskId) {
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
+            //TODO 生成预测文件
             Process process = null;
             boolean interrupted = false;  // 用于标记是否被中断
             try {
@@ -206,8 +207,30 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 processBuilder.redirectErrorStream(true);
                 process = processBuilder.start();
                 System.out.println("Started Python process for task: " + taskId);
+                StringBuilder outputString = null;
+                //获取输入流
+                InputStream inputStream = process.getInputStream();
+                //转成字符输入流
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+                int len = -1;
+                char[] c = new char[2048];
+                outputString = new StringBuilder();
+                //读取进程输入流中的内容
+                while ((len = inputStreamReader.read(c)) != -1) {
+                    String s = new String(c, 0, len);
+                    outputString.append(s);
+                }
+                System.out.println(outputString);
+                inputStream.close();
+                inputStreamReader.close();
                 // 等待进程完成
                 process.waitFor();
+                int exitValue = process.exitValue();
+                if (exitValue == 0) {
+                    System.out.println("进程正常结束");
+                } else {
+                    System.out.println("进程异常结束");
+                }
             } catch (InterruptedException e) {
                 interrupted = true;  // 记录中断状态
                 process.destroy();
