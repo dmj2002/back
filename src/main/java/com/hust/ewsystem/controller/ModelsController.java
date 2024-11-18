@@ -58,6 +58,9 @@ public class ModelsController {
     @Autowired
     private WindTurbineMapper windTurbineMapper;
 
+    @Autowired
+    private ModuleMapper moduleMapper;
+
     @PostMapping("/add")
     @Transactional
     public EwsResult<?> addmodel(@RequestBody ModelForm modelform){
@@ -284,7 +287,7 @@ public class ModelsController {
             Integer algorithmId = model.getAlgorithmId();
             String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
             // 算法调用
-            String taskId = modelsService.predict(alertInterval,modelLabel,algorithmLabel);
+            String taskId = modelsService.predict(alertInterval,modelLabel,algorithmLabel,modelId);
             Map<String,Object> map= new HashMap<>();
             map.put("modelId",modelId);
             map.put("taskId",taskId);
@@ -333,13 +336,30 @@ public class ModelsController {
         if (page1.getRecords().isEmpty()) {
             return EwsResult.error("查询结果为空");
         }
-        Map<String,Object> result = new HashMap<>();
-        result.put("total_count",page1.getTotal());
-        result.put("page",page1.getCurrent());
-        result.put("page_size",page1.getSize());
-        result.put("total_pages",page1.getPages());
-        result.put("modelList",page1.getRecords());
-        return EwsResult.OK("查询成功", result);
+        List<Models> records = page1.getRecords();
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Models model : records) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("modelId", model.getModelId());
+            map.put("modelLabel", model.getModelLabel());
+            map.put("modelName", model.getModelName());
+            map.put("modelVersion", model.getModelVersion());
+            map.put("turbineId", model.getTurbineId());
+            map.put("turbineNumber", windTurbineMapper.selectById(model.getTurbineId()).getTurbineNumber());
+            map.put("algorithmId", model.getAlgorithmId());
+            map.put("algorithmName",algorithmsMapper.selectById(model.getAlgorithmId()).getAlgorithmName());
+            map.put("moduleId", model.getModuleId());
+            map.put("moduleName",moduleMapper.selectById(model.getModuleId()).getModuleName());
+            map.put("modelStatus", model.getModelStatus());
+            result.add(map);
+        }
+        Map<String,Object> response = new HashMap<>();
+        response.put("total_count",page1.getTotal());
+        response.put("page",page1.getCurrent());
+        response.put("page_size",page1.getSize());
+        response.put("total_pages",page1.getPages());
+        response.put("modelList",result);
+        return EwsResult.OK("查询成功", response);
     }
     // 查询任务状态
     @PostMapping("/queryTask")

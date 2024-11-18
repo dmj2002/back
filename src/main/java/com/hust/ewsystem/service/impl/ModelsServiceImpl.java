@@ -65,7 +65,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
 
     }
     @Override
-    public String predict(Integer alertInterval, String modelLabel, String algorithmLabel) {
+    public String predict(Integer alertInterval, String modelLabel, String algorithmLabel,Integer modelId) {
         String taskId = UUID.randomUUID().toString();
         File taskDir = new File(pythonFilePath + "/task_logs/" + taskId);
         if (!taskDir.exists()) {
@@ -73,7 +73,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 throw new FileException("创建任务目录失败");
             }
         }
-        //读取train.csv的最后100行并写入predict.csv(无api)
+        //读取train.csv的最后100行并写入predict.csv(后续需要在定时任务中写)
         String trainFilePath = pythonFilePath + "/" + modelLabel + "/train.csv"; // 训练数据路径
         String predictFilePath = taskDir.getAbsolutePath() + "/predict.csv"; // 预测文件路径
         try (BufferedReader reader = new BufferedReader(new FileReader(trainFilePath));
@@ -116,7 +116,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         } catch (IOException e) {
             throw new FileException("setting.json文件配置失败",e);
         }
-        new Thread(() -> executePredict(pythonFilePath, alertInterval, algorithmLabel, taskId)).start();
+        new Thread(() -> executePredict(pythonFilePath, alertInterval, algorithmLabel, taskId, modelId)).start();
         return taskId;
     }
     // 提供查询任务状态的接口
@@ -188,7 +188,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         ScheduledFuture<?> scheduledTask = scheduler.schedule(task, 0, TimeUnit.SECONDS);
         taskMap.put(taskId, scheduledTask);
     }
-    public void executePredict(String filepath, Integer alertInterval, String algorithmLabel, String taskId) {
+    public void executePredict(String filepath, Integer alertInterval, String algorithmLabel, String taskId,Integer modelId) {
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
             //TODO 生成预测文件
@@ -238,7 +238,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 e.printStackTrace();
             } finally {
                 if(!interrupted) {
-                    readAndSaveResults(filepath, taskId);
+                    readAndSaveResults(filepath, taskId,modelId);
                 }
             }
         };
@@ -246,13 +246,11 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         ScheduledFuture<?> scheduledTask =scheduler.scheduleAtFixedRate(task, 0, alertInterval, TimeUnit.SECONDS);
         taskMap.put(taskId, scheduledTask);
     }
-    private void readAndSaveResults(String filepath, String taskId) {
+    private void readAndSaveResults(String filepath, String taskId,Integer modelId) {
         try {
             String resultFilePath = filepath + "/task_logs/" + taskId + "/result.json";
             String content = new String(Files.readAllBytes(Paths.get(resultFilePath)));
             JSONObject jsonObject = JSONObject.parseObject(content);
-            // Extract modelId
-            Integer modelId = jsonObject.getIntValue("modelId");
             // Extract alertList
             JSONArray alertList = jsonObject.getJSONArray("alertList");
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
