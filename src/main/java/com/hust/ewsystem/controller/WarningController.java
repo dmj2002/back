@@ -43,7 +43,7 @@ public class WarningController {
                                        @RequestParam(value = "page_size", required = true, defaultValue = "20") int pageSize,
                                        @RequestParam(value = "start_date", required = true) String startDate,
                                        @RequestParam(value = "end_date", required = false) String endDate,
-                                       @RequestParam(value = "warning_level", required = false) int warningLevel,
+                                       @RequestParam(value = "warning_level", required = false) Integer warningLevel,
                                        @RequestParam(value = "company_id", required = false) Integer companyId,
                                        @RequestParam(value = "windfarm_id", required = false) Integer windfarmId,
                                        @RequestParam(value = "module_id", required = false) Integer moduleId,
@@ -87,6 +87,9 @@ public class WarningController {
         }
         else{
             queryWrapper2.ge("start_time", startDate).le("end_time", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        }
+        if(warningLevel != null){
+            queryWrapper2.eq("warning_level", warningLevel);
         }
         Page<Warnings> page1 = warningService.page(warningsPage, queryWrapper2);
         if (page1.getRecords().isEmpty()) {
