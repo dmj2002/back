@@ -14,5 +14,6 @@ public class test {
         String formattedTime = startTime.format(formatter);
 
         System.out.println(formattedTime); // 输出为 "2021-06-01 00:00:00"
+        System.out.println(LocalDateTime.now().format(formatter)); // 输出为当前时间
     }
 }
