@@ -9,56 +9,42 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class test {
 
     public static void main(String[] args) {
-        String pythonpath = "C:\\Users\\丁梦杰\\Documents\\WeChat Files\\wxid_qpahcjjb2yxa32\\FileStorage\\File";
-//        System.out.println(pythonpath);
-        Process process = null;
-        boolean interrupted = false;  // 用于标记是否被中断
-        try {
-            // 准备命令
-            List<String> command = new ArrayList<>();
-            command.add("python");
-            command.add(String.format("2024-11/predict.py"));
-            command.add(String.format("2024-10/1.json"));
-            // 执行命令
-            ProcessBuilder processBuilder = new ProcessBuilder();
-            processBuilder.directory(new File(pythonpath));
-            processBuilder.command(command);
-            processBuilder.redirectErrorStream(true);
-            process = processBuilder.start();
-            StringBuilder outputString = null;
-            //获取输入流
-            InputStream inputStream = process.getInputStream();
-            //转成字符输入流
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        // 创建一个带有 3 个线程的调度线程池
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
 
-            int len = -1;
-            char[] c = new char[2048];
-            outputString = new StringBuilder();
-            //读取进程输入流中的内容
-            while ((len = inputStreamReader.read(c)) != -1) {
-                String s = new String(c, 0, len);
-                outputString.append(s);
-            }
-            System.out.println(outputString);
-            inputStream.close();
-            inputStreamReader.close();
-            // 等待进程完成
-            process.waitFor();
-            int exitValue = process.exitValue();
-            if (exitValue == 0) {
-                System.out.println("进程正常结束");
-            } else {
-                System.out.println("进程异常结束");
-            }
-        } catch (InterruptedException e) {
-            interrupted = true;  // 记录中断状态
-            process.destroy();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // 定义三个不同的任务
+        Runnable task1 = () -> System.out.println("Task 1 executed at " + System.currentTimeMillis());
+        Runnable task2 = () -> System.out.println("Task 2 executed at " + System.currentTimeMillis());
+        Runnable task3 = () -> System.out.println("Task 3 executed at " + System.currentTimeMillis());
+
+        // 每隔 2 秒执行一次 Task 1
+        ScheduledFuture<?> task1Future = scheduler.scheduleAtFixedRate(task1, 0, 2, TimeUnit.SECONDS);
+        // 每隔 3 秒执行一次 Task 2
+        ScheduledFuture<?> task2Future = scheduler.scheduleAtFixedRate(task2, 0, 3, TimeUnit.SECONDS);
+
+        // 每隔 5 秒执行一次 Task 3
+        ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(task3, 0, 5, TimeUnit.SECONDS);
+
+        // 15秒后取消特定任务
+        scheduler.schedule(() -> {
+            System.out.println("Cancelling Task 1 and Task 2...");
+            task1Future.cancel(true);
+            task2Future.cancel(true);
+        }, 15, TimeUnit.SECONDS);
+        System.out.println("Task 1 and Task 2 will be cancelled after 15 seconds.");
+        //关闭任务调度器
+        // 可选：在取消任务后关闭调度器
+        scheduler.schedule(() -> {
+            System.out.println("Shutting down scheduler...");
+            scheduler.shutdown();
+        }, 30, TimeUnit.SECONDS);
     }
 }

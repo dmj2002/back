@@ -36,7 +36,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     private WarningService warningService;
     // 任务状态
     private final Map<String, ScheduledFuture<?>> taskMap = new ConcurrentHashMap<>();
-
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
     @Override
     public String train(String algorithmLabel, String modelLabel) {
         String taskId = UUID.randomUUID().toString();
@@ -60,7 +60,10 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         } catch (IOException e) {
             throw new FileException("setting.json文件配置失败",e);
         }
-        new Thread(() -> executeTrain(pythonFilePath, algorithmLabel, taskId)).start();
+        Runnable task = () -> executeTrain(pythonFilePath, algorithmLabel, taskId);
+        // 调度任务一次性执行
+        ScheduledFuture<?> scheduledTask = scheduler.schedule(task, 0, TimeUnit.SECONDS);
+        taskMap.put(taskId, scheduledTask);
         return taskId;
 
     }
@@ -116,7 +119,10 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         } catch (IOException e) {
             throw new FileException("setting.json文件配置失败",e);
         }
-        new Thread(() -> executePredict(pythonFilePath, alertInterval, algorithmLabel, taskId, modelId)).start();
+        Runnable task = () -> executePredict(pythonFilePath, alertInterval, algorithmLabel, taskId,modelId);
+        // 定期调度任务
+        ScheduledFuture<?> scheduledTask =scheduler.scheduleWithFixedDelay(task, 0, alertInterval, TimeUnit.SECONDS);
+        taskMap.put(taskId, scheduledTask);
         return taskId;
     }
     // 提供查询任务状态的接口
@@ -160,91 +166,79 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
      * @param taskId 任务ID
      */
     public void executeTrain(String filepath, String algorithmLabel, String taskId) {
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        Runnable task = () -> {
-            Process process = null;
-            try {
-                // 准备命令
-                List<String> command = new ArrayList<>();
-                command.add("python");
-                command.add(String.format("alg/%s/train.py", algorithmLabel));
-                command.add(String.format("task_logs/%s/setting.json", taskId));
-                // 执行命令
-                ProcessBuilder processBuilder = new ProcessBuilder();
-                processBuilder.directory(new File(filepath));
-                processBuilder.command(command);
-                processBuilder.redirectErrorStream(true);
-                process = processBuilder.start();
-                System.out.println("Started Python process for task: " + taskId);
-                // 等待进程完成
-                process.waitFor();
-            } catch(InterruptedException e) {
-                process.destroy();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        };
-        // 调度任务一次性执行
-        ScheduledFuture<?> scheduledTask = scheduler.schedule(task, 0, TimeUnit.SECONDS);
-        taskMap.put(taskId, scheduledTask);
+        Process process = null;
+        try {
+            // 准备命令
+            List<String> command = new ArrayList<>();
+            command.add("python");
+            command.add(String.format("alg/%s/train.py", algorithmLabel));
+            command.add(String.format("task_logs/%s/setting.json", taskId));
+            // 执行命令
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            processBuilder.directory(new File(filepath));
+            processBuilder.command(command);
+            processBuilder.redirectErrorStream(true);
+            process = processBuilder.start();
+            System.out.println("Started Python process for task: " + taskId);
+            // 等待进程完成
+            process.waitFor();
+        } catch(InterruptedException e) {
+            process.destroy();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     public void executePredict(String filepath, Integer alertInterval, String algorithmLabel, String taskId,Integer modelId) {
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        Runnable task = () -> {
-            //TODO 生成预测文件
-            Process process = null;
-            boolean interrupted = false;  // 用于标记是否被中断
-            try {
-                // 准备命令
-                List<String> command = new ArrayList<>();
-                command.add("python");
-                command.add(String.format("alg/%s/predict.py", algorithmLabel));
-                command.add(String.format("task_logs/%s/setting.json", taskId));
-                // 执行命令
-                ProcessBuilder processBuilder = new ProcessBuilder();
-                processBuilder.directory(new File(filepath));
-                processBuilder.command(command);
-                processBuilder.redirectErrorStream(true);
-                process = processBuilder.start();
-                System.out.println("Started Python process for task: " + taskId);
-                StringBuilder outputString = null;
-                //获取输入流
-                InputStream inputStream = process.getInputStream();
-                //转成字符输入流
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-                int len = -1;
-                char[] c = new char[2048];
-                outputString = new StringBuilder();
-                //读取进程输入流中的内容
-                while ((len = inputStreamReader.read(c)) != -1) {
-                    String s = new String(c, 0, len);
-                    outputString.append(s);
-                }
-                System.out.println(outputString);
-                inputStream.close();
-                inputStreamReader.close();
-                // 等待进程完成
-                process.waitFor();
-                int exitValue = process.exitValue();
-                if (exitValue == 0) {
-                    System.out.println("进程正常结束");
-                } else {
-                    System.out.println("进程异常结束");
-                }
-            } catch (InterruptedException e) {
-                interrupted = true;  // 记录中断状态
-                process.destroy();
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if(!interrupted) {
-                    readAndSaveResults(filepath, taskId,modelId);
-                }
+        //TODO 生成预测文件
+        Process process = null;
+        boolean interrupted = false;  // 用于标记是否被中断
+        try {
+            // 准备命令
+            List<String> command = new ArrayList<>();
+            command.add("python");
+            command.add(String.format("alg/%s/predict.py", algorithmLabel));
+            command.add(String.format("task_logs/%s/setting.json", taskId));
+            // 执行命令
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            processBuilder.directory(new File(filepath));
+            processBuilder.command(command);
+            processBuilder.redirectErrorStream(true);
+            process = processBuilder.start();
+            System.out.println("Started Python process for task: " + taskId);
+            StringBuilder outputString = null;
+            //获取输入流
+            InputStream inputStream = process.getInputStream();
+            //转成字符输入流
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            int len = -1;
+            char[] c = new char[2048];
+            outputString = new StringBuilder();
+            //读取进程输入流中的内容
+            while ((len = inputStreamReader.read(c)) != -1) {
+                String s = new String(c, 0, len);
+                outputString.append(s);
             }
-        };
-        // 定期调度任务
-        ScheduledFuture<?> scheduledTask =scheduler.scheduleAtFixedRate(task, 0, alertInterval, TimeUnit.SECONDS);
-        taskMap.put(taskId, scheduledTask);
+            System.out.println(outputString);
+            inputStream.close();
+            inputStreamReader.close();
+            // 等待进程完成
+            process.waitFor();
+            int exitValue = process.exitValue();
+            if (exitValue == 0) {
+                System.out.println("进程正常结束");
+            } else {
+                System.out.println("进程异常结束");
+            }
+        } catch (InterruptedException e) {
+            interrupted = true;  // 记录中断状态
+            process.destroy();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if(!interrupted) {
+                readAndSaveResults(filepath, taskId,modelId);
+            }
+        }
     }
     private void readAndSaveResults(String filepath, String taskId,Integer modelId) {
         try {
