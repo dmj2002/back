@@ -1,14 +1,6 @@
 package com.hust.ewsystem;
 
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -31,7 +23,7 @@ public class test {
         ScheduledFuture<?> task2Future = scheduler.scheduleAtFixedRate(task2, 0, 3, TimeUnit.SECONDS);
 
         // 每隔 5 秒执行一次 Task 3
-        ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(task3, 0, 5, TimeUnit.SECONDS);
+         scheduler.scheduleAtFixedRate(task3, 0, 5, TimeUnit.SECONDS);
 
         // 15秒后取消特定任务
         scheduler.schedule(() -> {

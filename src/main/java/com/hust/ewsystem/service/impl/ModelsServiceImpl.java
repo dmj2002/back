@@ -119,7 +119,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         } catch (IOException e) {
             throw new FileException("setting.json文件配置失败",e);
         }
-        Runnable task = () -> executePredict(pythonFilePath, alertInterval, algorithmLabel, taskId,modelId);
+        Runnable task = () -> executePredict(pythonFilePath, algorithmLabel, taskId,modelId);
         // 定期调度任务
         ScheduledFuture<?> scheduledTask =scheduler.scheduleWithFixedDelay(task, 0, alertInterval, TimeUnit.SECONDS);
         taskMap.put(taskId, scheduledTask);
@@ -188,7 +188,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             e.printStackTrace();
         }
     }
-    public void executePredict(String filepath, Integer alertInterval, String algorithmLabel, String taskId,Integer modelId) {
+    public void executePredict(String filepath, String algorithmLabel, String taskId,Integer modelId) {
         //TODO 生成预测文件
         Process process = null;
         boolean interrupted = false;  // 用于标记是否被中断
