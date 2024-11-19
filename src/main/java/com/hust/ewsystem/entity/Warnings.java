@@ -29,7 +29,7 @@ public class Warnings implements Serializable {
 
     private Integer handlerId; // 处理人id
 
-    private LocalDateTime handledTime; // 处理时间
+    private LocalDateTime handleTime; // 处理时间
 
     private String warningDescription; // 预警描述
 
