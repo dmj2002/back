@@ -119,7 +119,13 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         } catch (IOException e) {
             throw new FileException("setting.json文件配置失败",e);
         }
-        Runnable task = () -> executePredict(pythonFilePath, algorithmLabel, taskId,modelId);
+        Runnable task = () ->{
+            try {
+                executePredict(pythonFilePath, algorithmLabel, taskId,modelId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
         // 定期调度任务
         ScheduledFuture<?> scheduledTask =scheduler.scheduleWithFixedDelay(task, 0, alertInterval, TimeUnit.SECONDS);
         taskMap.put(taskId, scheduledTask);
@@ -191,7 +197,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     public void executePredict(String filepath, String algorithmLabel, String taskId,Integer modelId) {
         //TODO 生成预测文件
         Process process = null;
-        boolean interrupted = false;  // 用于标记是否被中断
+        boolean interrupted = false;
         try {
             // 准备命令
             List<String> command = new ArrayList<>();
@@ -210,6 +216,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             InputStream inputStream = process.getInputStream();
             //转成字符输入流
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+
             int len = -1;
             char[] c = new char[2048];
             outputString = new StringBuilder();
@@ -218,7 +225,6 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 String s = new String(c, 0, len);
                 outputString.append(s);
             }
-            System.out.println(outputString);
             inputStream.close();
             inputStreamReader.close();
             // 等待进程完成
@@ -235,8 +241,9 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if(!interrupted) {
-                readAndSaveResults(filepath, taskId,modelId);
+            if (!interrupted) {
+                readAndSaveResults(filepath, taskId, modelId);
+                System.out.println("Finished reading and saving results for task: " + taskId);
             }
         }
     }

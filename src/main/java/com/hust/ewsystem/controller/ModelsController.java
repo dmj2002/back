@@ -286,7 +286,7 @@ public class ModelsController {
             String modelLabel = model.getModelLabel();
             Integer algorithmId = model.getAlgorithmId();
             String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
-            // 算法调用
+            //算法调用
             String taskId = modelsService.predict(alertInterval,modelLabel,algorithmLabel,modelId);
             Map<String,Object> map= new HashMap<>();
             map.put("modelId",modelId);
