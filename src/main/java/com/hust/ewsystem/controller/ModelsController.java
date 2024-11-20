@@ -4,8 +4,8 @@ package com.hust.ewsystem.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.common.exception.CrudException;
+import com.hust.ewsystem.common.exception.FileException;
 import com.hust.ewsystem.common.result.EwsResult;
-import com.hust.ewsystem.common.util.DateUtil;
 import com.hust.ewsystem.entity.*;
 import com.hust.ewsystem.mapper.*;
 import com.hust.ewsystem.service.CommonDataService;
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -50,8 +51,15 @@ public class ModelsController {
 
     @Autowired
     private AlgorithmsMapper algorithmsMapper;
+
     @Autowired
-    private ModelsMapper modelsMapper;
+    private WindFarmMapper windFarmMapper;
+
+    @Autowired
+    private WindTurbineMapper windTurbineMapper;
+
+    @Autowired
+    private ModuleMapper moduleMapper;
 
     @PostMapping("/add")
     @Transactional
@@ -107,6 +115,7 @@ public class ModelsController {
         for (Models models : modelsList) {
             Map<String,Object> map = new HashMap<>();
             map.put("modelId",models.getModelId());
+            map.put("modellabel",models.getModelLabel());
             map.put("modelName",models.getModelName());
             map.put("modelVersion",models.getModelVersion());
             map.put("modelStatus",models.getModelStatus());
@@ -229,8 +238,8 @@ public class ModelsController {
     public EwsResult<?> train(@RequestBody Map<String, Object> FileForm) {
         List<Integer> modelIds =(List<Integer>) FileForm.get("modelIds");
         List<Map<String, Object>> timePeriods = (List<Map<String, Object>>)FileForm.get("timePeriods");
-        //返回值：模型id->任务id
-        List<Map<Integer,String>> taskIdList = new ArrayList<>();
+        //返回值
+        List<Map<String,Object>> taskIdList = new ArrayList<>();
         //传入的每个模型测点不一定相同，所以需要分别处理
         for(Integer modelId : modelIds){
             String modelLabel = modelsService.getById(modelId).getModelLabel();
@@ -242,8 +251,8 @@ public class ModelsController {
             // 查询数据并提取 datetime和value列
             Map<LocalDateTime, Map<String, Object>> alignedData = new TreeMap<>();
             for (Map<String, Object> period : timePeriods) {
-                LocalDateTime startTime = DateUtil.getLocalDateTime((String) period.get("startTime"));
-                LocalDateTime endTime = DateUtil.getLocalDateTime((String) period.get("endTime"));
+                String startTime = (String) period.get("startTime");
+                String endTime = (String) period.get("endTime");
                 for (Map.Entry<String,String> entry : realToStandLabel.entrySet()) {
                     List<CommonData> data = commonDataService.selectDataByTime(entry.getKey().toLowerCase(), startTime, endTime);
                     for (CommonData record : data) {
@@ -254,51 +263,103 @@ public class ModelsController {
                 }
             }
             // 写入CSV文件
-            toCSV(alignedData, realToStandLabel, modelLabel);
+            toTrainCsv(alignedData, realToStandLabel, modelLabel);
             Integer algorithmId = modelsService.getById(modelId).getAlgorithmId();
             String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
             // 算法调用
             String taskId = modelsService.train(algorithmLabel, modelLabel);
-            Map<Integer,String> map = new HashMap<>();
-            map.put(modelId,taskId);
+            Map<String,Object> map= new HashMap<>();
+            map.put("modelId",modelId);
+            map.put("taskId",taskId);
             taskIdList.add(map);
         }
-        // TODO 结果处理等
+        return EwsResult.OK(taskIdList);
+    }
+
+    @PostMapping("/predict")
+    public EwsResult<?> predict(@RequestBody List<Integer> modelList){
+        List<Map<String,Object>> taskIdList = new ArrayList<>();
+        for(Integer modelId : modelList) {
+            //获取返回值
+            Models model = modelsService.getById(modelId);
+            Integer alertInterval = model.getAlertInterval();
+            String modelLabel = model.getModelLabel();
+            Integer algorithmId = model.getAlgorithmId();
+            String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
+            //算法调用
+            String taskId = modelsService.predict(alertInterval,modelLabel,algorithmLabel,modelId);
+            Map<String,Object> map= new HashMap<>();
+            map.put("modelId",modelId);
+            map.put("taskId",taskId);
+            taskIdList.add(map);
+        }
         return EwsResult.OK(taskIdList);
     }
 
     @GetMapping("/list")
-    public EwsResult<?> listModel(@RequestParam(value = "page", required = true, defaultValue = "1") int page,
-                                  @RequestParam(value = "page_size", required = true, defaultValue = "20") int pageSize,
+    public EwsResult<?> listModel(@RequestParam(value = "page") int page,
+                                  @RequestParam(value = "page_size") int pageSize,
+                                  @RequestParam(value = "module_id", required = false) Integer moduleId,
                                   @RequestParam(value = "company_id", required = false) Integer companyId,
                                   @RequestParam(value = "windfarm_id", required = false) Integer windfarmId,
-                                  @RequestParam(value = "module_id", required = false) Integer moduleId,
                                   @RequestParam(value = "turbine_id", required = false) Integer turbineId) {
         Page<Models> modelsPage = new Page<>(page, pageSize);
         QueryWrapper<Models> queryWrapper = new QueryWrapper<>();
-        if (companyId != null) {
-            queryWrapper.eq("company_id", companyId);
-        }
-        if (windfarmId != null) {
-            queryWrapper.eq("windfarm_id", windfarmId);
-        }
         if (moduleId != null) {
             queryWrapper.eq("module_id", moduleId);
         }
         if (turbineId != null) {
             queryWrapper.eq("turbine_id", turbineId);
         }
+        else{
+            List<Integer> turbineList = new ArrayList<>();
+            if (companyId != null) {
+                if (windfarmId != null) {
+                    turbineList = windTurbineMapper.selectList(
+                            new QueryWrapper<WindTurbine>().eq("wind_farm_id", windfarmId)
+                    ).stream().map(WindTurbine::getTurbineId).collect(Collectors.toList());
+                }
+                else {
+                    List<Integer> windfarmList = windFarmMapper.selectList(
+                            new QueryWrapper<WindFarm>().eq("company_id", companyId)
+                    ).stream().map(WindFarm::getWindFarmId).collect(Collectors.toList());
+                    turbineList = windTurbineMapper.selectList(
+                            new QueryWrapper<WindTurbine>().in("wind_farm_id", windfarmList)
+                    ).stream().map(WindTurbine::getTurbineId).collect(Collectors.toList());
+                }
+            }
+            if (!turbineList.isEmpty()) {
+                queryWrapper.in("turbine_id", turbineList);
+            }
+        }
         Page<Models> page1 = modelsService.page(modelsPage, queryWrapper);
         if (page1.getRecords().isEmpty()) {
-            throw new CrudException("查询结果为空");
+            return EwsResult.error("查询结果为空");
         }
-        Map<String,Object> result = new HashMap<>();
-        result.put("total_count",page1.getTotal());
-        result.put("page",page1.getCurrent());
-        result.put("page_size",page1.getSize());
-        result.put("total_pages",page1.getPages());
-        result.put("modelList",page1.getRecords());
-        return EwsResult.OK("查询成功", result);
+        List<Models> records = page1.getRecords();
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Models model : records) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("modelId", model.getModelId());
+            map.put("modelLabel", model.getModelLabel());
+            map.put("modelName", model.getModelName());
+            map.put("modelVersion", model.getModelVersion());
+            map.put("turbineId", model.getTurbineId());
+            map.put("turbineNumber", windTurbineMapper.selectById(model.getTurbineId()).getTurbineNumber());
+            map.put("algorithmId", model.getAlgorithmId());
+            map.put("algorithmName",algorithmsMapper.selectById(model.getAlgorithmId()).getAlgorithmName());
+            map.put("moduleId", model.getModuleId());
+            map.put("moduleName",moduleMapper.selectById(model.getModuleId()).getModuleName());
+            map.put("modelStatus", model.getModelStatus());
+            result.add(map);
+        }
+        Map<String,Object> response = new HashMap<>();
+        response.put("total_count",page1.getTotal());
+        response.put("page",page1.getCurrent());
+        response.put("page_size",page1.getSize());
+        response.put("total_pages",page1.getPages());
+        response.put("modelList",result);
+        return EwsResult.OK("查询成功", response);
     }
     // 查询任务状态
     @PostMapping("/queryTask")
@@ -320,7 +381,14 @@ public class ModelsController {
         String killTask = modelsService.killTask(taskId);
         return EwsResult.OK(killTask);
     }
-    public void toCSV(Map<LocalDateTime, Map<String, Object>> alignedData,Map<String, String> realToStandLabel,String modelLabel){
+    public void toTrainCsv(Map<LocalDateTime, Map<String, Object>> alignedData,Map<String, String> realToStandLabel,String modelLabel){
+        // 创建目标目录（如果不存在）
+        File modelDir = new File(String.format("%s/%s", pythonFilePath, modelLabel));
+        if (!modelDir.exists()) {
+            if (!modelDir.mkdirs()) {
+                throw new FileException("创建文件目录失败");
+            }
+        }
         // 写入 CSV 文件
         try (FileWriter csvWriter = new FileWriter(String.format("%s/%s/train.csv", pythonFilePath, modelLabel))) {
             // 写入表头
@@ -339,7 +407,7 @@ public class ModelsController {
                 csvWriter.append(line.toString()).append("\n");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new FileException("写入CSV文件失败", e);
         }
     }
     //标准测点标签 -> 真实测点标签
