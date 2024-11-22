@@ -50,6 +50,7 @@ public class WarningController {
     private WindTurbineMapper windTurbineMapper;
     @Autowired
     private ModelsService modelsService;
+    @GetMapping("/list")
     @Autowired
     private RealPortService realPortService;
     @Autowired
