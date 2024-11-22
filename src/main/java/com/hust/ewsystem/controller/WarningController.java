@@ -1,27 +1,40 @@
 package com.hust.ewsystem.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hust.ewsystem.DTO.QueryWarnDetailsDTO;
 import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.result.EwsResult;
+import com.hust.ewsystem.entity.CommonData;
+import com.hust.ewsystem.entity.ModelRealRelate;
 import com.hust.ewsystem.entity.Models;
+import com.hust.ewsystem.entity.RealPoint;
 import com.hust.ewsystem.entity.Warnings;
 import com.hust.ewsystem.entity.WindFarm;
 import com.hust.ewsystem.entity.WindTurbine;
 import com.hust.ewsystem.mapper.WindFarmMapper;
 import com.hust.ewsystem.mapper.WindTurbineMapper;
+import com.hust.ewsystem.service.ModelRealRelateService;
 import com.hust.ewsystem.service.ModelsService;
+import com.hust.ewsystem.service.RealPortService;
 import com.hust.ewsystem.service.WarningService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -38,6 +51,10 @@ public class WarningController {
     private WindTurbineMapper windTurbineMapper;
     @Autowired
     private ModelsService modelsService;
+    @Autowired
+    private RealPortService realPortService;
+    @Autowired
+    private ModelRealRelateService modelRealRelateService;
     @GetMapping("/List")
     public EwsResult<?> getWarningList(@RequestParam(value = "page") int page,
                                        @RequestParam(value = "page_size") int pageSize,
@@ -102,5 +119,37 @@ public class WarningController {
         result.put("total_pages",page1.getPages());
         result.put("warningList",page1.getRecords());
         return EwsResult.OK("查询成功", result);
+    }
+
+    @RequestMapping(value = "/detail",method = RequestMethod.POST)
+    public EwsResult<Object> queryWarnDetail(@Valid @RequestBody QueryWarnDetailsDTO queryWarnDetailsDTO){
+
+        // 根据风机ID和测点列表获取测点标签
+        Integer modelId = queryWarnDetailsDTO.getModelId();
+        QueryWrapper<ModelRealRelate> modelRealRelateWrapper = new QueryWrapper<>();
+        modelRealRelateWrapper.lambda().eq(ModelRealRelate::getModelId,modelId);
+        List<ModelRealRelate> modelRealRelateList = modelRealRelateService.list(modelRealRelateWrapper);
+        if (CollectionUtils.isEmpty(modelRealRelateList)){
+            return EwsResult.OK("测点数据为空",null);
+        }
+        List<Integer> realPointIdList = modelRealRelateList.stream().map(ModelRealRelate::getRealPointId).collect(Collectors.toList());
+
+        QueryWrapper<RealPoint> realPointQueryWrapper = new QueryWrapper<>();
+        realPointQueryWrapper.lambda().eq(RealPoint::getTurbineId,queryWarnDetailsDTO.getTurbineId()).in(RealPoint::getPointId,realPointIdList);
+        List<RealPoint> realPointList = realPortService.list(realPointQueryWrapper);
+
+        List<Map<Integer, String>> list = realPointList.stream().map(point -> {
+                    Map<Integer, String> map = new HashMap<>();
+                    map.put(point.getPointId(), point.getPointLabel());
+                    return map;
+                }).collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(list)){
+            return EwsResult.OK("测点数据为空",null);
+        }
+
+        // 查询测点值
+        Map<Integer, List<CommonData>> realPointValueList = realPortService.getRealPointValueList(list, queryWarnDetailsDTO);
+        return EwsResult.OK(realPointValueList);
     }
 }

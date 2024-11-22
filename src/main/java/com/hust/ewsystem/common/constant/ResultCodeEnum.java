@@ -11,15 +11,6 @@ public enum ResultCodeEnum {
 	SQL_ERROR(-1, "数据库执行失败"),
 	PARAM_ERROR(-2, "参数校验失败"),
 
-    ADAPTER_CALL_ERROR(1153, "适配接口调用方式异常"),
-    GET_MAC_ERROR(1505, "获取MAC地址IP地址异常"),
-
-    GET_REGISTER_ERROR(1506, "签到调用未获取到签到编号"),
-
-    CALL_TFP_ERROR(1509,"调用两定接口异常"),
-
-    CALL_EBC_ERROR(1510,"调用ebc接口异常"),
-
     CALL_COM_ERROR(1511,"调用COM组件失败"),
 
     CALL_DLL_INIT_ERROR(1512,"动态库初始化函数执行异常"),

@@ -30,21 +30,21 @@ public class EwsResult<T> implements Serializable {
 
     public static<T> EwsResult<T> OK(T data) {
         EwsResult<T> r = new EwsResult<T>();
-        r.setCode(CommonConstant.NUM_COMMON_0);
+        r.setCode(CommonConstant.NUM_COMMON_200);
         r.setResult(data);
         return r;
     }
 
     public static<T> EwsResult<T> OK(String msg) {
         EwsResult<T> r = new EwsResult<T>();
-        r.setCode(CommonConstant.NUM_COMMON_0);
+        r.setCode(CommonConstant.NUM_COMMON_200);
         r.setMessage(msg);
         return r;
     }
 
     public static<T> EwsResult<T> OK(String msg, T data) {
         EwsResult<T> r = new EwsResult<T>();
-        r.setCode(CommonConstant.NUM_COMMON_0);
+        r.setCode(CommonConstant.NUM_COMMON_200);
         r.setMessage(msg);
         r.setResult(data);
         return r;
@@ -52,14 +52,14 @@ public class EwsResult<T> implements Serializable {
 
     public static<T> EwsResult<T> error(String msg, T data) {
         EwsResult<T> r = new EwsResult<T>();
-        r.setCode(CommonConstant.NUM_COMMON_NEG_1);
+        r.setCode(CommonConstant.NUM_COMMON_500);
         r.setMessage(msg);
         r.setResult(data);
         return r;
     }
 
     public static<T> EwsResult<T> error(String msg) {
-        return error(CommonConstant.NUM_COMMON_NEG_1, msg);
+        return error(CommonConstant.NUM_COMMON_500, msg);
     }
 
     public static<T> EwsResult<T> error(int code, String msg) {

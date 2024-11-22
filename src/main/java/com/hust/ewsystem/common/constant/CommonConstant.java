@@ -2,7 +2,12 @@ package com.hust.ewsystem.common.constant;
 
 
 /**
- * 通用常量类
+ * @BelongsProject: back
+ * @BelongsPackage: com.hust.ewsystem.common.constant
+ * @Author: xdy
+ * @CreateTime: 2024-11-22  09:54
+ * @Description: 常量类
+ * @Version: 1.0
  */
 public class CommonConstant {
 
@@ -15,6 +20,16 @@ public class CommonConstant {
 	 * 通用数字0
 	 */
 	public static final Integer NUM_COMMON_0 = 0;
+
+	/**
+	 * 通用数字200
+	 */
+	public static final Integer NUM_COMMON_200 = 200;
+
+	/**
+	 * 通用数字500
+	 */
+	public static final Integer NUM_COMMON_500 = 500;
 	
 	/**
 	 * 通用数字1

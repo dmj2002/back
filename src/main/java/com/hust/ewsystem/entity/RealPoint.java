@@ -27,4 +27,6 @@ public class RealPoint implements Serializable {
     private String pointUnit; // 测点单位
 
     private Integer pointType; // 测点类型
+
+    private Integer turbineId; // 测点类型
 }
