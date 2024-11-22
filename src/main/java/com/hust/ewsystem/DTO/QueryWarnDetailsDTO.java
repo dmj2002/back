@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import javax.validation.constraints.NotEmpty;
+
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
