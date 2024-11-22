@@ -38,7 +38,7 @@ public class WarningController {
     private WindTurbineMapper windTurbineMapper;
     @Autowired
     private ModelsService modelsService;
-    @GetMapping("/List")
+    @GetMapping("/list")
     public EwsResult<?> getWarningList(@RequestParam(value = "page") int page,
                                        @RequestParam(value = "page_size") int pageSize,
                                        @RequestParam(value = "start_date") String startDate,
