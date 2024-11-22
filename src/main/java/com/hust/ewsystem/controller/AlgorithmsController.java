@@ -57,7 +57,10 @@ public class AlgorithmsController {
         String algorithmDir = pythonFilePath + "/alg/A" + String.format("%04d", algorithmId);
         File dir = new File(algorithmDir);
         if (!dir.exists()) {
-            dir.mkdirs(); // 创建目录
+             // 创建目录
+            if (!dir.mkdirs()) {
+                throw new FileException("创建文件目录失败");
+            }
         }
         // 保存文件
         try {
@@ -73,15 +76,19 @@ public class AlgorithmsController {
     @DeleteMapping("/delete/{algorithmId}")
     public EwsResult<?> deleteAlgoithm(@PathVariable Integer algorithmId) {
         boolean remove = algorithmsService.removeById(algorithmId);
-        if(remove) {
-            String algorithmDir = pythonFilePath + "/A" + String.format("%04d", algorithmId);
-            File dir = new File(algorithmDir);
-            if (dir.exists()) {
-                dir.delete(); // 删除目录
+        if(!remove) {
+            return EwsResult.error("删除算法失败");
+        }
+        String algorithmDir = pythonFilePath + "/alg/A" + String.format("%04d", algorithmId);
+        File dir = new File(algorithmDir);
+        if (dir.exists()) {
+            // 删除目录
+            if (!dir.delete()) {
+                throw new FileException("删除文件目录失败");
             }
             return EwsResult.OK("删除算法成功");
         }
-        return EwsResult.error("删除算法失败");
+        else return EwsResult.error("删除算法失败");
     }
     @PutMapping("/update")
     public EwsResult<?> updateAlgorithm(@RequestBody @Validated Algorithms algorithms) {

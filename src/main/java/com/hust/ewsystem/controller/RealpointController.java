@@ -1,7 +1,6 @@
 package com.hust.ewsystem.controller;
 
 import com.hust.ewsystem.common.result.EwsResult;
-import com.hust.ewsystem.entity.Algorithms;
 import com.hust.ewsystem.entity.RealPoint;
 import com.hust.ewsystem.mapper.RealPointMapper;
 import org.springframework.beans.factory.annotation.Autowired;
