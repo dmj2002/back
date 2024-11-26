@@ -60,6 +60,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public EwsResult<?> handleMethodArgumentNotValidExceptionX(MethodArgumentNotValidException e) {
+        log.error("参数校验失败：{}",  Objects.requireNonNull(e.getFieldError()).getDefaultMessage());
         return EwsResult.error(org.apache.commons.lang3.StringUtils.isBlank(Objects.requireNonNull(e.getFieldError()).getDefaultMessage()) ? "参数检验失败" : Objects.requireNonNull(e.getFieldError()).getDefaultMessage());
     }
 
