@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @BelongsProject: back
@@ -23,11 +24,12 @@ import java.util.Date;
 public class QueryWarnDetailsDTO implements Serializable {
 
     private static final long serialVersionUID = -1463752699274359956L;
+
     /**
      * 真实测点ID
      */
-    @NotNull(message = "模型ID不能为空")
-    private Integer modelId;
+    @NotNull(message = "测点ID不能为空")
+    private List<Integer> pointIdList;
 
     /**
      * 风机ID

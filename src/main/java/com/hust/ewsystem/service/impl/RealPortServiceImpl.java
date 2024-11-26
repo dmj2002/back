@@ -3,6 +3,7 @@ package com.hust.ewsystem.service.impl;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hust.ewsystem.DTO.QueryWarnDetailsDTO;
+import com.hust.ewsystem.DTO.TrendDataDTO;
 import com.hust.ewsystem.common.constant.CommonConstant;
 import com.hust.ewsystem.common.util.DateUtil;
 import com.hust.ewsystem.entity.CommonData;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,15 +36,19 @@ public class RealPortServiceImpl extends ServiceImpl<RealPortMapper, RealPoint> 
 
     @Override
     @DS("slave")
-    public Map<Integer,List<CommonData>> getRealPointValueList(List<Map<Integer, String>> pointLabels, QueryWarnDetailsDTO queryWarnDetailsDTO) {
+    public List<TrendDataDTO> getRealPointValueList(List<Map<Integer, String>> pointLabels, QueryWarnDetailsDTO queryWarnDetailsDTO) {
         List<CommonData> valueList;
-        Map<Integer,List<CommonData>> result = new LinkedHashMap<>();
+        List<TrendDataDTO> result = new LinkedList<>();
         String startDate = DateUtil.dateTimeToDateString(queryWarnDetailsDTO.getStartDate(), CommonConstant.DATETIME_FORMAT_1);
         String endDate = DateUtil.dateTimeToDateString(queryWarnDetailsDTO.getEndDate(), CommonConstant.DATETIME_FORMAT_1);
+        TrendDataDTO trendDataDTO;
         for (Map<Integer, String> pointLabel : pointLabels) {
             for (Map.Entry<Integer, String> entry : pointLabel.entrySet()) {
                 valueList = commonDataMapper.selectDataByTime(entry.getValue().toLowerCase(), startDate, endDate);
-                result.put(entry.getKey(),valueList);
+                trendDataDTO = new TrendDataDTO();
+                trendDataDTO.setPointId(entry.getKey());
+                trendDataDTO.setPointValue(valueList);
+                result.add(trendDataDTO);
             }
         }
         return result;

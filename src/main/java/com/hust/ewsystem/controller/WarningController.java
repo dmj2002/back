@@ -3,10 +3,9 @@ package com.hust.ewsystem.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.DTO.QueryWarnDetailsDTO;
+import com.hust.ewsystem.DTO.TrendDataDTO;
 import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.result.EwsResult;
-import com.hust.ewsystem.entity.CommonData;
-import com.hust.ewsystem.entity.ModelRealRelate;
 import com.hust.ewsystem.entity.Models;
 import com.hust.ewsystem.entity.RealPoint;
 import com.hust.ewsystem.entity.Warnings;
@@ -119,35 +118,27 @@ public class WarningController {
         return EwsResult.OK("查询成功", result);
     }
 
-    @RequestMapping(value = "/detail",method = RequestMethod.POST)
-    public EwsResult<Object> queryWarnDetail(@Valid @RequestBody QueryWarnDetailsDTO queryWarnDetailsDTO){
-
-        // 根据风机ID和测点列表获取测点标签
-        Integer modelId = queryWarnDetailsDTO.getModelId();
-        QueryWrapper<ModelRealRelate> modelRealRelateWrapper = new QueryWrapper<>();
-        modelRealRelateWrapper.lambda().eq(ModelRealRelate::getModelId,modelId);
-        List<ModelRealRelate> modelRealRelateList = modelRealRelateService.list(modelRealRelateWrapper);
-        if (CollectionUtils.isEmpty(modelRealRelateList)){
-            return EwsResult.OK("测点数据为空",null);
-        }
-        List<Integer> realPointIdList = modelRealRelateList.stream().map(ModelRealRelate::getRealPointId).collect(Collectors.toList());
-
+    /**
+     * 查询预警详情趋势数据
+     * @param queryWarnDetailsDTO queryWarnDetailsDTO
+     * @return EwsResult<List<TrendDataDTO>>
+     */
+    @RequestMapping(value = "/trendData",method = RequestMethod.POST)
+    public EwsResult<List<TrendDataDTO>> queryWarnDetail(@Valid @RequestBody QueryWarnDetailsDTO queryWarnDetailsDTO){
+        List<Integer> realPointIdList = queryWarnDetailsDTO.getPointIdList();
         QueryWrapper<RealPoint> realPointQueryWrapper = new QueryWrapper<>();
         realPointQueryWrapper.lambda().eq(RealPoint::getTurbineId,queryWarnDetailsDTO.getTurbineId()).in(RealPoint::getPointId,realPointIdList);
         List<RealPoint> realPointList = realPortService.list(realPointQueryWrapper);
-
+        if (CollectionUtils.isEmpty(realPointList)){
+            return EwsResult.OK("测点不存在,请检查参数后重试",null);
+        }
         List<Map<Integer, String>> list = realPointList.stream().map(point -> {
                     Map<Integer, String> map = new HashMap<>();
                     map.put(point.getPointId(), point.getPointLabel());
                     return map;
                 }).collect(Collectors.toList());
-
-        if (CollectionUtils.isEmpty(list)){
-            return EwsResult.OK("测点数据为空",null);
-        }
-
         // 查询测点值
-        Map<Integer, List<CommonData>> realPointValueList = realPortService.getRealPointValueList(list, queryWarnDetailsDTO);
+        List<TrendDataDTO> realPointValueList = realPortService.getRealPointValueList(list, queryWarnDetailsDTO);
         return EwsResult.OK(realPointValueList);
     }
 }

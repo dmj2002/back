@@ -2,10 +2,8 @@ package com.hust.ewsystem.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hust.ewsystem.DTO.QueryWarnDetailsDTO;
-import com.hust.ewsystem.entity.CommonData;
-import com.hust.ewsystem.entity.Models;
+import com.hust.ewsystem.DTO.TrendDataDTO;
 import com.hust.ewsystem.entity.RealPoint;
-import com.hust.ewsystem.entity.RealPointValue;
 
 import java.util.List;
 import java.util.Map;
@@ -26,5 +24,5 @@ public interface RealPortService extends IService<RealPoint> {
      * @param queryWarnDetailsDTO
      * @return
      */
-    public Map<Integer,List<CommonData>> getRealPointValueList(List<Map<Integer, String>> pointLabels, QueryWarnDetailsDTO queryWarnDetailsDTO);
+    public List<TrendDataDTO> getRealPointValueList(List<Map<Integer, String>> pointLabels, QueryWarnDetailsDTO queryWarnDetailsDTO);
 }
