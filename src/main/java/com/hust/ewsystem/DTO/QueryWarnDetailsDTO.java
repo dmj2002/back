@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -19,8 +20,9 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-public class QueryWarnDetailsDTO {
+public class QueryWarnDetailsDTO implements Serializable {
 
+    private static final long serialVersionUID = -1463752699274359956L;
     /**
      * 真实测点ID
      */
