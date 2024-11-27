@@ -5,8 +5,8 @@ server:
     uri-encoding: UTF-8
   ssl:
     enabled: false
-#  servlet:
-#    context-path: /ews
+  servlet:
+    context-path: /ews
 # 数据库连接配置
 spring:
   datasource:

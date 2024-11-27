@@ -2,22 +2,31 @@ package com.hust.ewsystem.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hust.ewsystem.DTO.QueryWarnDetailsDTO;
+import com.hust.ewsystem.DTO.TrendDataDTO;
 import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.Models;
+import com.hust.ewsystem.entity.RealPoint;
 import com.hust.ewsystem.entity.Warnings;
 import com.hust.ewsystem.entity.WindFarm;
 import com.hust.ewsystem.entity.WindTurbine;
 import com.hust.ewsystem.mapper.WindFarmMapper;
 import com.hust.ewsystem.mapper.WindTurbineMapper;
+import com.hust.ewsystem.service.ModelRealRelateService;
 import com.hust.ewsystem.service.ModelsService;
+import com.hust.ewsystem.service.RealPortService;
 import com.hust.ewsystem.service.WarningService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -38,7 +47,12 @@ public class WarningController {
     private WindTurbineMapper windTurbineMapper;
     @Autowired
     private ModelsService modelsService;
-    @GetMapping("/List")
+
+    @Autowired
+    private RealPortService realPortService;
+    @Autowired
+    private ModelRealRelateService modelRealRelateService;
+    @GetMapping("/list")
     public EwsResult<?> getWarningList(@RequestParam(value = "page") int page,
                                        @RequestParam(value = "page_size") int pageSize,
                                        @RequestParam(value = "start_date") String startDate,
@@ -102,5 +116,29 @@ public class WarningController {
         result.put("total_pages",page1.getPages());
         result.put("warningList",page1.getRecords());
         return EwsResult.OK("查询成功", result);
+    }
+
+    /**
+     * 查询预警详情趋势数据
+     * @param queryWarnDetailsDTO queryWarnDetailsDTO
+     * @return EwsResult<List<TrendDataDTO>>
+     */
+    @RequestMapping(value = "/trendData",method = RequestMethod.POST)
+    public EwsResult<List<TrendDataDTO>> queryWarnDetail(@Valid @RequestBody QueryWarnDetailsDTO queryWarnDetailsDTO){
+        List<Integer> realPointIdList = queryWarnDetailsDTO.getPointIdList();
+        QueryWrapper<RealPoint> realPointQueryWrapper = new QueryWrapper<>();
+        realPointQueryWrapper.lambda().eq(RealPoint::getTurbineId,queryWarnDetailsDTO.getTurbineId()).in(RealPoint::getPointId,realPointIdList);
+        List<RealPoint> realPointList = realPortService.list(realPointQueryWrapper);
+        if (CollectionUtils.isEmpty(realPointList)){
+            return EwsResult.OK("测点不存在,请检查参数后重试",null);
+        }
+        List<Map<Integer, String>> list = realPointList.stream().map(point -> {
+                    Map<Integer, String> map = new HashMap<>();
+                    map.put(point.getPointId(), point.getPointLabel());
+                    return map;
+                }).collect(Collectors.toList());
+        // 查询测点值
+        List<TrendDataDTO> realPointValueList = realPortService.getRealPointValueList(list, queryWarnDetailsDTO);
+        return EwsResult.OK(realPointValueList);
     }
 }

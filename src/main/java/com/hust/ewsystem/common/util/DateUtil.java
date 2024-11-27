@@ -109,61 +109,6 @@ public class DateUtil {
 
 
     /**
-     * 字符串转换为Date
-     * @param dateStr
-     * @return
-     */
-    public static Date getDate(String dateStr) {
-        if (StringUtils.isEmpty(dateStr)) {
-            return null;
-        }
-        Date date = null;
-        if (dateStr.length() <= CommonConstant.COMMON_10) {
-            if (dateStr.contains(CommonConstant.DATE_CONNECTOR)) {
-                LocalDate localDate = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern(CommonConstant.DATE_FORMAT_1));
-                date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            } else {
-                LocalDate localDate = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern(CommonConstant.DATE_FORMAT_2));
-                date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            }
-        } else {
-            if (dateStr.length() == CommonConstant.COMMON_14) {
-                LocalDateTime localDateTime = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern(CommonConstant.DATETIME_FORMAT_2));
-                date = Date.from(localDateTime.atZone(ZoneOffset.ofHours(CommonConstant.COMMON_8)).toInstant());
-            }else if(dateStr.length() == CommonConstant.COMMON_17){
-                LocalDateTime localDateTime = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern(CommonConstant.DATETIME_FORMAT_4));
-                date = Date.from(localDateTime.atZone(ZoneOffset.ofHours(CommonConstant.COMMON_8)).toInstant());
-            }else {
-                LocalDateTime localDateTime = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern(CommonConstant.DATETIME_FORMAT_1));
-                date = Date.from(localDateTime.atZone(ZoneOffset.ofHours(CommonConstant.COMMON_8)).toInstant());
-            }
-        }
-        return date;
-    }
-
-    /**
-     * 字符串转换为Date
-     * @param dateStr
-     * @return
-     */
-    public static Date getDate(String dateStr,String format) {
-        if (StringUtils.isEmpty(dateStr) || StringUtils.isEmpty(format)) {
-            return null;
-        }
-        Date date = null;
-        if (format.contains(CommonConstant.DATE_HOUR)) {
-            LocalDateTime localDateTime = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern(format));
-            date = Date.from(localDateTime.atZone(ZoneOffset.ofHours(CommonConstant.COMMON_8)).toInstant());
-        } else {
-            LocalDate localDate = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern(format));
-            date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        }
-        return date;
-    }
-
-
-
-    /**
      * 日期转LocalDateTime
      * @param dateStr
      * @return
@@ -213,24 +158,6 @@ public class DateUtil {
     public static int getCurrYear(){
         Calendar calendar = Calendar.getInstance();
         return calendar.get(Calendar.YEAR);
-    }
-
-    /**
-     * 格式化日期时间为.yyyyMMdd
-     * @return 格式化后的日期时间字符
-     */
-    public static String formatDateTime(Date date, String format) {
-
-        if (date == null) {
-            return null;
-        }
-
-        if (StringUtils.isEmpty(format)) {
-            format = CommonConstant.DATE_FORMAT_1;
-        }
-        String strDate = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern(format));
-        return strDate;
     }
 
     /**
@@ -407,4 +334,24 @@ public class DateUtil {
         return String.valueOf(timeInMillis);
     }
 
+    /**
+     * dateTimeToDateString 使用DateTimeFormatter会更具优势，因为它是新的日期时间API的一部分，具有更好的性能和线程安全性
+     * @param date
+     * @param pattern
+     * @return
+     */
+    public static String dateTimeToDateString(Date date,String pattern){
+
+        // 将Date对象转换为Instant
+        Instant instant = date.toInstant();
+
+        // 将Instant转换为LocalDateTime，并指定时区为东八区（GMT+8）
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.of(CommonConstant.TIME_ZONE));
+
+        // 定义日期格式模板
+        DateTimeFormatter dtf =DateTimeFormatter.ofPattern(pattern);
+
+        // 将LocalDateTime对象按照指定格式转换为String
+        return localDateTime.format(dtf);
+    }
 }

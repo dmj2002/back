@@ -1,0 +1,43 @@
+package com.hust.ewsystem.controller;
+
+import com.hust.ewsystem.common.result.EwsResult;
+import com.hust.ewsystem.entity.RealPoint;
+import com.hust.ewsystem.mapper.RealPointMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+@RestController
+@RequestMapping("/realpoint")
+public class RealpointController {
+
+    @Autowired
+    private RealPointMapper realPointMapper;
+
+    @PostMapping("/add")
+    public EwsResult<?> addRealPoint(@RequestBody RealPoint realPoint) {
+        int inserted = realPointMapper.insert(realPoint);
+        if(inserted != 0){
+            Map<String,Object> result = new HashMap<>();
+            result.put("pointId", realPoint.getPointId());
+            result.put("pointLabel", realPoint.getPointLabel());
+            result.put("pointDescription", realPoint.getPointDescription());
+            result.put("module_id", realPoint.getModuleId());
+            result.put("pointType", realPoint.getPointType());
+            result.put("pointUnit", realPoint.getPointUnit());
+            result.put("turbine_id", realPoint.getTurbineId());
+            return EwsResult.OK("测点添加成功", result);
+        }
+        else{
+            return EwsResult.error("测点添加失败");
+        }
+    }
+    @GetMapping("/get/{pointId}")
+    public EwsResult<?> getRealPoint(@PathVariable Integer pointId){
+        RealPoint realPoint = realPointMapper.selectById(pointId);
+        return Objects.isNull(realPoint) ? EwsResult.error("未找到该测点") : EwsResult.OK("测点查找成功",realPoint);
+    }
+}
