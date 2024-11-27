@@ -253,11 +253,11 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             String content = new String(Files.readAllBytes(Paths.get(resultFilePath)));
             JSONObject jsonObject = JSONObject.parseObject(content);
             // Extract alertList
-            JSONArray alertList = jsonObject.getJSONArray("alertList");
+            JSONArray alertList = jsonObject.getJSONArray("alarm_list");
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             for (int i = 0; i < alertList.size(); i++) {
                 JSONObject alert = alertList.getJSONObject(i);
-                String alertInfo = alert.getString("alertInfo");
+                String alertInfo = alert.getString("alarm_info");
                 LocalDateTime startTime = LocalDateTime.parse(alert.getString("startTime"), formatter);
                 LocalDateTime endTime = LocalDateTime.parse(alert.getString("endTime"), formatter);
                 // Save to database

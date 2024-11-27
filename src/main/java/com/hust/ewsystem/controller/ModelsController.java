@@ -95,17 +95,28 @@ public class ModelsController {
         }
         //model_real_relate表插入
         List<String> standpointList = modelform.getPointList();
-        Map<String, Integer> standToRealIdMap = standToRealId(standpointList);
+        Map<String, List<Integer>> standToRealIdMap = standToRealId(standpointList);
         List<ModelRealRelate> modelRealRelateList = new ArrayList<>();
-        for(String standPoint : standpointList){
-            Integer realPointId = standToRealIdMap.get(standPoint);
+
+        for (String standPoint : standpointList) {
+            // 获取真实测点 ID 列表
+            List<Integer> realPointIds = standToRealIdMap.getOrDefault(standPoint, new ArrayList<>());
+            // 遍历模型列表
             for (Models models : modelsList) {
+                // 遍历每个真实测点 ID
+
+                Integer uniqueRealId = findUniqueRealId(realPointIds, models.getTurbineId());
+                if (uniqueRealId == null) {
+                    continue; // 如果找不到唯一的真实 ID，跳过
+                }
+                // 创建关联对象并添加到列表
                 ModelRealRelate modelRealRelate = new ModelRealRelate();
                 modelRealRelate.setModelId(models.getModelId())
-                               .setRealPointId(realPointId);
+                        .setRealPointId(uniqueRealId);
                 modelRealRelateList.add(modelRealRelate);
             }
         }
+
         boolean saveBatch2 = modelRealRelateService.saveBatch(modelRealRelateList);
         if(!saveBatch2){
             throw new CrudException("模型关联批量保存失败");
@@ -124,8 +135,21 @@ public class ModelsController {
         }
         return EwsResult.OK(result);
     }
+
+    private Integer findUniqueRealId(List<Integer> realPointIds, Integer turbineId) {
+        // 查询 real_point 表，筛选出符合条件的唯一 realId
+        Integer realPointId = realPointMapper.selectOne(
+                new QueryWrapper<RealPoint>()
+                        .in("point_id", realPointIds) // 在 realPointIds 中查找
+                        .eq("turbine_id", turbineId)       // 匹配 turbineId
+        ).getPointId();
+        return realPointId;
+    }
+
     @PostMapping("/change")
     @Transactional
+
+    //change需要改改 没搞懂这个逻辑 待办待办
     public EwsResult<?> changemodel(@RequestBody List<ModelForm> model){
         //models表修改
         List<Models> modelsList = new ArrayList<>();
@@ -159,9 +183,13 @@ public class ModelsController {
             if(standpointList == null || standpointList.isEmpty()){
                 break;
             }
-            Map<String, Integer> standToRealIdMap = standToRealId(standpointList);
+            Map<String, List<Integer>> standToRealIdMap = standToRealId(standpointList);
             // 将 Map 的值收集到 Set中: A
-            Set<Integer> realPointIdSet = new HashSet<>(standToRealIdMap.values());
+            Set<Integer> realPointIdSet = standToRealIdMap.values()
+                    .stream() // 将 Collection<List<Integer>> 转为流
+                    .flatMap(List::stream) // 将每个 List<Integer> 平铺展开为 Integer 流
+                    .collect(Collectors.toSet()); // 收集到 Set<Integer>
+
             //当前模型的测点:B
             Set<Integer> exitrealPointIdSet = modelRealRelateService.list(
                     new QueryWrapper<ModelRealRelate>().eq("model_id", modelform.getModel().getModelId())
@@ -247,6 +275,7 @@ public class ModelsController {
                     new QueryWrapper<ModelRealRelate>().eq("model_id", modelId)
             ).stream().map(ModelRealRelate::getRealPointId).collect(Collectors.toList());
             //真实测点标签 -> 标准测点标签
+
             Map<String, String> realToStandLabel = RealToStandLabel(realpointId);
             // 查询数据并提取 datetime和value列
             Map<LocalDateTime, Map<String, Object>> alignedData = new TreeMap<>();
@@ -348,8 +377,8 @@ public class ModelsController {
             map.put("turbineNumber", windTurbineMapper.selectById(model.getTurbineId()).getTurbineNumber());
             map.put("algorithmId", model.getAlgorithmId());
             map.put("algorithmName",algorithmsMapper.selectById(model.getAlgorithmId()).getAlgorithmName());
-            map.put("moduleId", model.getModuleId());
-            map.put("moduleName",moduleMapper.selectById(model.getModuleId()).getModuleName());
+//            map.put("moduleId", model.getModuleId());
+//            map.put("moduleName",moduleMapper.selectById(model.getModuleId()).getModuleName());
             map.put("modelStatus", model.getModelStatus());
             result.add(map);
         }
@@ -459,22 +488,31 @@ public class ModelsController {
         return RealTostandPointMap;
     }
     //标准测点标签 -> 真实测点ID
-    public Map<String, Integer> standToRealId(List<String> standpointList){
-        Map<String, Integer> standToRealPointMap = new HashMap<>();
-        //标准测点标签 -> 标准测点ID
+    public Map<String, List<Integer>> standToRealId(List<String> standpointList) {
+        // 修改返回值类型为 Map<String, List<Integer>>
+        Map<String, List<Integer>> standToRealPointMap = new HashMap<>();
+
+        // 标准测点标签 -> 标准测点ID
         Map<String, Integer> standPointMap = standPointMapper.selectList(
                 new QueryWrapper<StandPoint>().in("point_label", standpointList)
         ).stream().collect(Collectors.toMap(StandPoint::getPointLabel, StandPoint::getPointId));
-        //标准测点ID -> 真实测点ID
-        Map<Integer, Integer> standToRealMap = standRealRelateMapper.selectList(
+
+        // 标准测点ID -> 真实测点ID（支持一对多）
+        Map<Integer, List<Integer>> standToRealMap = standRealRelateMapper.selectList(
                 new QueryWrapper<StandRealRelate>().in("stand_point_id", standPointMap.values())
-        ).stream().collect(Collectors.toMap(StandRealRelate::getStandPointId, StandRealRelate::getRealPointId));
-        //标准测点标签 -> 真实测点标签
+        ).stream().collect(Collectors.groupingBy(
+                StandRealRelate::getStandPointId, // 分组键为 stand_point_id
+                Collectors.mapping(StandRealRelate::getRealPointId, Collectors.toList()) // 值为 real_point_id 列表
+        ));
+
+        // 将标准测点标签 -> 真实测点ID 映射到最终结果
         for (String standPointLabel : standpointList) {
             Integer standPointId = standPointMap.get(standPointLabel);
-            Integer realPointId = standToRealMap.get(standPointId);
-            standToRealPointMap.put(standPointLabel, realPointId);
+            List<Integer> realPointIds = standToRealMap.getOrDefault(standPointId, new ArrayList<>());
+            standToRealPointMap.put(standPointLabel, realPointIds);
         }
+
         return standToRealPointMap;
     }
+
 }
