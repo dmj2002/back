@@ -36,9 +36,10 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     private WarningService warningService;
     // 任务状态
     private final Map<String, ScheduledFuture<?>> taskMap = new ConcurrentHashMap<>();
+    private final Map<Integer, String> modelMap = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
     @Override
-    public String train(String algorithmLabel, String modelLabel) {
+    public String train(String algorithmLabel, String modelLabel,Integer modelId) {
         String taskId = UUID.randomUUID().toString();
         File taskDir = new File(pythonFilePath + "/task_logs/" + taskId);
         if (!taskDir.exists()) {
@@ -64,6 +65,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         // 调度任务一次性执行
         ScheduledFuture<?> scheduledTask = scheduler.schedule(task, 0, TimeUnit.SECONDS);
         taskMap.put(taskId, scheduledTask);
+        modelMap.put(modelId,taskId);
         return taskId;
 
     }
@@ -129,8 +131,10 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         // 定期调度任务
         ScheduledFuture<?> scheduledTask =scheduler.scheduleWithFixedDelay(task, 0, alertInterval, TimeUnit.SECONDS);
         taskMap.put(taskId, scheduledTask);
+        modelMap.put(modelId,taskId);
         return taskId;
     }
+
     // 提供查询任务状态的接口
     @Override
     public Map<String, Object> getTaskStatus(String taskId) {
@@ -149,13 +153,21 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         return statusMap;
     }
 
+    /**
+     * 终止任务
+     * @param modelId
+     * @return
+     */
+
     @Override
-    public String killTask(String taskId) {
+    public String killTask(Integer modelId) {
         // 终止ScheduledFuture任务
+        String taskId = modelMap.get(modelId);
         ScheduledFuture<?> scheduledTask = taskMap.get(taskId);
         if (scheduledTask != null) {
             scheduledTask.cancel(true);
             taskMap.remove(taskId);
+            modelMap.remove(modelId);
         }
         // 检查任务和线程是否都已终止
         if (scheduledTask == null) {
