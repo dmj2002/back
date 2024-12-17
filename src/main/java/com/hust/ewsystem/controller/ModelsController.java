@@ -151,12 +151,10 @@ public class ModelsController {
      */
     private Integer findUniqueRealId(List<Integer> realPointIds, Integer turbineId) {
         // 查询 real_point 表，筛选出符合条件的唯一 realId
-        Integer realPointId = realPointMapper.selectOne(
-                new QueryWrapper<RealPoint>()
+        return realPointMapper.selectOne(new QueryWrapper<RealPoint>()
                         .in("point_id", realPointIds) // 在 realPointIds 中查找
                         .eq("turbine_id", turbineId)       // 匹配 turbineId
         ).getPointId();
-        return realPointId;
     }
 
     /**
@@ -411,10 +409,9 @@ public class ModelsController {
             map.put("modelStatus", model.getModelStatus());
             result.add(map);
         }
-        List<WindTurbine> turbineList = new ArrayList<>();
         QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
         windTurbineQueryWrapper.select("turbine_id", "turbine_name","wind_farm_id");  // 指定你需要的字段
-        turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
+        List<WindTurbine> turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
 
 
         QueryWrapper<WindFarm> windFarmQueryWrapper = new QueryWrapper<>();
