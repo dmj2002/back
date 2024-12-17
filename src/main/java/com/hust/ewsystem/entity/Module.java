@@ -19,7 +19,7 @@ public class Module implements Serializable {
 
     private String moduleName; // 模块名称
 
-    private Integer subsystemId; // 子系统id
+
 
     private Integer turbineId; // 风机id
 

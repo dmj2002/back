@@ -21,7 +21,7 @@ public class WindFarm implements Serializable {
 
     private String windFarmAddress; // 风场地址
 
-    private String windFarmNumber; // 风场电话
+    private String contactNumber; // 风场电话
 
     private Integer companyId; // 公司id
 }

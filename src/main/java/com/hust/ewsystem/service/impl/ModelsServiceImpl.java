@@ -250,17 +250,29 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     private void readAndSaveResults(String filepath, String taskId,Integer modelId) {
         try {
             String resultFilePath = filepath + "/task_logs/" + taskId + "/result.json";
-            String content = new String(Files.readAllBytes(Paths.get(resultFilePath)));
+
+            // 强制使用 UTF-8 编码读取文件内容
+            StringBuilder contentBuilder = new StringBuilder();
+            try (BufferedReader reader = Files.newBufferedReader(Paths.get(resultFilePath), StandardCharsets.UTF_8)) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    contentBuilder.append(line);
+                }
+            }
+            String content = contentBuilder.toString();
+
+            // 解析 JSON 内容
             JSONObject jsonObject = JSONObject.parseObject(content);
-            // Extract alertList
             JSONArray alertList = jsonObject.getJSONArray("alarm_list");
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
             for (int i = 0; i < alertList.size(); i++) {
                 JSONObject alert = alertList.getJSONObject(i);
                 String alertInfo = alert.getString("alarm_info");
-                LocalDateTime startTime = LocalDateTime.parse(alert.getString("startTime"), formatter);
-                LocalDateTime endTime = LocalDateTime.parse(alert.getString("endTime"), formatter);
-                // Save to database
+                LocalDateTime startTime = LocalDateTime.parse(alert.getString("start_time"), formatter);
+                LocalDateTime endTime = LocalDateTime.parse(alert.getString("end_time"), formatter);
+
+                // 保存到数据库
                 Warnings warning = new Warnings();
                 warning.setModelId(modelId);
                 warning.setWarningDescription(alertInfo);

@@ -7,6 +7,7 @@ import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.exception.FileException;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.*;
+import com.hust.ewsystem.entity.Module;
 import com.hust.ewsystem.mapper.*;
 import com.hust.ewsystem.service.CommonDataService;
 import com.hust.ewsystem.service.ModelRealRelateService;
@@ -60,6 +61,8 @@ public class ModelsController {
 
     @Autowired
     private ModuleMapper moduleMapper;
+    @Autowired
+    private CompanyMapper companyMapper;
 
     @PostMapping("/add")
     @Transactional
@@ -374,7 +377,7 @@ public class ModelsController {
             map.put("modelName", model.getModelName());
             map.put("modelVersion", model.getModelVersion());
             map.put("turbineId", model.getTurbineId());
-            map.put("turbineNumber", windTurbineMapper.selectById(model.getTurbineId()).getTurbineNumber());
+            map.put("turbineNumber", windTurbineMapper.selectById(model.getTurbineId()).getTurbineName());
             map.put("algorithmId", model.getAlgorithmId());
             map.put("algorithmName",algorithmsMapper.selectById(model.getAlgorithmId()).getAlgorithmName());
 //            map.put("moduleId", model.getModuleId());
@@ -382,12 +385,39 @@ public class ModelsController {
             map.put("modelStatus", model.getModelStatus());
             result.add(map);
         }
+        List<WindTurbine> turbineList = new ArrayList<>();
+        QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
+        windTurbineQueryWrapper.select("turbine_id", "turbine_name","wind_farm_id");  // 指定你需要的字段
+        turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
+
+
+        QueryWrapper<WindFarm> windFarmQueryWrapper = new QueryWrapper<>();
+        windFarmQueryWrapper.select("wind_farm_id", "wind_farm_name,company_id");
+        List<WindFarm> windFarmList = windFarmMapper.selectList(windFarmQueryWrapper);
+
+        QueryWrapper<Company> companyQueryWrapper = new QueryWrapper<>();
+        companyQueryWrapper.select("company_id", "company_name");
+        List<Company> companyList = companyMapper.selectList(companyQueryWrapper);
+
+        QueryWrapper<Module> moduleQueryWrapper = new QueryWrapper<>();
+        moduleQueryWrapper.select("module_id", "module_name");
+        List<Module> moduleList = moduleMapper.selectList(moduleQueryWrapper);
+
+        QueryWrapper<Algorithms> algorithmsQueryWrapper = new QueryWrapper<>();
+        algorithmsQueryWrapper.select("algorithm_id","algorithm_name","algorithm_label");
+        List<Algorithms> algorithmsList = algorithmsMapper.selectList(algorithmsQueryWrapper);
+
         Map<String,Object> response = new HashMap<>();
         response.put("total_count",page1.getTotal());
         response.put("page",page1.getCurrent());
         response.put("page_size",page1.getSize());
         response.put("total_pages",page1.getPages());
         response.put("modelList",result);
+        response.put("companyList",companyList);
+        response.put("windFarmList",windFarmList);
+        response.put("turbineList",turbineList);
+        response.put("moduleList",moduleList);
+        response.put("algorithmList",algorithmsList);
         return EwsResult.OK("查询成功", response);
     }
     // 查询任务状态

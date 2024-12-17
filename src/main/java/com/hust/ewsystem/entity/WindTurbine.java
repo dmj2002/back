@@ -18,7 +18,7 @@ public class WindTurbine implements Serializable {
     @TableId(type = IdType.AUTO)
     private Integer turbineId; // 风机id
 
-    private String turbineNumber; // 风机编号
+    private String turbineName; // 风机编号
 
     private String turbineModel; // 风机型号
 

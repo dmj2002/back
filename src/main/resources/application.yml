@@ -16,15 +16,15 @@ spring:
       datasource:
         master:
           type: com.alibaba.druid.pool.DruidDataSource
-          url: jdbc:mysql://192.168.1.153:3306/ewsystem?useSSL=false
+          url: jdbc:mysql://localhost:3306/ewsystem?serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8
           username: root
-          password: feiling
+          password: 5728
           driver-class-name: com.mysql.cj.jdbc.Driver
         slave:
           type: com.alibaba.druid.pool.DruidDataSource
-          url: jdbc:mysql://192.168.1.153:3306/EWSystemdata?useSSL=false
+          url: jdbc:mysql://localhost:3306/ewsystemdata?serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8
           username: root
-          password: feiling
+          password: 5728
           driver-class-name: com.mysql.cj.jdbc.Driver
 
   # Redis 连接集群
