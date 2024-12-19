@@ -7,7 +7,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hust.ewsystem.common.exception.FileException;
 import com.hust.ewsystem.entity.Models;
 import com.hust.ewsystem.entity.Warnings;
+import com.hust.ewsystem.entity.tasks;
 import com.hust.ewsystem.mapper.ModelsMapper;
+import com.hust.ewsystem.mapper.TaskMapper;
 import com.hust.ewsystem.service.ModelsService;
 
 import com.hust.ewsystem.service.WarningService;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -34,13 +37,43 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
 
     @Autowired
     private WarningService warningService;
+    @Autowired
+    private TaskMapper tasksMapper;
     // 任务状态
     private final Map<String, ScheduledFuture<?>> taskMap = new ConcurrentHashMap<>();
-    private final Map<Integer, String> modelMap = new ConcurrentHashMap<>();
+    private final Map<String, String> modelMap = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
+    @PostConstruct
+    public void initModelMap() {
+        List<tasks> tasks = tasksMapper.selectList(null);
+        if (tasks.isEmpty()) {
+            // 记录日志：没有获取到任何任务数据
+            System.out.println("No tasks found in the database.");
+        }
+        for (tasks task : tasks) {
+            if(task.getTaskType()==0) {
+                modelMap.put(task.getModelId() + "_train", task.getTaskLabel());
+            }
+            else if(task.getTaskType()==1){
+                modelMap.put(task.getModelId() + "_predict", task.getTaskLabel());
+            }
+        }
+    }
     @Override
     public String train(String algorithmLabel, String modelLabel,Integer modelId) {
-        String taskId = UUID.randomUUID().toString();
+        String taskId;
+        if(modelMap.getOrDefault(modelId + "_train",null)!=null){
+            taskId = modelMap.get(modelId + "_train").toString();
+        }else{
+            taskId = UUID.randomUUID().toString();
+            tasks newtask = new tasks();
+            newtask.setModelId(modelId)
+                    .setTaskType(0)
+                    .setTaskLabel(taskId)
+                    .setStartTime(LocalDateTime.now());
+            tasksMapper.insert(newtask);
+            modelMap.put(modelId + "_train",taskId);
+        }
         File taskDir = new File(pythonFilePath + "/task_logs/" + taskId);
         if (!taskDir.exists()) {
             if (!taskDir.mkdirs()) {
@@ -65,13 +98,23 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         // 调度任务一次性执行
         ScheduledFuture<?> scheduledTask = scheduler.schedule(task, 0, TimeUnit.SECONDS);
         taskMap.put(taskId, scheduledTask);
-        modelMap.put(modelId,taskId);
         return taskId;
-
     }
     @Override
     public String predict(Integer alertInterval, String modelLabel, String algorithmLabel,Integer modelId) {
-        String taskId = UUID.randomUUID().toString();
+        String taskId;
+        if(modelMap.getOrDefault(modelId + "_predict",null)!=null){
+            taskId = modelMap.get(modelId + "_predict").toString();
+        }else{
+            taskId = UUID.randomUUID().toString();
+            tasks newtask = new tasks();
+            newtask.setModelId(modelId)
+                    .setTaskType(1)
+                    .setTaskLabel(taskId)
+                    .setStartTime(LocalDateTime.now());
+            tasksMapper.insert(newtask);
+            modelMap.put(modelId + "_predict",taskId);
+        }
         File taskDir = new File(pythonFilePath + "/task_logs/" + taskId);
         if (!taskDir.exists()) {
             if (!taskDir.mkdirs()) {
@@ -131,7 +174,6 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         // 定期调度任务
         ScheduledFuture<?> scheduledTask =scheduler.scheduleWithFixedDelay(task, 0, alertInterval, TimeUnit.SECONDS);
         taskMap.put(taskId, scheduledTask);
-        modelMap.put(modelId,taskId);
         return taskId;
     }
 
@@ -158,16 +200,15 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
      * @param modelId
      * @return
      */
-
     @Override
     public String killTask(Integer modelId) {
         // 终止ScheduledFuture任务
-        String taskId = modelMap.get(modelId);
+        String taskId = modelMap.get(modelId + "_predict");
         ScheduledFuture<?> scheduledTask = taskMap.get(taskId);
         if (scheduledTask != null) {
             scheduledTask.cancel(true);
-            taskMap.remove(taskId);
-            modelMap.remove(modelId);
+//            taskMap.remove(taskId);
+//            modelMap.remove(modelId);
         }
         // 检查任务和线程是否都已终止
         if (scheduledTask == null) {
