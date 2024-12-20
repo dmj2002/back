@@ -489,11 +489,17 @@ public class ModelsController {
         List<Map<String, Object>> resultList = new ArrayList<>();
         for(Integer modelId : modelIdList){
             Map<String, Object> result = new HashMap<>();
+            Models model = modelsService.getById(modelId);
+            //修改模型状态为已完成
+            model.setModelStatus(2);
+            modelsService.updateById(model);
             String str = modelsService.killTask(modelId);
+
             result.put("modelId", modelId);
             result.put("result", str);
             resultList.add(result);
         }
+
         return EwsResult.OK(resultList);
     }
     public void toTrainCsv(Map<LocalDateTime, Map<String, Object>> alignedData,Map<String, String> realToStandLabel,String modelLabel){
