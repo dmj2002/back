@@ -68,6 +68,11 @@ public class ModelsController {
     @Autowired
     private CompanyMapper companyMapper;
 
+    /**
+     * 添加模型
+     * @param modelform
+     * @return
+     */
     @PostMapping("/add")
     @Transactional
     public EwsResult<?> addmodel(@RequestBody ModelForm modelform){
@@ -111,7 +116,6 @@ public class ModelsController {
             // 遍历模型列表
             for (Models models : modelsList) {
                 // 遍历每个真实测点 ID
-
                 Integer uniqueRealId = findUniqueRealId(realPointIds, models.getTurbineId());
                 if (uniqueRealId == null) {
                     continue; // 如果找不到唯一的真实 ID，跳过
@@ -143,20 +147,27 @@ public class ModelsController {
         return EwsResult.OK(result);
     }
 
+    /**
+     * 查询真实测点ID
+     * @param realPointIds
+     * @param turbineId
+     * @return
+     */
     private Integer findUniqueRealId(List<Integer> realPointIds, Integer turbineId) {
         // 查询 real_point 表，筛选出符合条件的唯一 realId
-        Integer realPointId = realPointMapper.selectOne(
-                new QueryWrapper<RealPoint>()
+        return realPointMapper.selectOne(new QueryWrapper<RealPoint>()
                         .in("point_id", realPointIds) // 在 realPointIds 中查找
                         .eq("turbine_id", turbineId)       // 匹配 turbineId
         ).getPointId();
-        return realPointId;
     }
 
+    /**
+     * 修改模型
+     * @param model
+     * @return
+     */
     @PostMapping("/change")
     @Transactional
-
-    //change需要改改 没搞懂这个逻辑 待办待办
     public EwsResult<?> changemodel(@RequestBody List<ModelForm> model){
         //models表修改
         List<Models> modelsList = new ArrayList<>();
@@ -176,27 +187,35 @@ public class ModelsController {
             String newVersion = "v" + majorVersion + "." + minorVersion;
             //像版本号这种
             newModel.setModelVersion(newVersion);
+            newModel.setModelStatus(0);
             modelsList.add(newModel);
         }
         boolean updateBatch = modelsService.updateBatchById(modelsList);
         if(!updateBatch){
             throw new CrudException("修改模型失败");
         }
-        //model_real_relate表修改
+        //model_real_relate表修改(可能会变多可能会变少)
+        //两种方案，目前采用法二
+        //法一：先全部删除再插入
+        //法二：先查出所有的，然后对比，删除不需要的，插入需要的（通过集合的差进行判断）
         List<ModelRealRelate> modelRealRelateList = new ArrayList<>();
         for(ModelForm modelform : model){
             List<String> standpointList = modelform.getPointList();
-            //表示当前模型没有修改测点
+            //表示当前模型没有任何测点
             if(standpointList == null || standpointList.isEmpty()){
+                modelRealRelateService.remove(
+                        new QueryWrapper<ModelRealRelate>().eq("model_id", modelform.getModel().getModelId())
+                );
                 break;
             }
             Map<String, List<Integer>> standToRealIdMap = standToRealId(standpointList);
             // 将 Map 的值收集到 Set中: A
-            Set<Integer> realPointIdSet = standToRealIdMap.values()
-                    .stream() // 将 Collection<List<Integer>> 转为流
-                    .flatMap(List::stream) // 将每个 List<Integer> 平铺展开为 Integer 流
-                    .collect(Collectors.toSet()); // 收集到 Set<Integer>
-
+            Set<Integer> realPointIdSet = new HashSet<>();
+            for(String standpoint:standpointList){
+                List<Integer> RealIds = standToRealIdMap.getOrDefault(standpoint, new ArrayList<>());
+                Integer realId = findUniqueRealId(RealIds, modelform.getModel().getTurbineId());
+                realPointIdSet.add(realId);
+            }
             //当前模型的测点:B
             Set<Integer> exitrealPointIdSet = modelRealRelateService.list(
                     new QueryWrapper<ModelRealRelate>().eq("model_id", modelform.getModel().getModelId())
@@ -277,7 +296,8 @@ public class ModelsController {
         List<Map<String,Object>> taskIdList = new ArrayList<>();
         //传入的每个模型测点不一定相同，所以需要分别处理
         for(Integer modelId : modelIds){
-
+            //修改模型状态为训练中
+            modelsService.updateById(new Models().setModelStatus(1).setModelId(modelId));
             String modelLabel = modelsService.getById(modelId).getModelLabel();
             List<Integer> realpointId = modelRealRelateService.list(
                     new QueryWrapper<ModelRealRelate>().eq("model_id", modelId)
@@ -304,7 +324,7 @@ public class ModelsController {
             Integer algorithmId = modelsService.getById(modelId).getAlgorithmId();
             String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
             // 算法调用
-            String taskId = modelsService.train(algorithmLabel, modelLabel);
+            String taskId = modelsService.train(algorithmLabel, modelLabel,modelId);
             Map<String,Object> map= new HashMap<>();
             map.put("modelId",modelId);
             map.put("taskId",taskId);
@@ -322,6 +342,9 @@ public class ModelsController {
         for(Integer modelId : modelList) {
             //获取返回值
             Models model = modelsService.getById(modelId);
+            //修改模型状态为预测中
+            model.setModelStatus(3);
+            modelsService.updateById(model);
             Integer alertInterval = model.getAlertInterval();
             String modelLabel = model.getModelLabel();
             Integer algorithmId = model.getAlgorithmId();
@@ -396,10 +419,9 @@ public class ModelsController {
             map.put("modelStatus", model.getModelStatus());
             result.add(map);
         }
-        List<WindTurbine> turbineList = new ArrayList<>();
         QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
         windTurbineQueryWrapper.select("turbine_id", "turbine_name","wind_farm_id");  // 指定你需要的字段
-        turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
+        List<WindTurbine> turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
 
 
         QueryWrapper<WindFarm> windFarmQueryWrapper = new QueryWrapper<>();
@@ -456,10 +478,23 @@ public class ModelsController {
         }
         return EwsResult.OK(taskStatus);
     }
-    @DeleteMapping("/kill/{taskId}")
-    public EwsResult<?> deleteTask(@PathVariable String taskId) {
-        String killTask = modelsService.killTask(taskId);
-        return EwsResult.OK(killTask);
+
+    /**
+     * 根据模型id暂停任务
+     * @param modelIdList
+     * @return
+     */
+    @PostMapping("/stopPredict")
+    public EwsResult stopPredict(@RequestBody List<Integer> modelIdList){
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        for(Integer modelId : modelIdList){
+            Map<String, Object> result = new HashMap<>();
+            String str = modelsService.killTask(modelId);
+            result.put("modelId", modelId);
+            result.put("result", str);
+            resultList.add(result);
+        }
+        return EwsResult.OK(resultList);
     }
     public void toTrainCsv(Map<LocalDateTime, Map<String, Object>> alignedData,Map<String, String> realToStandLabel,String modelLabel){
         // 创建目标目录（如果不存在）
@@ -538,7 +573,7 @@ public class ModelsController {
         }
         return RealTostandPointMap;
     }
-    //标准测点标签 -> 真实测点ID
+    //标准测点标签 -> 真实测点IDs
     public Map<String, List<Integer>> standToRealId(List<String> standpointList) {
         // 修改返回值类型为 Map<String, List<Integer>>
         Map<String, List<Integer>> standToRealPointMap = new HashMap<>();
@@ -555,14 +590,12 @@ public class ModelsController {
                 StandRealRelate::getStandPointId, // 分组键为 stand_point_id
                 Collectors.mapping(StandRealRelate::getRealPointId, Collectors.toList()) // 值为 real_point_id 列表
         ));
-
         // 将标准测点标签 -> 真实测点ID 映射到最终结果
         for (String standPointLabel : standpointList) {
             Integer standPointId = standPointMap.get(standPointLabel);
             List<Integer> realPointIds = standToRealMap.getOrDefault(standPointId, new ArrayList<>());
             standToRealPointMap.put(standPointLabel, realPointIds);
         }
-
         return standToRealPointMap;
     }
 

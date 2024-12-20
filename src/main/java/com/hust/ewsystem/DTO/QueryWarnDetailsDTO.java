@@ -26,9 +26,9 @@ public class QueryWarnDetailsDTO implements Serializable {
     private static final long serialVersionUID = -1463752699274359956L;
 
     /**
-     * 真实测点ID
+     * 标准测点ID
      */
-    @NotNull(message = "测点ID不能为空")
+    @NotNull(message = "标准测点ID不能为空")
     private List<Integer> pointIdList;
 
     /**

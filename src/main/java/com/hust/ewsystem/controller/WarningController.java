@@ -1,5 +1,6 @@
 package com.hust.ewsystem.controller;
 
+import ch.qos.logback.classic.gaffer.PropertyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.DTO.QueryWarnDetailsDTO;
@@ -8,15 +9,19 @@ import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.Models;
 import com.hust.ewsystem.entity.RealPoint;
+import com.hust.ewsystem.entity.StandRealRelate;
 import com.hust.ewsystem.entity.Warnings;
 import com.hust.ewsystem.entity.WindFarm;
 import com.hust.ewsystem.entity.WindTurbine;
 import com.hust.ewsystem.mapper.WindFarmMapper;
 import com.hust.ewsystem.mapper.WindTurbineMapper;
-import com.hust.ewsystem.service.ModelRealRelateService;
 import com.hust.ewsystem.service.ModelsService;
 import com.hust.ewsystem.service.RealPortService;
+import com.hust.ewsystem.service.StandRealRelateService;
 import com.hust.ewsystem.service.WarningService;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,25 +39,33 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/warning")
 public class WarningController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(WarningController.class);
+
     @Autowired
     private WarningService warningService;
+
     @Autowired
     private WindFarmMapper windFarmMapper;
+
     @Autowired
     private WindTurbineMapper windTurbineMapper;
+
     @Autowired
     private ModelsService modelsService;
 
     @Autowired
     private RealPortService realPortService;
-    @Autowired
-    private ModelRealRelateService modelRealRelateService;
+
+    @Resource
+    private StandRealRelateService standRealRelateService;
+
     @GetMapping("/list")
     public EwsResult<?> getWarningList(@RequestParam(value = "page") int page,
                                        @RequestParam(value = "page_size") int pageSize,
@@ -125,20 +139,39 @@ public class WarningController {
      */
     @RequestMapping(value = "/trendData",method = RequestMethod.POST)
     public EwsResult<List<TrendDataDTO>> queryWarnDetail(@Valid @RequestBody QueryWarnDetailsDTO queryWarnDetailsDTO){
-        List<Integer> realPointIdList = queryWarnDetailsDTO.getPointIdList();
-        QueryWrapper<RealPoint> realPointQueryWrapper = new QueryWrapper<>();
-        realPointQueryWrapper.lambda().eq(RealPoint::getTurbineId,queryWarnDetailsDTO.getTurbineId()).in(RealPoint::getPointId,realPointIdList);
-        List<RealPoint> realPointList = realPortService.list(realPointQueryWrapper);
-        if (CollectionUtils.isEmpty(realPointList)){
-            return EwsResult.OK("测点不存在,请检查参数后重试",null);
+        List<Integer> standPointIdList = queryWarnDetailsDTO.getPointIdList();
+        QueryWrapper<StandRealRelate> queryWrapper;
+        QueryWrapper<RealPoint> realPointQueryWrapper;
+        List<Map<Integer, String>> relPointAndLableList = new ArrayList<>();
+        Map<Integer,String> relPointAndLableMap;
+        // 根据风机ID和标准测点ID获取真实测点ID与测点标签的对应关系
+        for (Integer standPointId : standPointIdList) {
+            queryWrapper = new QueryWrapper<>();
+            queryWrapper.lambda().eq(StandRealRelate::getStandPointId,standPointId);
+            List<StandRealRelate> standRealRelateList = standRealRelateService.list(queryWrapper);
+            if (CollectionUtils.isEmpty(standRealRelateList)){
+                LOGGER.error(String.format("标准测点id【%s】与对应的真实测点关联关系不存在",standPointId));
+                return EwsResult.error("测点不存在,请检查参数后重试",null);
+            }
+            List<Integer> realPointList = new ArrayList<>();
+            for (StandRealRelate standRealRelate : standRealRelateList) {
+                realPointList.add(standRealRelate.getRealPointId());
+            }
+            realPointQueryWrapper = new QueryWrapper<>();
+            realPointQueryWrapper.lambda().in(RealPoint::getPointId,realPointList).eq(RealPoint::getTurbineId,queryWarnDetailsDTO.getTurbineId());
+            RealPoint realPoint = realPortService.getOne(realPointQueryWrapper);
+            if (Objects.isNull(realPoint)){
+                String realIdList = StringUtils.join(realPointList, ",");
+                LOGGER.error(String.format("获取真实测点信息为空,真实测点id【%s】,风机id【%d】",realIdList,queryWarnDetailsDTO.getTurbineId()));
+                return EwsResult.error("测点不存在,请检查参数后重试",null);
+            }
+            relPointAndLableMap = new HashMap<>();
+            relPointAndLableMap.put(realPoint.getPointId(),realPoint.getPointLabel());
+            relPointAndLableList.add(relPointAndLableMap);
         }
-        List<Map<Integer, String>> list = realPointList.stream().map(point -> {
-                    Map<Integer, String> map = new HashMap<>();
-                    map.put(point.getPointId(), point.getPointLabel());
-                    return map;
-                }).collect(Collectors.toList());
+
         // 查询测点值
-        List<TrendDataDTO> realPointValueList = realPortService.getRealPointValueList(list, queryWarnDetailsDTO);
+        List<TrendDataDTO> realPointValueList = realPortService.getRealPointValueList(relPointAndLableList, queryWarnDetailsDTO);
         return EwsResult.OK(realPointValueList);
     }
 }
