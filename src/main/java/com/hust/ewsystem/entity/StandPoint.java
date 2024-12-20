@@ -23,4 +23,9 @@ public class StandPoint implements Serializable {
     private String pointUnit; // 测点单位
 
     private Integer pointType; // 测点类型
+
+    /**
+     * 模块ID
+     */
+    private Integer moduleId;
 }

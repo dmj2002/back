@@ -6,9 +6,9 @@ import com.hust.ewsystem.DTO.TurbineDetailsInfoDTO;
 import com.hust.ewsystem.DTO.TurbineInfoDTO;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.Module;
-import com.hust.ewsystem.entity.RealPoint;
+import com.hust.ewsystem.entity.StandPoint;
 import com.hust.ewsystem.service.ModuleService;
-import com.hust.ewsystem.service.RealPortService;
+import com.hust.ewsystem.service.StandPointService;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,7 +35,8 @@ public class TurbineController {
     private ModuleService moduleService;
 
     @Resource
-    private RealPortService realPortService;
+    private StandPointService standPointService;
+
 
     /**
      * 查询风机信息
@@ -48,7 +49,7 @@ public class TurbineController {
         queryWrapper.lambda().eq(Module::getTurbineId,queryTurbineInfoDTO.getTurbineId());
         List<Module> list = moduleService.list(queryWrapper);
         if (CollectionUtils.isEmpty(list)) {
-            return EwsResult.OK(String.format("未查询到风机信息,风机id【%s】",queryTurbineInfoDTO.getTurbineId()));
+            return EwsResult.error(String.format("未查询到风机信息,风机id【%s】",queryTurbineInfoDTO.getTurbineId()));
         }
         TurbineInfoDTO turbineInfoDTO = initResult(queryTurbineInfoDTO, list);
         return EwsResult.OK(turbineInfoDTO);
@@ -68,14 +69,14 @@ public class TurbineController {
         result.setWindFarmName(queryTurbineInfoDTO.getWindFarmName());
         List<TurbineDetailsInfoDTO> detailsInfoList =  new ArrayList<>(moduleList.size());
         TurbineDetailsInfoDTO turbineDetailsInfoDTO;
-        QueryWrapper<RealPoint> queryWrapper;
+        QueryWrapper<StandPoint> queryWrapper;
         for (Module module : moduleList) {
             turbineDetailsInfoDTO = new TurbineDetailsInfoDTO();
             turbineDetailsInfoDTO.setModuleId(module.getModuleId());
             turbineDetailsInfoDTO.setModuleName(module.getModuleName());
             queryWrapper = new QueryWrapper<>();
-            queryWrapper.lambda().eq(RealPoint::getTurbineId,module.getTurbineId()).eq(RealPoint::getModuleId,module.getModuleId());
-            List<RealPoint> list = realPortService.list(queryWrapper);
+            queryWrapper.lambda().eq(StandPoint::getModuleId,module.getModuleId());
+            List<StandPoint> list = standPointService.list(queryWrapper);
             turbineDetailsInfoDTO.setPointList(list);
             detailsInfoList.add(turbineDetailsInfoDTO);
         }
