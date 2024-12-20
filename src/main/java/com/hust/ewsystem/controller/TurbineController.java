@@ -9,6 +9,8 @@ import com.hust.ewsystem.entity.Module;
 import com.hust.ewsystem.entity.StandPoint;
 import com.hust.ewsystem.service.ModuleService;
 import com.hust.ewsystem.service.StandPointService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +33,8 @@ import java.util.List;
 @RequestMapping("/turbine")
 public class TurbineController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TurbineController.class);
+
     @Resource
     private ModuleService moduleService;
 
@@ -49,7 +53,8 @@ public class TurbineController {
         queryWrapper.lambda().eq(Module::getTurbineId,queryTurbineInfoDTO.getTurbineId());
         List<Module> list = moduleService.list(queryWrapper);
         if (CollectionUtils.isEmpty(list)) {
-            return EwsResult.error(String.format("未查询到风机信息,风机id【%s】",queryTurbineInfoDTO.getTurbineId()));
+            LOGGER.error(String.format("获取风机模块信息为空,风机id【%s】",queryTurbineInfoDTO.getTurbineId()));
+            return EwsResult.error(String.format("获取风机信息为空,风机id【%s】",queryTurbineInfoDTO.getTurbineId()));
         }
         TurbineInfoDTO turbineInfoDTO = initResult(queryTurbineInfoDTO, list);
         return EwsResult.OK(turbineInfoDTO);

@@ -1,5 +1,6 @@
 package com.hust.ewsystem.controller;
 
+import ch.qos.logback.classic.gaffer.PropertyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.DTO.QueryWarnDetailsDTO;
@@ -18,6 +19,9 @@ import com.hust.ewsystem.service.ModelsService;
 import com.hust.ewsystem.service.RealPortService;
 import com.hust.ewsystem.service.StandRealRelateService;
 import com.hust.ewsystem.service.WarningService;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +45,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/warning")
 public class WarningController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WarningController.class);
 
     @Autowired
     private WarningService warningService;
@@ -144,6 +150,7 @@ public class WarningController {
             queryWrapper.lambda().eq(StandRealRelate::getStandPointId,standPointId);
             List<StandRealRelate> standRealRelateList = standRealRelateService.list(queryWrapper);
             if (CollectionUtils.isEmpty(standRealRelateList)){
+                LOGGER.error(String.format("标准测点id【%s】与对应的真实测点关联关系不存在",standPointId));
                 return EwsResult.error("测点不存在,请检查参数后重试",null);
             }
             List<Integer> realPointList = new ArrayList<>();
@@ -154,6 +161,8 @@ public class WarningController {
             realPointQueryWrapper.lambda().in(RealPoint::getPointId,realPointList).eq(RealPoint::getTurbineId,queryWarnDetailsDTO.getTurbineId());
             RealPoint realPoint = realPortService.getOne(realPointQueryWrapper);
             if (Objects.isNull(realPoint)){
+                String realIdList = StringUtils.join(realPointList, ",");
+                LOGGER.error(String.format("获取真实测点信息为空,真实测点id【%s】,风机id【%d】",realIdList,queryWarnDetailsDTO.getTurbineId()));
                 return EwsResult.error("测点不存在,请检查参数后重试",null);
             }
             relPointAndLableMap = new HashMap<>();
