@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 
 @RestController
-@RequestMapping("/ews/model")
+@RequestMapping("/model")
 public class ModelsController {
 
     @Value("${algorithm.pythonFilePath}")
