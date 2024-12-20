@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -253,6 +254,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
 
             // 强制使用 UTF-8 编码读取文件内容
             StringBuilder contentBuilder = new StringBuilder();
+
             try (BufferedReader reader = Files.newBufferedReader(Paths.get(resultFilePath), StandardCharsets.UTF_8)) {
                 String line;
                 while ((line = reader.readLine()) != null) {

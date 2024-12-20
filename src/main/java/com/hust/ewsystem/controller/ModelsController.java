@@ -2,6 +2,7 @@ package com.hust.ewsystem.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.exception.FileException;
@@ -52,6 +53,9 @@ public class ModelsController {
 
     @Autowired
     private AlgorithmsMapper algorithmsMapper;
+
+    @Autowired
+    private AlgorithmStandRelateMapper algorithmStandRelateMapper;
 
     @Autowired
     private WindFarmMapper windFarmMapper;
@@ -273,6 +277,7 @@ public class ModelsController {
         List<Map<String,Object>> taskIdList = new ArrayList<>();
         //传入的每个模型测点不一定相同，所以需要分别处理
         for(Integer modelId : modelIds){
+
             String modelLabel = modelsService.getById(modelId).getModelLabel();
             List<Integer> realpointId = modelRealRelateService.list(
                     new QueryWrapper<ModelRealRelate>().eq("model_id", modelId)
@@ -304,6 +309,9 @@ public class ModelsController {
             map.put("modelId",modelId);
             map.put("taskId",taskId);
             taskIdList.add(map);
+            UpdateWrapper<Models> modelsUpdateWrapper = new UpdateWrapper<>();
+            modelsUpdateWrapper.eq("model_id", modelId).set("model_status", 2);
+            modelsService.update(modelsUpdateWrapper);
         }
         return EwsResult.OK(taskIdList);
     }
@@ -324,6 +332,9 @@ public class ModelsController {
             map.put("modelId",modelId);
             map.put("taskId",taskId);
             taskIdList.add(map);
+            UpdateWrapper<Models> modelsUpdateWrapper = new UpdateWrapper<>();
+            modelsUpdateWrapper.eq("model_id", modelId).set("model_status", 3);
+            modelsService.update(modelsUpdateWrapper);
         }
         return EwsResult.OK(taskIdList);
     }
@@ -366,7 +377,7 @@ public class ModelsController {
         }
         Page<Models> page1 = modelsService.page(modelsPage, queryWrapper);
         if (page1.getRecords().isEmpty()) {
-            return EwsResult.error("查询结果为空");
+            //return EwsResult.error("查询结果为空");
         }
         List<Models> records = page1.getRecords();
         List<Map<String, Object>> result = new ArrayList<>();
@@ -407,6 +418,14 @@ public class ModelsController {
         algorithmsQueryWrapper.select("algorithm_id","algorithm_name","algorithm_label");
         List<Algorithms> algorithmsList = algorithmsMapper.selectList(algorithmsQueryWrapper);
 
+        QueryWrapper<StandPoint> standPointQueryWrapper = new QueryWrapper<>();
+        standPointQueryWrapper.select("point_id","point_label","point_description");
+        List<StandPoint> standPointList = standPointMapper.selectList(standPointQueryWrapper);
+
+        QueryWrapper<AlgorithmStandRelate> algorithmStandRelateQueryWrapper = new QueryWrapper<>();
+        algorithmStandRelateQueryWrapper.select("algorithm_id","stand_point_id");
+        List<AlgorithmStandRelate> algorithmStandRelateList = algorithmStandRelateMapper.selectList(algorithmStandRelateQueryWrapper);
+
         Map<String,Object> response = new HashMap<>();
         response.put("total_count",page1.getTotal());
         response.put("page",page1.getCurrent());
@@ -418,6 +437,8 @@ public class ModelsController {
         response.put("turbineList",turbineList);
         response.put("moduleList",moduleList);
         response.put("algorithmList",algorithmsList);
+        response.put("standPointList",standPointList);
+        response.put("algorithmStandRelateList",algorithmStandRelateList);
         return EwsResult.OK("查询成功", response);
     }
     // 查询任务状态
