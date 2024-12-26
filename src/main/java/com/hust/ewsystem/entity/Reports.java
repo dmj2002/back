@@ -28,4 +28,6 @@ public class Reports implements Serializable {
     private LocalDateTime initialTime;  // 初始时间
 
     private Integer status;  // 状态
+
+    private String reportText; //通知文本
 }
