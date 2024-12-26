@@ -7,12 +7,9 @@ import com.hust.ewsystem.DTO.QueryWarnDetailsDTO;
 import com.hust.ewsystem.DTO.TrendDataDTO;
 import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.result.EwsResult;
-import com.hust.ewsystem.entity.Models;
-import com.hust.ewsystem.entity.RealPoint;
-import com.hust.ewsystem.entity.StandRealRelate;
-import com.hust.ewsystem.entity.Warnings;
-import com.hust.ewsystem.entity.WindFarm;
-import com.hust.ewsystem.entity.WindTurbine;
+import com.hust.ewsystem.entity.*;
+import com.hust.ewsystem.mapper.CompanyMapper;
+import com.hust.ewsystem.mapper.ModelsMapper;
 import com.hust.ewsystem.mapper.WindFarmMapper;
 import com.hust.ewsystem.mapper.WindTurbineMapper;
 import com.hust.ewsystem.service.ModelsService;
@@ -55,7 +52,12 @@ public class WarningController {
     private WindFarmMapper windFarmMapper;
 
     @Autowired
+    private CompanyMapper companyMapper;
+
+    @Autowired
     private WindTurbineMapper windTurbineMapper;
+
+    @Autowired ModelsMapper modelsMapper;
 
     @Autowired
     private ModelsService modelsService;
@@ -123,12 +125,34 @@ public class WarningController {
         if (page1.getRecords().isEmpty()) {
             throw new CrudException("查询结果为空");
         }
+        QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
+        windTurbineQueryWrapper.select("turbine_id", "turbine_name","wind_farm_id");  // 指定你需要的字段
+        List<WindTurbine> turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
+
+
+        QueryWrapper<WindFarm> windFarmQueryWrapper = new QueryWrapper<>();
+        windFarmQueryWrapper.select("wind_farm_id", "wind_farm_name,company_id");
+        List<WindFarm> windFarmList = windFarmMapper.selectList(windFarmQueryWrapper);
+
+        QueryWrapper<Company> companyQueryWrapper = new QueryWrapper<>();
+        companyQueryWrapper.select("company_id", "company_name");
+        List<Company> companyList = companyMapper.selectList(companyQueryWrapper);
+
+        QueryWrapper<Models> modelsQueryWrapper = new QueryWrapper<>();
+        modelsQueryWrapper.select("model_id","turbine_id");
+        List<Models> modelsList = modelsMapper.selectList(modelsQueryWrapper);
+
+
         Map<String,Object> result = new HashMap<>();
         result.put("total_count",page1.getTotal());
         result.put("page",page1.getCurrent());
         result.put("page_size",page1.getSize());
         result.put("total_pages",page1.getPages());
         result.put("warningList",page1.getRecords());
+        result.put("companyList",companyList);
+        result.put("windFarmList",windFarmList);
+        result.put("turbineList",turbineList);
+        result.put("modelList",modelsList);
         return EwsResult.OK("查询成功", result);
     }
 

@@ -327,12 +327,17 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 LocalDateTime startTime = LocalDateTime.parse(alert.getString("start_time"), formatter);
                 LocalDateTime endTime = LocalDateTime.parse(alert.getString("end_time"), formatter);
 
+
                 // 保存到数据库
                 Warnings warning = new Warnings();
                 warning.setModelId(modelId);
                 warning.setWarningDescription(alertInfo);
                 warning.setStartTime(startTime);
                 warning.setEndTime(endTime);
+
+                warning.setWarningStatus(0);//异常状态：未处理
+                warning.setWarningLevel(0);//set为一级先
+
                 warningService.save(warning);
             }
         } catch (IOException e) {
