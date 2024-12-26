@@ -21,11 +21,13 @@ public class Reports implements Serializable {
 
     private String reportLabel;  // 报告标签
 
-    private Integer turbineIdl;  // 风机id
+    private Integer turbineId;  // 风机id
 
     private Integer employeeId;  // 员工id
 
     private LocalDateTime initialTime;  // 初始时间
 
     private Integer status;  // 状态
+
+    private String reportText;  // 通知文本
 }

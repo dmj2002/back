@@ -3,6 +3,7 @@ package com.hust.ewsystem.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hust.ewsystem.common.exception.FileException;
 import com.hust.ewsystem.entity.Models;
@@ -61,20 +62,20 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     }
     @Override
     public String train(String algorithmLabel, String modelLabel,Integer modelId) {
-        String taskId;
+        String taskLabel;
         if(modelMap.getOrDefault(modelId + "_train",null)!=null){
-            taskId = modelMap.get(modelId + "_train").toString();
+            taskLabel = modelMap.get(modelId + "_train").toString();
         }else{
-            taskId = UUID.randomUUID().toString();
+            taskLabel = UUID.randomUUID().toString();
             tasks newtask = new tasks();
             newtask.setModelId(modelId)
                     .setTaskType(0)
-                    .setTaskLabel(taskId)
+                    .setTaskLabel(taskLabel)
                     .setStartTime(LocalDateTime.now());
             tasksMapper.insert(newtask);
-            modelMap.put(modelId + "_train",taskId);
+            modelMap.put(modelId + "_train", taskLabel);
         }
-        File taskDir = new File(pythonFilePath + "/task_logs/" + taskId);
+        File taskDir = new File(pythonFilePath + "/task_logs/" + taskLabel);
         if (!taskDir.exists()) {
             if (!taskDir.mkdirs()) {
                 throw new FileException("创建任务目录失败");
@@ -85,37 +86,37 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         JSONObject settings = new JSONObject();
         settings.put("modelPath", pythonFilePath + "/" + modelLabel);
         settings.put("trainDataPath", pythonFilePath + "/" + modelLabel + "/train.csv");
-        settings.put("predictDataPath", pythonFilePath + "/task_logs/" + taskId + "/predict.csv");
-        settings.put("resultDataPath", pythonFilePath + "/task_logs/" + taskId + "/result.json");
-        settings.put("logPath", pythonFilePath + "/task_logs/" + taskId + "/" + taskId + ".log");
+        settings.put("predictDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/predict.csv");
+        settings.put("resultDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/result.json");
+        settings.put("logPath", pythonFilePath + "/task_logs/" + taskLabel + "/" + taskLabel + ".log");
         // 写入 setting.json 文件
         try (FileWriter fileWriter = new FileWriter(settingFile)) {
             fileWriter.write(settings.toJSONString());
         } catch (IOException e) {
             throw new FileException("setting.json文件配置失败",e);
         }
-        Runnable task = () -> executeTrain(pythonFilePath, algorithmLabel, taskId);
+        Runnable task = () -> executeTrain(pythonFilePath, algorithmLabel, taskLabel);
         // 调度任务一次性执行
         ScheduledFuture<?> scheduledTask = scheduler.schedule(task, 0, TimeUnit.SECONDS);
-        taskMap.put(taskId, scheduledTask);
-        return taskId;
+        taskMap.put(taskLabel, scheduledTask);
+        return taskLabel;
     }
     @Override
     public String predict(Integer alertInterval, String modelLabel, String algorithmLabel,Integer modelId) {
-        String taskId;
+        String taskLabel;
         if(modelMap.getOrDefault(modelId + "_predict",null)!=null){
-            taskId = modelMap.get(modelId + "_predict").toString();
+            taskLabel = modelMap.get(modelId + "_predict").toString();
         }else{
-            taskId = UUID.randomUUID().toString();
+            taskLabel = UUID.randomUUID().toString();
             tasks newtask = new tasks();
             newtask.setModelId(modelId)
                     .setTaskType(1)
-                    .setTaskLabel(taskId)
+                    .setTaskLabel(taskLabel)
                     .setStartTime(LocalDateTime.now());
             tasksMapper.insert(newtask);
-            modelMap.put(modelId + "_predict",taskId);
+            modelMap.put(modelId + "_predict", taskLabel);
         }
-        File taskDir = new File(pythonFilePath + "/task_logs/" + taskId);
+        File taskDir = new File(pythonFilePath + "/task_logs/" + taskLabel);
         if (!taskDir.exists()) {
             if (!taskDir.mkdirs()) {
                 throw new FileException("创建任务目录失败");
@@ -155,9 +156,9 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         JSONObject settings = new JSONObject();
         settings.put("modelPath", pythonFilePath + "/" + modelLabel);
         settings.put("trainDataPath", pythonFilePath + "/" + modelLabel + "/train.csv");
-        settings.put("predictDataPath", pythonFilePath + "/task_logs/" + taskId + "/predict.csv");
-        settings.put("resultDataPath", pythonFilePath + "/task_logs/" + taskId + "/result.json");
-        settings.put("logPath", pythonFilePath + "/task_logs/" + taskId + "/" + taskId + ".log");
+        settings.put("predictDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/predict.csv");
+        settings.put("resultDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/result.json");
+        settings.put("logPath", pythonFilePath + "/task_logs/" + taskLabel + "/" + taskLabel + ".log");
         // 写入 setting.json 文件
         try (FileWriter fileWriter = new FileWriter(settingFile)) {
             fileWriter.write(settings.toJSONString());
@@ -166,23 +167,23 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         }
         Runnable task = () ->{
             try {
-                executePredict(pythonFilePath, algorithmLabel, taskId,modelId);
+                executePredict(pythonFilePath, algorithmLabel, taskLabel,modelId);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         };
         // 定期调度任务
         ScheduledFuture<?> scheduledTask =scheduler.scheduleWithFixedDelay(task, 0, alertInterval, TimeUnit.SECONDS);
-        taskMap.put(taskId, scheduledTask);
-        return taskId;
+        taskMap.put(taskLabel, scheduledTask);
+        return taskLabel;
     }
 
     // 提供查询任务状态的接口
     @Override
-    public Map<String, Object> getTaskStatus(String taskId) {
+    public Map<String, Object> getTaskStatus(String taskLabel) {
         Map<String, Object> statusMap = new HashMap<>();
-        statusMap.put("taskId", taskId);
-        ScheduledFuture<?> scheduledTask = taskMap.get(taskId);
+        statusMap.put("taskLabel", taskLabel);
+        ScheduledFuture<?> scheduledTask = taskMap.get(taskLabel);
         if (scheduledTask == null) {
             statusMap.put("status", "任务不存在");
         } else if (scheduledTask.isCancelled()) {
@@ -203,11 +204,11 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     @Override
     public String killTask(Integer modelId) {
         // 终止ScheduledFuture任务
-        String taskId = modelMap.get(modelId + "_predict");
-        ScheduledFuture<?> scheduledTask = taskMap.get(taskId);
+        String taskLabel = modelMap.get(modelId + "_predict");
+        ScheduledFuture<?> scheduledTask = taskMap.get(taskLabel);
         if (scheduledTask != null) {
             scheduledTask.cancel(true);
-//            taskMap.remove(taskId);
+//            taskMap.remove(taskLabel);
 //            modelMap.remove(modelId);
         }
         // 检查任务和线程是否都已终止
@@ -222,23 +223,23 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
      *
      * @param filepath 进程工作目录
      * @param algorithmLabel 算法标签
-     * @param taskId 任务ID
+     * @param taskLabel 任务ID
      */
-    public void executeTrain(String filepath, String algorithmLabel, String taskId) {
+    public void executeTrain(String filepath, String algorithmLabel, String taskLabel) {
         Process process = null;
         try {
             // 准备命令
             List<String> command = new ArrayList<>();
             command.add("python");
             command.add(String.format("alg/%s/train.py", algorithmLabel));
-            command.add(String.format("task_logs/%s/setting.json", taskId));
+            command.add(String.format("task_logs/%s/setting.json", taskLabel));
             // 执行命令
             ProcessBuilder processBuilder = new ProcessBuilder();
             processBuilder.directory(new File(filepath));
             processBuilder.command(command);
             processBuilder.redirectErrorStream(true);
             process = processBuilder.start();
-            System.out.println("Started Python process for task: " + taskId);
+            System.out.println("Started Python process for task: " + taskLabel);
             // 等待进程完成
             process.waitFor();
         } catch(InterruptedException e) {
@@ -247,7 +248,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             e.printStackTrace();
         }
     }
-    public void executePredict(String filepath, String algorithmLabel, String taskId,Integer modelId) {
+    public void executePredict(String filepath, String algorithmLabel, String taskLabel,Integer modelId) {
         //TODO 生成预测文件
         Process process = null;
         boolean interrupted = false;
@@ -256,14 +257,14 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             List<String> command = new ArrayList<>();
             command.add("python");
             command.add(String.format("alg/%s/predict.py", algorithmLabel));
-            command.add(String.format("task_logs/%s/setting.json", taskId));
+            command.add(String.format("task_logs/%s/setting.json", taskLabel));
             // 执行命令
             ProcessBuilder processBuilder = new ProcessBuilder();
             processBuilder.directory(new File(filepath));
             processBuilder.command(command);
             processBuilder.redirectErrorStream(true);
             process = processBuilder.start();
-            System.out.println("Started Python process for task: " + taskId);
+            System.out.println("Started Python process for task: " + taskLabel);
             StringBuilder outputString = null;
             //获取输入流
             InputStream inputStream = process.getInputStream();
@@ -295,14 +296,14 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             e.printStackTrace();
         } finally {
             if (!interrupted) {
-                readAndSaveResults(filepath, taskId, modelId);
-                System.out.println("Finished reading and saving results for task: " + taskId);
+                readAndSaveResults(filepath, taskLabel, modelId);
+                System.out.println("Finished reading and saving results for task: " + taskLabel);
             }
         }
     }
-    private void readAndSaveResults(String filepath, String taskId,Integer modelId) {
+    private void readAndSaveResults(String filepath, String taskLabel,Integer modelId) {
         try {
-            String resultFilePath = filepath + "/task_logs/" + taskId + "/result.json";
+            String resultFilePath = filepath + "/task_logs/" + taskLabel + "/result.json";
 
             // 强制使用 UTF-8 编码读取文件内容
             StringBuilder contentBuilder = new StringBuilder();
@@ -331,6 +332,8 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 warning.setWarningDescription(alertInfo);
                 warning.setStartTime(startTime);
                 warning.setEndTime(endTime);
+                Integer taskId = tasksMapper.selectOne(new QueryWrapper<tasks>().eq("task_label", taskLabel)).getTaskId();
+                warning.setTaskId(taskId);
                 warningService.save(warning);
             }
         } catch (IOException e) {

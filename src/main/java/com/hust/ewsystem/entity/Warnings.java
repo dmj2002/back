@@ -35,4 +35,6 @@ public class Warnings implements Serializable {
     private String warningDescription; // 预警描述
 
     private Integer transferredToWorkOrder; // 是否转入工单
+
+    private Integer taskId; // 任务id
 }

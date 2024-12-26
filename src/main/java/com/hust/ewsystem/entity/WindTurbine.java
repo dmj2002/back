@@ -20,7 +20,7 @@ public class WindTurbine implements Serializable {
 
     private String turbineName; // 风机编号
 
-    private String turbineModel; // 风机型号
+    private String turbineType; // 风机型号
 
     private Double turbineCapacity; // 风机容量
 

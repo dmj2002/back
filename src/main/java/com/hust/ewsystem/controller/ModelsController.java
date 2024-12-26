@@ -452,8 +452,8 @@ public class ModelsController {
         if (taskIdList == null || taskIdList.isEmpty()) {
             return EwsResult.error("任务ID列表不能为空");
         }
-        for (String taskId : taskIdList) {
-            Map<String, Object> onetaskStatus = modelsService.getTaskStatus(taskId);
+        for (String taskLabel : taskIdList) {
+            Map<String, Object> onetaskStatus = modelsService.getTaskStatus(taskLabel);
             taskStatus.add(onetaskStatus);
         }
         return EwsResult.OK(taskStatus);
