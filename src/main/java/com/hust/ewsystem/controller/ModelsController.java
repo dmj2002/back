@@ -2,6 +2,7 @@ package com.hust.ewsystem.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.exception.FileException;
@@ -52,6 +53,9 @@ public class ModelsController {
 
     @Autowired
     private AlgorithmsMapper algorithmsMapper;
+
+    @Autowired
+    private AlgorithmStandRelateMapper algorithmStandRelateMapper;
 
     @Autowired
     private WindFarmMapper windFarmMapper;
@@ -325,6 +329,9 @@ public class ModelsController {
             map.put("modelId",modelId);
             map.put("taskId",taskId);
             taskIdList.add(map);
+            UpdateWrapper<Models> modelsUpdateWrapper = new UpdateWrapper<>();
+            modelsUpdateWrapper.eq("model_id", modelId).set("model_status", 2);
+            modelsService.update(modelsUpdateWrapper);
         }
         return EwsResult.OK(taskIdList);
     }
@@ -348,6 +355,9 @@ public class ModelsController {
             map.put("modelId",modelId);
             map.put("taskId",taskId);
             taskIdList.add(map);
+            UpdateWrapper<Models> modelsUpdateWrapper = new UpdateWrapper<>();
+            modelsUpdateWrapper.eq("model_id", modelId).set("model_status", 3);
+            modelsService.update(modelsUpdateWrapper);
         }
         return EwsResult.OK(taskIdList);
     }
@@ -390,7 +400,7 @@ public class ModelsController {
         }
         Page<Models> page1 = modelsService.page(modelsPage, queryWrapper);
         if (page1.getRecords().isEmpty()) {
-            return EwsResult.error("查询结果为空");
+            //return EwsResult.error("查询结果为空");
         }
         List<Models> records = page1.getRecords();
         List<Map<String, Object>> result = new ArrayList<>();
@@ -410,7 +420,7 @@ public class ModelsController {
             result.add(map);
         }
         QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
-        windTurbineQueryWrapper.select("turbine_id", "turbine_name","wind_farm_id");  // 指定你需要的字段
+        windTurbineQueryWrapper.select("turbine_id", "turbine_type","turbine_name","wind_farm_id");  // 指定你需要的字段
         List<WindTurbine> turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
 
 
@@ -430,6 +440,14 @@ public class ModelsController {
         algorithmsQueryWrapper.select("algorithm_id","algorithm_name","algorithm_label");
         List<Algorithms> algorithmsList = algorithmsMapper.selectList(algorithmsQueryWrapper);
 
+        QueryWrapper<StandPoint> standPointQueryWrapper = new QueryWrapper<>();
+        standPointQueryWrapper.select("point_id","point_label","point_description");
+        List<StandPoint> standPointList = standPointMapper.selectList(standPointQueryWrapper);
+
+        QueryWrapper<AlgorithmStandRelate> algorithmStandRelateQueryWrapper = new QueryWrapper<>();
+        algorithmStandRelateQueryWrapper.select("algorithm_id","stand_point_id");
+        List<AlgorithmStandRelate> algorithmStandRelateList = algorithmStandRelateMapper.selectList(algorithmStandRelateQueryWrapper);
+
         Map<String,Object> response = new HashMap<>();
         response.put("total_count",page1.getTotal());
         response.put("page",page1.getCurrent());
@@ -441,6 +459,8 @@ public class ModelsController {
         response.put("turbineList",turbineList);
         response.put("moduleList",moduleList);
         response.put("algorithmList",algorithmsList);
+        response.put("standPointList",standPointList);
+        response.put("algorithmStandRelateList",algorithmStandRelateList);
         return EwsResult.OK("查询成功", response);
     }
     // 查询任务状态
@@ -469,11 +489,17 @@ public class ModelsController {
         List<Map<String, Object>> resultList = new ArrayList<>();
         for(Integer modelId : modelIdList){
             Map<String, Object> result = new HashMap<>();
+            Models model = modelsService.getById(modelId);
+            //修改模型状态为已完成
+            model.setModelStatus(2);
+            modelsService.updateById(model);
             String str = modelsService.killTask(modelId);
+
             result.put("modelId", modelId);
             result.put("result", str);
             resultList.add(result);
         }
+
         return EwsResult.OK(resultList);
     }
     public void toTrainCsv(Map<LocalDateTime, Map<String, Object>> alignedData,Map<String, String> realToStandLabel,String modelLabel){

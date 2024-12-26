@@ -69,7 +69,7 @@ public class TurbineController {
     public TurbineInfoDTO initResult(QueryTurbineInfoDTO queryTurbineInfoDTO,List<Module> moduleList){
         TurbineInfoDTO result = new TurbineInfoDTO();
         result.setTurbineId(queryTurbineInfoDTO.getTurbineId());
-        result.setTurbineNumber(queryTurbineInfoDTO.getTurbineNumber());
+        result.setTurbineName(queryTurbineInfoDTO.getTurbineName());
         result.setWindFarmId(queryTurbineInfoDTO.getWindFarmId());
         result.setWindFarmName(queryTurbineInfoDTO.getWindFarmName());
         List<TurbineDetailsInfoDTO> detailsInfoList =  new ArrayList<>(moduleList.size());

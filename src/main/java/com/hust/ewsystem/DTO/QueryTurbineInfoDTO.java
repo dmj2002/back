@@ -45,5 +45,5 @@ public class QueryTurbineInfoDTO implements Serializable {
      * 风机名称
      */
     @NotBlank(message = "风机名称不能为空")
-    private String turbineNumber;
+    private String turbineName;
 }

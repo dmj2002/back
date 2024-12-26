@@ -40,7 +40,7 @@ public class TurbineInfoDTO implements Serializable {
     /**
      * 风机名称
      */
-    private String turbineNumber;
+    private String turbineName;
 
     /**
      * 模块列表
