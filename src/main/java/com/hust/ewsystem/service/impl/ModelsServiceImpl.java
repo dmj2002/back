@@ -334,6 +334,8 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 warning.setEndTime(endTime);
                 Integer taskId = tasksMapper.selectOne(new QueryWrapper<tasks>().eq("task_label", taskLabel)).getTaskId();
                 warning.setTaskId(taskId);
+                warning.setWarningStatus(0);//异常状态：未处理
+                warning.setWarningLevel(0);//set为一级先
                 warningService.save(warning);
             }
         } catch (IOException e) {
