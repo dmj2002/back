@@ -125,6 +125,7 @@ public class WarningController {
         if (page1.getRecords().isEmpty()) {
             throw new CrudException("查询结果为空");
         }
+        //TODO: 什么意思？？？把所有数据都查出来吗？
         QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
         windTurbineQueryWrapper.select("turbine_id","turbine_type", "turbine_name","wind_farm_id");  // 指定你需要的字段
         List<WindTurbine> turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
