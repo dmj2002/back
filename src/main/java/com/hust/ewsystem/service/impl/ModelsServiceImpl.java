@@ -64,7 +64,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     public String train(String algorithmLabel, String modelLabel,Integer modelId) {
         String taskLabel;
         if(modelMap.getOrDefault(modelId + "_train",null)!=null){
-            taskLabel = modelMap.get(modelId + "_train").toString();
+            taskLabel = modelMap.get(modelId + "_train");
         }else{
             taskLabel = UUID.randomUUID().toString();
             tasks newtask = new tasks();
@@ -106,7 +106,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         String taskLabel;
         Integer taskId;
         if(modelMap.getOrDefault(modelId + "_predict",null)!=null){
-            taskLabel = modelMap.get(modelId + "_predict").toString();
+            taskLabel = modelMap.get(modelId + "_predict");
             taskId = tasksMapper.selectOne(new QueryWrapper<tasks>().eq("task_label", taskLabel)).getTaskId();
         }else{
             taskLabel = UUID.randomUUID().toString();
