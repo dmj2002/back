@@ -342,9 +342,6 @@ public class ModelsController {
         for(Integer modelId : modelList) {
             //获取返回值
             Models model = modelsService.getById(modelId);
-            //修改模型状态为预测中
-            model.setModelStatus(3);
-            modelsService.updateById(model);
             Integer alertInterval = model.getAlertInterval();
             String modelLabel = model.getModelLabel();
             Integer algorithmId = model.getAlgorithmId();
@@ -355,6 +352,7 @@ public class ModelsController {
             map.put("modelId",modelId);
             map.put("taskId",taskId);
             taskIdList.add(map);
+            //修改模型状态为预测中
             UpdateWrapper<Models> modelsUpdateWrapper = new UpdateWrapper<>();
             modelsUpdateWrapper.eq("model_id", modelId).set("model_status", 3);
             modelsService.update(modelsUpdateWrapper);

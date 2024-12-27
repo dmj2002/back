@@ -104,8 +104,10 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     @Override
     public String predict(Integer alertInterval, String modelLabel, String algorithmLabel,Integer modelId) {
         String taskLabel;
+        Integer taskId;
         if(modelMap.getOrDefault(modelId + "_predict",null)!=null){
             taskLabel = modelMap.get(modelId + "_predict").toString();
+            taskId = tasksMapper.selectOne(new QueryWrapper<tasks>().eq("task_label", taskLabel)).getTaskId();
         }else{
             taskLabel = UUID.randomUUID().toString();
             tasks newtask = new tasks();
@@ -114,6 +116,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                     .setTaskLabel(taskLabel)
                     .setStartTime(LocalDateTime.now());
             tasksMapper.insert(newtask);
+            taskId = newtask.getTaskId();
             modelMap.put(modelId + "_predict", taskLabel);
         }
         File taskDir = new File(pythonFilePath + "/task_logs/" + taskLabel);
@@ -167,7 +170,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         }
         Runnable task = () ->{
             try {
-                executePredict(pythonFilePath, algorithmLabel, taskLabel,modelId);
+                executePredict(pythonFilePath, algorithmLabel, taskLabel, modelId, taskId);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -248,7 +251,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             e.printStackTrace();
         }
     }
-    public void executePredict(String filepath, String algorithmLabel, String taskLabel,Integer modelId) {
+    public void executePredict(String filepath, String algorithmLabel, String taskLabel,Integer modelId,Integer taskId) {
         //TODO 生成预测文件
         Process process = null;
         boolean interrupted = false;
@@ -296,12 +299,12 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             e.printStackTrace();
         } finally {
             if (!interrupted) {
-                readAndSaveResults(filepath, taskLabel, modelId);
+                readAndSaveResults(filepath, taskLabel, modelId, taskId);
                 System.out.println("Finished reading and saving results for task: " + taskLabel);
             }
         }
     }
-    private void readAndSaveResults(String filepath, String taskLabel,Integer modelId) {
+    private void readAndSaveResults(String filepath, String taskLabel,Integer modelId,Integer taskId) {
         try {
             String resultFilePath = filepath + "/task_logs/" + taskLabel + "/result.json";
 
@@ -332,7 +335,6 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 warning.setWarningDescription(alertInfo);
                 warning.setStartTime(startTime);
                 warning.setEndTime(endTime);
-                Integer taskId = tasksMapper.selectOne(new QueryWrapper<tasks>().eq("task_label", taskLabel)).getTaskId();
                 warning.setTaskId(taskId);
                 warning.setWarningStatus(0);//异常状态：未处理
                 warning.setWarningLevel(0);//set为一级先
