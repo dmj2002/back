@@ -397,8 +397,8 @@ public class ModelsController {
             }
         }
         Page<Models> page1 = modelsService.page(modelsPage, queryWrapper);
-        if (page1.getRecords().isEmpty()) {
-            //return EwsResult.error("查询结果为空");
+        if (page1.getRecords().isEmpty() || page1.getRecords() == null) {
+            return EwsResult.error("查询结果为空");
         }
         List<Models> records = page1.getRecords();
         List<Map<String, Object>> result = new ArrayList<>();
