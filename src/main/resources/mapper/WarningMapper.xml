@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hust.ewsystem.mapper.WarningMapper">
+
+    <!-- 根据 Warning 对象列表中的 modelId 查询对应的 WarningsVO -->
+    <select id="getWarningsByModelId" resultType="com.example.vo.WarningsVO">
+        SELECT w.*,t.turbine_name
+        FROM warnings w
+        LEFT JOIN models m ON w.model_id = m.model_id
+        LEFT JOIN wind_turbine t ON m.turbine_id = t.turbine_id
+        WHERE w.warning_id IN
+        <foreach item="warning" index="index" collection="records" open="(" separator="," close=")">
+            #{warning.warningId}
+        </foreach>
+    </select>
+</mapper>
