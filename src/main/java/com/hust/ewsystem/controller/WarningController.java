@@ -58,8 +58,12 @@ public class WarningController {
 
     @Resource
     private StandRealRelateService standRealRelateService;
+
     @Autowired
     private WarningMapper warningMapper;
+
+    @Autowired
+    private ReportWarningRelateMapper reportWarningRelateMapper;
 
     @GetMapping("/list")
     public EwsResult<?> getWarningList(@RequestParam(value = "page") int page,
@@ -201,7 +205,7 @@ public class WarningController {
                 if(warning == null){
                     throw new CrudException("预警不存在");
                 }
-                warning.setWarningStatus(2);
+                warning.setWarningStatus(3);
                 warning.setHandlerId(warningOperateDTO.getOperateId());
                 warning.setHandleTime(LocalDateTime.now());
                 warningService.updateById(warning);
@@ -209,14 +213,13 @@ public class WarningController {
             return EwsResult.OK("关闭成功");
         }
         //挂起操作
-        //TODO 挂起操作的逻辑?需要修改哪个字段？
         else if(warningOperateDTO.getOperateCode() == 1){
             for(Integer warningId : warningOperateDTO.getWarningId()){
                 Warnings warning = warningService.getById(warningId);
                 if(warning == null){
                     throw new CrudException("预警不存在");
                 }
-                warning.setWarningStatus(1);
+                warning.setWarningStatus(3);
                 warning.setHandlerId(warningOperateDTO.getOperateId());
                 warning.setHandleTime(LocalDateTime.now());
                 warningService.updateById(warning);
@@ -230,7 +233,7 @@ public class WarningController {
                 if(warning == null){
                     throw new CrudException("预警不存在");
                 }
-                warning.setWarningStatus(1);
+                warning.setWarningStatus(2);
                 warning.setHandleTime(LocalDateTime.now());
                 warning.setWarningLevel(warningOperateDTO.getWarningLevel());
                 warningService.updateById(warning);
@@ -248,6 +251,10 @@ public class WarningController {
                         .initialTime(LocalDateTime.now())
                         .build();
                 reportsMapper.insert(report);
+                reportWarningRelateMapper.insert(ReportWarningRelate.builder()
+                                        .reportId(report.getReportId())
+                                        .warningId(warningId)
+                                        .build());
             }
             return EwsResult.OK("通知成功");
         }
