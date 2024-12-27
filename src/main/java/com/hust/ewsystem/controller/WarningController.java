@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.DTO.QueryWarnDetailsDTO;
 import com.hust.ewsystem.DTO.TrendDataDTO;
+import com.hust.ewsystem.DTO.WarningOperateDTO;
 import com.hust.ewsystem.VO.WarningsVO;
 import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.result.EwsResult;
@@ -18,12 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
@@ -44,6 +40,9 @@ public class WarningController {
 
     @Autowired
     private WarningService warningService;
+
+    @Autowired
+    private ReportsMapper reportsMapper;
 
     @Autowired
     private WindFarmMapper windFarmMapper;
@@ -192,5 +191,69 @@ public class WarningController {
         // 查询测点值
         List<TrendDataDTO> realPointValueList = realPortService.getRealPointValueList(relPointAndLableList, queryWarnDetailsDTO);
         return EwsResult.OK(realPointValueList);
+    }
+    @PostMapping("/operate")
+    public EwsResult<?> operateWarning(@RequestBody WarningOperateDTO warningOperateDTO) {
+        //关闭操作
+        if(warningOperateDTO.getOperateCode() == 0){
+            for(Integer warningId : warningOperateDTO.getWarningId()){
+                Warnings warning = warningService.getById(warningId);
+                if(warning == null){
+                    throw new CrudException("预警不存在");
+                }
+                warning.setWarningStatus(2);
+                warning.setHandlerId(warningOperateDTO.getOperateId());
+                warning.setHandleTime(LocalDateTime.now());
+                warningService.updateById(warning);
+            }
+            return EwsResult.OK("关闭成功");
+        }
+        //挂起操作
+        //TODO 挂起操作的逻辑?需要修改哪个字段？
+        else if(warningOperateDTO.getOperateCode() == 1){
+            for(Integer warningId : warningOperateDTO.getWarningId()){
+                Warnings warning = warningService.getById(warningId);
+                if(warning == null){
+                    throw new CrudException("预警不存在");
+                }
+                warning.setWarningStatus(1);
+                warning.setHandlerId(warningOperateDTO.getOperateId());
+                warning.setHandleTime(LocalDateTime.now());
+                warningService.updateById(warning);
+            }
+            return EwsResult.OK("挂起成功");
+        }
+        //分级操作
+        else if(warningOperateDTO.getOperateCode() == 2){
+            for(Integer warningId : warningOperateDTO.getWarningId()){
+                Warnings warning = warningService.getById(warningId);
+                if(warning == null){
+                    throw new CrudException("预警不存在");
+                }
+                warning.setWarningStatus(1);
+                warning.setHandleTime(LocalDateTime.now());
+                warning.setWarningLevel(warningOperateDTO.getWarningLevel());
+                warningService.updateById(warning);
+            }
+            return EwsResult.OK("分级成功");
+        }
+        //通知操作
+        else if(warningOperateDTO.getOperateCode() == 3){
+            for(Integer warningId : warningOperateDTO.getWarningId()){
+                Integer turbineId = warningMapper.getTurbineIdByWarningId(warningId);
+                Reports report = Reports.builder()
+                        .reportText(warningOperateDTO.getReportText())
+                        .turbineId(turbineId)
+                        .status(0)
+                        .initialTime(LocalDateTime.now())
+                        .build();
+                reportsMapper.insert(report);
+            }
+            return EwsResult.OK("通知成功");
+        }
+        else{
+            throw new CrudException("操作码错误");
+        }
+
     }
 }

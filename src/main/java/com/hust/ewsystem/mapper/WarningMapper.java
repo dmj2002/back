@@ -10,4 +10,6 @@ import java.util.List;
 public interface WarningMapper extends BaseMapper<Warnings> {
 
     List<WarningsVO> getWarningsByModelId(@Param("records") List<Warnings> records);
+
+    Integer getTurbineIdByWarningId(@Param("warningId") Integer warningId);
 }
