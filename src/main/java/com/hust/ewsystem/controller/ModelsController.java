@@ -483,7 +483,7 @@ public class ModelsController {
      * @return
      */
     @PostMapping("/stopPredict")
-    public EwsResult stopPredict(@RequestBody List<Integer> modelIdList){
+    public EwsResult<?> stopPredict(@RequestBody List<Integer> modelIdList){
         List<Map<String, Object>> resultList = new ArrayList<>();
         for(Integer modelId : modelIdList){
             Map<String, Object> result = new HashMap<>();
