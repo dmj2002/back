@@ -1,6 +1,5 @@
 package com.hust.ewsystem.controller;
 
-import ch.qos.logback.classic.gaffer.PropertyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.DTO.QueryWarnDetailsDTO;
@@ -50,12 +49,7 @@ public class WarningController {
     private WindFarmMapper windFarmMapper;
 
     @Autowired
-    private CompanyMapper companyMapper;
-
-    @Autowired
     private WindTurbineMapper windTurbineMapper;
-
-    @Autowired ModelsMapper modelsMapper;
 
     @Autowired
     private ModelsService modelsService;
