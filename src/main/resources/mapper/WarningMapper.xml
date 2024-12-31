@@ -13,7 +13,7 @@
             #{warning.warningId}
         </foreach>
     </select>
-    <select id="getTurbineIdByWarningId" resultType="Interger">
+    <select id="getTurbineIdByWarningId" resultType="Integer">
         SELECT m.turbine_id
         FROM warnings w
         LEFT JOIN models m ON w.model_id = m.model_id
