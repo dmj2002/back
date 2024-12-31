@@ -25,6 +25,7 @@ public class ShareController {
 
     @GetMapping("/overview")
     public EwsResult<?> overview(OverviewDTO overviewDTO) {
+        //TODO 通过设备类型、公司类别、公司名称、时间段查询数据
         Map<String,Object> result = new HashMap<>();
         //设备品牌入口
         if(overviewDTO.getType()!=null){
