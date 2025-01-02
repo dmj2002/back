@@ -153,10 +153,10 @@ public class WarningController {
         result.put("page_size",page1.getSize());
         result.put("total_pages",page1.getPages());
         result.put("warningList",WarningsListVO);
-//        result.put("companyList",companyList);
-//        result.put("windFarmList",windFarmList);
-//        result.put("turbineList",turbineList);
-//        result.put("modelList",modelsList);
+        result.put("companyList",companyList);
+        result.put("windFarmList",windFarmList);
+        result.put("turbineList",turbineList);
+        result.put("modelList",modelsList);
         return EwsResult.OK("查询成功", result);
     }
 
