@@ -3,9 +3,11 @@ package com.hust.ewsystem.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hust.ewsystem.common.exception.FileException;
+import com.hust.ewsystem.controller.WarningController;
 import com.hust.ewsystem.entity.Models;
 import com.hust.ewsystem.entity.Warnings;
 import com.hust.ewsystem.entity.tasks;
@@ -14,6 +16,8 @@ import com.hust.ewsystem.mapper.TaskMapper;
 import com.hust.ewsystem.service.ModelsService;
 
 import com.hust.ewsystem.service.WarningService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -32,6 +36,8 @@ import java.util.concurrent.*;
 @Service
 @Transactional
 public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> implements ModelsService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ModelsServiceImpl.class);
 
     @Value("${algorithm.pythonFilePath}")
     public String pythonFilePath;
@@ -300,7 +306,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         } finally {
             if (!interrupted) {
                 readAndSaveResults(filepath, taskLabel, modelId, taskId);
-                System.out.println("Finished reading and saving results for task: " + taskLabel);
+                LOGGER.error("Finished reading and saving results for task: " + taskLabel);
             }
         }
     }
@@ -323,25 +329,89 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             JSONArray alertList = jsonObject.getJSONArray("alarm_list");
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-            for (int i = 0; i < alertList.size(); i++) {
-                JSONObject alert = alertList.getJSONObject(i);
-                String alertInfo = alert.getString("alarm_info");
-                LocalDateTime startTime = LocalDateTime.parse(alert.getString("start_time"), formatter);
-                LocalDateTime endTime = LocalDateTime.parse(alert.getString("end_time"), formatter);
+            // 预警信息入库及合并
+            processAlerts(alertList.toJavaList(JSONObject.class),modelId,taskId,formatter);
 
-                // 保存到数据库
-                Warnings warning = new Warnings();
-                warning.setModelId(modelId);
-                warning.setWarningDescription(alertInfo);
-                warning.setStartTime(startTime);
-                warning.setEndTime(endTime);
-                warning.setTaskId(taskId);
-                warning.setWarningStatus(0);//异常状态：未处理
-                warning.setWarningLevel(0);//set为一级先
-                warningService.save(warning);
-            }
-        } catch (IOException e) {
+//            for (int i = 0; i < alertList.size(); i++) {
+//                JSONObject alert = alertList.getJSONObject(i);
+//                String alertInfo = alert.getString("alarm_info");
+//                LocalDateTime startTime = LocalDateTime.parse(alert.getString("start_time"), formatter);
+//                LocalDateTime endTime = LocalDateTime.parse(alert.getString("end_time"), formatter);
+//
+//                // 保存到数据库
+//                Warnings warning = new Warnings();
+//                warning.setModelId(modelId);
+//                warning.setWarningDescription(alertInfo);
+//                warning.setStartTime(startTime);
+//                warning.setEndTime(endTime);
+//                warning.setTaskId(taskId);
+//                warning.setWarningStatus(0);//异常状态：未处理
+//                warning.setWarningLevel(0);//set为一级先
+//                warningService.save(warning);
+//            }
+        } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * 预警信息入库及合并
+     * @param alertList alertList
+     * @param modelId modelId
+     * @param taskId taskId
+     * @param formatter formatter
+     */
+    private void processAlerts(List<JSONObject> alertList, int modelId, int taskId,DateTimeFormatter formatter) {
+        Iterator<JSONObject> iterator = alertList.iterator();
+        JSONObject prevAlert = null;
+        while (iterator.hasNext()) {
+            JSONObject alert = iterator.next();
+            String alertInfo = alert.getString("alarm_info");
+            LocalDateTime startTime = LocalDateTime.parse(alert.getString("start_time"), formatter);
+            LocalDateTime endTime = LocalDateTime.parse(alert.getString("end_time"), formatter);
+
+            // 保存到数据库
+            Warnings warning = new Warnings();
+            warning.setModelId(modelId);
+            warning.setWarningDescription(alertInfo);
+            warning.setStartTime(startTime);
+            warning.setEndTime(endTime);
+            warning.setTaskId(taskId);
+            warning.setWarningStatus(0);
+            warning.setWarningLevel(0);
+
+            if (prevAlert!= null) {
+                LocalDateTime prevStartTime = LocalDateTime.parse(prevAlert.getString("start_time"), formatter);
+                LocalDateTime prevEndTime = LocalDateTime.parse(prevAlert.getString("end_time"), formatter);
+
+                // 判断当前警报的开始时间是否在上一个警报的结束时间之前预警信息相同
+                // 如果满足条件，更新上一个警告对象的结束时间为当前警报的结束时间，然后使用 continue 跳过保存当前警告对象
+                if (prevAlert.getString("alarm_info").equals(alert.getString("alarm_info"))
+                        && prevAlert.getString("alarm_level").equals(alert.getString("alarm_level"))
+                        && startTime.isBefore(prevEndTime)) {
+                    // 持久化更新上一个警告对象的结束时间
+                    try {
+                        LambdaQueryWrapper<Warnings> queryWrapper = new LambdaQueryWrapper<>();
+                        queryWrapper.eq(Warnings::getTaskId,taskId).eq(Warnings::getModelId,modelId)
+                                        .eq(Warnings::getWarningLevel,0).eq(Warnings::getWarningStatus,0)
+                                        .eq(Warnings::getWarningDescription,alertInfo).eq(Warnings::getStartTime,prevStartTime);
+                        Warnings one = warningService.getOne(queryWrapper);
+                        one.setEndTime(endTime);
+                        warningService.updateById(one);
+                    } catch (Exception e) {
+                        LOGGER.error("Failed to update prevWarning: ", e);
+                    }
+                    continue;
+                }
+            }
+
+            try {
+                warningService.save(warning);
+            } catch (Exception e) {
+                LOGGER.error("Failed to save warning: " + warning, e);
+            }
+            prevAlert = alert;
         }
     }
 }
