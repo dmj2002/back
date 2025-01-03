@@ -11,6 +11,7 @@ import com.hust.ewsystem.DTO.TrendDataDTO;
 import com.hust.ewsystem.DTO.TurbineWarnMatrixDTO;
 import com.hust.ewsystem.DTO.WarnCountDTO;
 import com.hust.ewsystem.DTO.WarningOperateDTO;
+import com.hust.ewsystem.DTO.WarningsDTO;
 import com.hust.ewsystem.VO.WarningsVO;
 import com.hust.ewsystem.common.constant.CommonConstant;
 import com.hust.ewsystem.common.exception.CrudException;
@@ -406,8 +407,8 @@ public class WarningController {
      * @return EwsResult<IPage<Warnings>>
      */
     @RequestMapping(value = "/getWarnList",method = RequestMethod.POST)
-    public EwsResult<IPage<Warnings>> getWarnList(@Valid @RequestBody QueryWarnDTO queryWarnDTO){
-        IPage<Warnings> warnInfo = warningService.getWarnInfo(queryWarnDTO);
+    public EwsResult<IPage<WarningsDTO>> getWarnList(@Valid @RequestBody QueryWarnDTO queryWarnDTO){
+        IPage<WarningsDTO> warnInfo = warningService.getWarnInfo(queryWarnDTO);
         return EwsResult.OK(warnInfo);
     }
 }

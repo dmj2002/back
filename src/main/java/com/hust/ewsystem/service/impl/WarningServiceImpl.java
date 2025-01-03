@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hust.ewsystem.DTO.QueryWarnDTO;
+import com.hust.ewsystem.DTO.WarningsDTO;
 import com.hust.ewsystem.common.constant.CommonConstant;
 import com.hust.ewsystem.entity.Models;
 import com.hust.ewsystem.entity.Warnings;
@@ -35,7 +36,7 @@ public class WarningServiceImpl extends ServiceImpl<WarningMapper, Warnings> imp
      * @return String 风机预警信息
      */
     @Override
-    public IPage<Warnings> getWarnInfo(QueryWarnDTO queryWarnDTO) {
+    public IPage<WarningsDTO> getWarnInfo(QueryWarnDTO queryWarnDTO) {
         Page<Warnings> page = new Page<>(queryWarnDTO.getPageNo(),queryWarnDTO.getPageSize());
         if (CommonConstant.ALL.equals(queryWarnDTO.getWindFarmId())){
             queryWarnDTO.setWindFarmId(null);
