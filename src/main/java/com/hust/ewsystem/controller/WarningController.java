@@ -2,8 +2,10 @@ package com.hust.ewsystem.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.DTO.QueryTurbineWarnMatrixDTO;
+import com.hust.ewsystem.DTO.QueryWarnDTO;
 import com.hust.ewsystem.DTO.QueryWarnDetailsDTO;
 import com.hust.ewsystem.DTO.TrendDataDTO;
 import com.hust.ewsystem.DTO.TurbineWarnMatrixDTO;
@@ -314,14 +316,7 @@ public class WarningController {
      */
     @RequestMapping(value = "/queryTurbineWarnMatrix",method = RequestMethod.POST)
     public EwsResult<List<TurbineWarnMatrixDTO>> queryTurbineWarnMatrix(@Valid @RequestBody QueryTurbineWarnMatrixDTO queryTurbineWarnMatrixDTO){
-        List<WindFarm> list;
-        if (CommonConstant.ALL.equals(queryTurbineWarnMatrixDTO.getWindFarmId())){
-            list = windFarmService.list();
-        }else {
-            LambdaQueryWrapper<WindFarm> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(WindFarm::getWindFarmId,queryTurbineWarnMatrixDTO.getWindFarmId());
-            list = windFarmService.list(wrapper);
-        }
+        List<WindFarm> list = getWindFarmList(queryTurbineWarnMatrixDTO.getWindFarmId());
         List<TurbineWarnMatrixDTO> result = new ArrayList<>();
         WarnCountDTO warnCountDTO;
         TurbineWarnMatrixDTO turbineWarnMatrixDTO;
@@ -346,6 +341,23 @@ public class WarningController {
             result.add(turbineWarnMatrixDTO);
         }
         return EwsResult.OK(result);
+    }
+
+    /**
+     * 查询风场列表
+     * @param windFarmId windFarmId
+     * @return List<WindFarm>
+     */
+    public List<WindFarm> getWindFarmList(Integer windFarmId){
+        List<WindFarm> list;
+        if (CommonConstant.ALL.equals(windFarmId)){
+            list = windFarmService.list();
+        }else {
+            LambdaQueryWrapper<WindFarm> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(WindFarm::getWindFarmId,windFarmId);
+            list = windFarmService.list(wrapper);
+        }
+        return list;
     }
 
 
@@ -386,5 +398,16 @@ public class WarningController {
             }
         }
         return warnCount;
+    }
+
+    /**
+     * 概览-预警列表
+     * @param queryWarnDTO queryWarnDTO
+     * @return EwsResult<IPage<Warnings>>
+     */
+    @RequestMapping(value = "/getWarnList",method = RequestMethod.POST)
+    public EwsResult<IPage<Warnings>> getWarnList(@Valid @RequestBody QueryWarnDTO queryWarnDTO){
+        IPage<Warnings> warnInfo = warningService.getWarnInfo(queryWarnDTO);
+        return EwsResult.OK(warnInfo);
     }
 }
