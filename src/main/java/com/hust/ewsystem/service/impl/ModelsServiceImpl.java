@@ -292,7 +292,14 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
             // 预警信息入库及合并
-            processAlerts(alertList.toJavaList(JSONObject.class),modelId,taskId,formatter);
+            // 使用传统 for 循环转换 JSONArray 为 List<JSONObject>
+            List<JSONObject> alerts = new ArrayList<>();
+            for (int i = 0; i < alertList.size(); i++) {
+                JSONObject alert = alertList.getJSONObject(i); // 获取 JSONObject
+                alerts.add(alert); // 添加到 List 中
+            }
+
+            processAlerts(alerts,modelId,taskId,formatter);
 
 //            for (int i = 0; i < alertList.size(); i++) {
 //                JSONObject alert = alertList.getJSONObject(i);
