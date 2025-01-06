@@ -91,7 +91,7 @@ public class ModelsController {
             newModel.setTurbineId(turbineId)
                     .setModelVersion("V1.0")
                     .setModelStatus(0)
-                    .setAlertWindow(60);
+                    .setAlertWindowSize(60);
             modelsList.add(newModel);
         }
         boolean saveBatch1 = modelsService.saveBatch(modelsList);

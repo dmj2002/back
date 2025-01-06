@@ -235,7 +235,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             processBuilder.command(command);
             processBuilder.redirectErrorStream(true);
             process = processBuilder.start();
-            System.out.println("Started Python process for task: " + taskLabel);
+            System.out.println("Started Python process for model: " +modelId+ " task: " + taskLabel);
             StringBuilder outputString = null;
             //获取输入流
             InputStream inputStream = process.getInputStream();
@@ -291,8 +291,13 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             JSONArray alertList = jsonObject.getJSONArray("alarm_list");
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+            List<JSONObject> alertJsonList = new ArrayList<>();
+            for (int i = 0; i < alertList.size(); i++) {
+                alertJsonList.add(alertList.getJSONObject(i));
+            }
+
             // 预警信息入库及合并
-            processAlerts(alertList.toJavaList(JSONObject.class),modelId,taskId,formatter);
+            processAlerts(alertJsonList,modelId,taskId,formatter);
 
 //            for (int i = 0; i < alertList.size(); i++) {
 //                JSONObject alert = alertList.getJSONObject(i);
