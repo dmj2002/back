@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
@@ -90,7 +91,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 newtask.setModelId(modelId)
                         .setTaskType(1)
                         .setTaskLabel(taskLabel)
-                        .setStartTime(LocalDateTime.now());
+                        .setStartTime(LocalDateTime.now(ZoneId.of("Asia/Shanghai")));
                 tasksMapper.insert(newtask);
                 Integer taskId= newtask.getTaskId();
                 File taskDir = new File(pythonFilePath + "/task_logs/" + taskLabel);
@@ -268,7 +269,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         } finally {
             if (!interrupted) {
                 readAndSaveResults(filepath, taskLabel, modelId, taskId);
-                LOGGER.error("Finished reading and saving results for task: " + taskLabel);
+                LOGGER.info("Finished reading and saving results for task: " + taskLabel);
             }
         }
     }
