@@ -146,4 +146,9 @@ public class CommonConstant {
 	 * 通用数字-1
 	 */
 	public static final Integer NUM_COMMON_NEG_1 = -1;
+
+	/**
+	 * 通用全部标识
+	 */
+	public static final Integer ALL = 9999;
 }

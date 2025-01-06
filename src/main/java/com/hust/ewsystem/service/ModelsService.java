@@ -7,8 +7,8 @@ import java.util.Map;
 
 public interface ModelsService extends IService<Models> {
     String train(String algorithmLabel, String modelLabel,Integer modelId);
-    Map<String, Object> getTaskStatus(String taskLabel);
-    String killTask(Integer modelId);
-    String predict(Integer alertInterval, String modelLabel, String algorithmLabel,Integer modelId);
+//    Map<String, Object> getTaskStatus(String taskLabel);
+    String killTask(String modelLabel);
+    void predict(Integer alertInterval, String modelLabel, String algorithmLabel,Integer modelId);
 
 }

@@ -1,25 +1,55 @@
 package com.hust.ewsystem.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hust.ewsystem.DTO.QueryTurbineWarnMatrixDTO;
+import com.hust.ewsystem.DTO.QueryWarnDTO;
 import com.hust.ewsystem.DTO.QueryWarnDetailsDTO;
 import com.hust.ewsystem.DTO.TrendDataDTO;
+import com.hust.ewsystem.DTO.TurbineWarnMatrixDTO;
+import com.hust.ewsystem.DTO.WarnCountDTO;
 import com.hust.ewsystem.DTO.WarningOperateDTO;
+import com.hust.ewsystem.DTO.WarningsDTO;
 import com.hust.ewsystem.VO.WarningsVO;
+import com.hust.ewsystem.common.constant.CommonConstant;
 import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.result.EwsResult;
-import com.hust.ewsystem.entity.*;
-import com.hust.ewsystem.mapper.*;
+import com.hust.ewsystem.entity.Company;
+import com.hust.ewsystem.entity.Models;
+import com.hust.ewsystem.entity.RealPoint;
+import com.hust.ewsystem.entity.ReportWarningRelate;
+import com.hust.ewsystem.entity.Reports;
+import com.hust.ewsystem.entity.StandRealRelate;
+import com.hust.ewsystem.entity.Warnings;
+import com.hust.ewsystem.entity.WindFarm;
+import com.hust.ewsystem.entity.WindTurbine;
+import com.hust.ewsystem.mapper.CompanyMapper;
+import com.hust.ewsystem.mapper.ModelsMapper;
+import com.hust.ewsystem.mapper.ReportWarningRelateMapper;
+import com.hust.ewsystem.mapper.ReportsMapper;
+import com.hust.ewsystem.mapper.WarningMapper;
+import com.hust.ewsystem.mapper.WindFarmMapper;
+import com.hust.ewsystem.mapper.WindTurbineMapper;
 import com.hust.ewsystem.service.ModelsService;
 import com.hust.ewsystem.service.RealPortService;
 import com.hust.ewsystem.service.StandRealRelateService;
 import com.hust.ewsystem.service.WarningService;
+import com.hust.ewsystem.service.WindFarmService;
+import com.hust.ewsystem.service.WindTurbineService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
@@ -30,6 +60,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @RestController
@@ -70,6 +102,12 @@ public class WarningController {
 
     @Autowired
     private ReportWarningRelateMapper reportWarningRelateMapper;
+
+    @Resource
+    private WindFarmService windFarmService;
+
+    @Resource
+    private WindTurbineService windTurbineService;
 
     @GetMapping("/list")
     public EwsResult<?> getWarningList(@RequestParam(value = "page") int page,
@@ -202,6 +240,7 @@ public class WarningController {
         List<TrendDataDTO> realPointValueList = realPortService.getRealPointValueList(relPointAndLableList, queryWarnDetailsDTO);
         return EwsResult.OK(realPointValueList);
     }
+
     @PostMapping("/operate")
     public EwsResult<?> operateWarning(@RequestBody WarningOperateDTO warningOperateDTO) {
         //关闭操作
@@ -268,5 +307,108 @@ public class WarningController {
             throw new CrudException("操作码错误");
         }
 
+    }
+
+
+    /**
+     * 概览页面-风机预警矩阵
+     * @param queryTurbineWarnMatrixDTO queryWarnDetailsDTO
+     * @return EwsResult<List<TurbineWarnMatrixDTO>>
+     */
+    @RequestMapping(value = "/queryTurbineWarnMatrix",method = RequestMethod.POST)
+    public EwsResult<List<TurbineWarnMatrixDTO>> queryTurbineWarnMatrix(@Valid @RequestBody QueryTurbineWarnMatrixDTO queryTurbineWarnMatrixDTO){
+        List<WindFarm> list = getWindFarmList(queryTurbineWarnMatrixDTO.getWindFarmId());
+        List<TurbineWarnMatrixDTO> result = new ArrayList<>();
+        WarnCountDTO warnCountDTO;
+        TurbineWarnMatrixDTO turbineWarnMatrixDTO;
+        for (WindFarm windFarm : list) {
+            turbineWarnMatrixDTO = new TurbineWarnMatrixDTO();
+            turbineWarnMatrixDTO.setWindFarmName(windFarm.getWindFarmName());
+            Integer windFarmId = windFarm.getWindFarmId();
+            LambdaQueryWrapper<WindTurbine> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(WindTurbine::getWindFarmId,windFarmId);
+            List<WindTurbine> windTurbines = windTurbineService.list(queryWrapper);
+            List<WarnCountDTO> warnCounts = new ArrayList<>();
+            for (WindTurbine windTurbine : windTurbines) {
+                warnCountDTO = new WarnCountDTO();
+                warnCountDTO.setTurbineId(windTurbine.getTurbineId());
+                String turbineNumber = getTurbineNumber(windTurbine.getTurbineName());
+                warnCountDTO.setTurbineNumber(Integer.parseInt(turbineNumber));
+                int warnCount = getWarnCount(windTurbine.getTurbineId(), queryTurbineWarnMatrixDTO);
+                warnCountDTO.setWarnCount(warnCount);
+                warnCounts.add(warnCountDTO);
+            }
+            turbineWarnMatrixDTO.setWarnCountList(warnCounts);
+            result.add(turbineWarnMatrixDTO);
+        }
+        return EwsResult.OK(result);
+    }
+
+    /**
+     * 查询风场列表
+     * @param windFarmId windFarmId
+     * @return List<WindFarm>
+     */
+    public List<WindFarm> getWindFarmList(Integer windFarmId){
+        List<WindFarm> list;
+        if (CommonConstant.ALL.equals(windFarmId)){
+            list = windFarmService.list();
+        }else {
+            LambdaQueryWrapper<WindFarm> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(WindFarm::getWindFarmId,windFarmId);
+            list = windFarmService.list(wrapper);
+        }
+        return list;
+    }
+
+
+    /**
+     * 从风机名称总获取风机编号
+     * @param turbineName 风机名称
+     * @return String 风机编号
+     */
+    public String getTurbineNumber(String turbineName){
+        // 使用正则表达式匹配数字
+        java.util.regex.Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(turbineName);
+        StringBuilder result = new StringBuilder();
+        while (matcher.find()) {
+            result.append(matcher.group());
+        }
+        return result.toString();
+    }
+
+    /**
+     * 根据风机ID关联模型ID 获取预警数量
+     * @param turbineId 风机id
+     * @return String 风机预警总数量
+     */
+    public int getWarnCount(Integer turbineId,QueryTurbineWarnMatrixDTO queryTurbineWarnMatrixDTO){
+        int warnCount = 0;
+        LambdaQueryWrapper<Models> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Models::getTurbineId, turbineId);
+        List<Models> list = modelsService.list(queryWrapper);
+        for (Models models : list) {
+            Integer modelId = models.getModelId();
+            LambdaQueryWrapper<Warnings> warningsWrapper = new LambdaQueryWrapper<>();
+            warningsWrapper.eq(Warnings::getModelId,modelId)
+                    .ge(Warnings::getStartTime,queryTurbineWarnMatrixDTO.getStartDate()).le(Warnings::getEndTime,queryTurbineWarnMatrixDTO.getEndDate());
+            List<Warnings> warnings = warningService.list(warningsWrapper);
+            if (!CollectionUtils.isEmpty(warnings)){
+                warnCount += warnings.size();
+            }
+        }
+        return warnCount;
+    }
+
+    /**
+     * 概览-预警列表
+     * @param queryWarnDTO queryWarnDTO
+     * @return EwsResult<IPage<Warnings>>
+     */
+    @RequestMapping(value = "/getWarnList",method = RequestMethod.POST)
+    public EwsResult<IPage<WarningsDTO>> getWarnList(@Valid @RequestBody QueryWarnDTO queryWarnDTO){
+        IPage<WarningsDTO> warnInfo = warningService.getWarnInfo(queryWarnDTO);
+        return EwsResult.OK(warnInfo);
     }
 }

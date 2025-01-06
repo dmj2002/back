@@ -4,10 +4,8 @@ package com.hust.ewsystem.service.impl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hust.ewsystem.common.exception.FileException;
-import com.hust.ewsystem.controller.WarningController;
 import com.hust.ewsystem.entity.Models;
 import com.hust.ewsystem.entity.Warnings;
 import com.hust.ewsystem.entity.tasks;
@@ -23,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -48,39 +45,16 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     private TaskMapper tasksMapper;
     // 任务状态
     private final Map<String, ScheduledFuture<?>> taskMap = new ConcurrentHashMap<>();
-    private final Map<String, String> modelMap = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
-    @PostConstruct
-    public void initModelMap() {
-        List<tasks> tasks = tasksMapper.selectList(null);
-        if (tasks.isEmpty()) {
-            // 记录日志：没有获取到任何任务数据
-            System.out.println("No tasks found in the database.");
-        }
-        for (tasks task : tasks) {
-            if(task.getTaskType()==0) {
-                modelMap.put(task.getModelId() + "_train", task.getTaskLabel());
-            }
-            else if(task.getTaskType()==1){
-                modelMap.put(task.getModelId() + "_predict", task.getTaskLabel());
-            }
-        }
-    }
     @Override
     public String train(String algorithmLabel, String modelLabel,Integer modelId) {
-        String taskLabel;
-        if(modelMap.getOrDefault(modelId + "_train",null)!=null){
-            taskLabel = modelMap.get(modelId + "_train");
-        }else{
-            taskLabel = UUID.randomUUID().toString();
-            tasks newtask = new tasks();
-            newtask.setModelId(modelId)
-                    .setTaskType(0)
-                    .setTaskLabel(taskLabel)
-                    .setStartTime(LocalDateTime.now());
-            tasksMapper.insert(newtask);
-            modelMap.put(modelId + "_train", taskLabel);
-        }
+        String taskLabel = UUID.randomUUID().toString();
+        tasks newtask = new tasks();
+        newtask.setModelId(modelId)
+                .setTaskType(0)
+                .setTaskLabel(taskLabel)
+                .setStartTime(LocalDateTime.now());
+        tasksMapper.insert(newtask);
         File taskDir = new File(pythonFilePath + "/task_logs/" + taskLabel);
         if (!taskDir.exists()) {
             if (!taskDir.mkdirs()) {
@@ -104,78 +78,70 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         Runnable task = () -> executeTrain(pythonFilePath, algorithmLabel, taskLabel);
         // 调度任务一次性执行
         ScheduledFuture<?> scheduledTask = scheduler.schedule(task, 0, TimeUnit.SECONDS);
-        taskMap.put(taskLabel, scheduledTask);
+        taskMap.put(modelLabel + "_train", scheduledTask);
         return taskLabel;
     }
     @Override
-    public String predict(Integer alertInterval, String modelLabel, String algorithmLabel,Integer modelId) {
-        String taskLabel;
-        Integer taskId;
-        if(modelMap.getOrDefault(modelId + "_predict",null)!=null){
-            taskLabel = modelMap.get(modelId + "_predict");
-            taskId = tasksMapper.selectOne(new QueryWrapper<tasks>().eq("task_label", taskLabel)).getTaskId();
-        }else{
-            taskLabel = UUID.randomUUID().toString();
-            tasks newtask = new tasks();
-            newtask.setModelId(modelId)
-                    .setTaskType(1)
-                    .setTaskLabel(taskLabel)
-                    .setStartTime(LocalDateTime.now());
-            tasksMapper.insert(newtask);
-            taskId = newtask.getTaskId();
-            modelMap.put(modelId + "_predict", taskLabel);
-        }
-        File taskDir = new File(pythonFilePath + "/task_logs/" + taskLabel);
-        if (!taskDir.exists()) {
-            if (!taskDir.mkdirs()) {
-                throw new FileException("创建任务目录失败");
-            }
-        }
-        //读取train.csv的最后100行并写入predict.csv(后续需要在定时任务中写)
-        String trainFilePath = pythonFilePath + "/" + modelLabel + "/train.csv"; // 训练数据路径
-        String predictFilePath = taskDir.getAbsolutePath() + "/predict.csv"; // 预测文件路径
-        try (BufferedReader reader = new BufferedReader(new FileReader(trainFilePath));
-             BufferedWriter writer = new BufferedWriter(new FileWriter(predictFilePath))) {
-            // 读取表头（第一行）
-            String header = reader.readLine(); // 读取表头
-            // 写入表头到predict.csv
-            writer.write(header);
-            writer.newLine();
-            // 使用 LinkedList 保持最新的 100 行
-            int maxLines = 100;
-            LinkedList<String> lastLines = new LinkedList<>();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // 如果超过100行，移除最旧的
-                if (lastLines.size() == maxLines) {
-                    lastLines.poll();
-                }
-                lastLines.add(line); // 添加当前行
-            }
-            // 将最后100行写入predict.csv文件
-            for (String lastLine : lastLines) {
-                writer.write(lastLine);
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //准备setting.json
-        File settingFile = new File(taskDir, "setting.json");
-        JSONObject settings = new JSONObject();
-        settings.put("modelPath", pythonFilePath + "/" + modelLabel);
-        settings.put("trainDataPath", pythonFilePath + "/" + modelLabel + "/train.csv");
-        settings.put("predictDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/predict.csv");
-        settings.put("resultDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/result.json");
-        settings.put("logPath", pythonFilePath + "/task_logs/" + taskLabel + "/" + taskLabel + ".log");
-        // 写入 setting.json 文件
-        try (FileWriter fileWriter = new FileWriter(settingFile)) {
-            fileWriter.write(settings.toJSONString());
-        } catch (IOException e) {
-            throw new FileException("setting.json文件配置失败",e);
-        }
+    public void predict(Integer alertInterval, String modelLabel, String algorithmLabel,Integer modelId) {
         Runnable task = () ->{
             try {
+                String taskLabel = UUID.randomUUID().toString();
+                tasks newtask = new tasks();
+                newtask.setModelId(modelId)
+                        .setTaskType(1)
+                        .setTaskLabel(taskLabel)
+                        .setStartTime(LocalDateTime.now());
+                tasksMapper.insert(newtask);
+                Integer taskId= newtask.getTaskId();
+                File taskDir = new File(pythonFilePath + "/task_logs/" + taskLabel);
+                if (!taskDir.exists()) {
+                    if (!taskDir.mkdirs()) {
+                        throw new FileException("创建任务目录失败");
+                    }
+                }
+                //TODO 读取train.csv的最后100行并写入predict.csv(后续需要在定时任务中写)
+                String trainFilePath = pythonFilePath + "/" + modelLabel + "/train.csv"; // 训练数据路径
+                String predictFilePath = taskDir.getAbsolutePath() + "/predict.csv"; // 预测文件路径
+                try (BufferedReader reader = new BufferedReader(new FileReader(trainFilePath));
+                     BufferedWriter writer = new BufferedWriter(new FileWriter(predictFilePath))) {
+                    // 读取表头（第一行）
+                    String header = reader.readLine(); // 读取表头
+                    // 写入表头到predict.csv
+                    writer.write(header);
+                    writer.newLine();
+                    // 使用 LinkedList 保持最新的 100 行
+                    int maxLines = 100;
+                    LinkedList<String> lastLines = new LinkedList<>();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        // 如果超过100行，移除最旧的
+                        if (lastLines.size() == maxLines) {
+                            lastLines.poll();
+                        }
+                        lastLines.add(line); // 添加当前行
+                    }
+                    // 将最后100行写入predict.csv文件
+                    for (String lastLine : lastLines) {
+                        writer.write(lastLine);
+                        writer.newLine();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                //准备setting.json
+                File settingFile = new File(taskDir, "setting.json");
+                JSONObject settings = new JSONObject();
+                settings.put("modelPath", pythonFilePath + "/" + modelLabel);
+                settings.put("trainDataPath", pythonFilePath + "/" + modelLabel + "/train.csv");
+                settings.put("predictDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/predict.csv");
+                settings.put("resultDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/result.json");
+                settings.put("logPath", pythonFilePath + "/task_logs/" + taskLabel + "/" + taskLabel + ".log");
+                // 写入 setting.json 文件
+                try (FileWriter fileWriter = new FileWriter(settingFile)) {
+                    fileWriter.write(settings.toJSONString());
+                } catch (IOException e) {
+                    throw new FileException("setting.json文件配置失败",e);
+                }
                 executePredict(pythonFilePath, algorithmLabel, taskLabel, modelId, taskId);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -183,42 +149,39 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         };
         // 定期调度任务
         ScheduledFuture<?> scheduledTask =scheduler.scheduleWithFixedDelay(task, 0, alertInterval, TimeUnit.SECONDS);
-        taskMap.put(taskLabel, scheduledTask);
-        return taskLabel;
+        taskMap.put(modelLabel + "_predict", scheduledTask);
     }
 
-    // 提供查询任务状态的接口
-    @Override
-    public Map<String, Object> getTaskStatus(String taskLabel) {
-        Map<String, Object> statusMap = new HashMap<>();
-        statusMap.put("taskLabel", taskLabel);
-        ScheduledFuture<?> scheduledTask = taskMap.get(taskLabel);
-        if (scheduledTask == null) {
-            statusMap.put("status", "任务不存在");
-        } else if (scheduledTask.isCancelled()) {
-            statusMap.put("status", "任务已取消");
-        } else if (scheduledTask.isDone()) {
-            statusMap.put("status", "任务已完成");
-        } else {
-            statusMap.put("status", "任务进行中");
-        }
-        return statusMap;
-    }
+//    // 提供查询任务状态的接口
+//    @Override
+//    public Map<String, Object> getTaskStatus(String taskLabel) {
+//        Map<String, Object> statusMap = new HashMap<>();
+//        statusMap.put("taskLabel", taskLabel);
+//        ScheduledFuture<?> scheduledTask = taskMap.get(taskLabel);
+//        if (scheduledTask == null) {
+//            statusMap.put("status", "任务不存在");
+//        } else if (scheduledTask.isCancelled()) {
+//            statusMap.put("status", "任务已取消");
+//        } else if (scheduledTask.isDone()) {
+//            statusMap.put("status", "任务已完成");
+//        } else {
+//            statusMap.put("status", "任务进行中");
+//        }
+//        return statusMap;
+//    }
 
     /**
      * 终止任务
-     * @param modelId
+     * @param modelLabel
      * @return
      */
     @Override
-    public String killTask(Integer modelId) {
+    public String killTask(String modelLabel) {
         // 终止ScheduledFuture任务
-        String taskLabel = modelMap.get(modelId + "_predict");
-        ScheduledFuture<?> scheduledTask = taskMap.get(taskLabel);
+        ScheduledFuture<?> scheduledTask = taskMap.get(modelLabel + "_predict");
         if (scheduledTask != null) {
             scheduledTask.cancel(true);
-//            taskMap.remove(taskLabel);
-//            modelMap.remove(modelId);
+            taskMap.remove(modelLabel + "_predict");
         }
         // 检查任务和线程是否都已终止
         if (scheduledTask == null) {
@@ -258,7 +221,6 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         }
     }
     public void executePredict(String filepath, String algorithmLabel, String taskLabel,Integer modelId,Integer taskId) {
-        //TODO 生成预测文件
         Process process = null;
         boolean interrupted = false;
         try {
@@ -368,6 +330,9 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         while (iterator.hasNext()) {
             JSONObject alert = iterator.next();
             String alertInfo = alert.getString("alarm_info");
+            if(alertInfo.contains("正常")){
+                continue;
+            }
             LocalDateTime startTime = LocalDateTime.parse(alert.getString("start_time"), formatter);
             LocalDateTime endTime = LocalDateTime.parse(alert.getString("end_time"), formatter);
 
