@@ -52,4 +52,6 @@ public class Models implements Serializable {
 
     private Integer alertInterval;  // 每隔多少秒跑一次算法文件
 
+    private Integer alertWindow;  // 算法文件窗口大小
+
 }

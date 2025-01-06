@@ -90,7 +90,8 @@ public class ModelsController {
             //后端自己生成的模型参数
             newModel.setTurbineId(turbineId)
                     .setModelVersion("V1.0")
-                    .setModelStatus(0);
+                    .setModelStatus(0)
+                    .setAlertWindow(60);
             modelsList.add(newModel);
         }
         boolean saveBatch1 = modelsService.saveBatch(modelsList);
@@ -338,7 +339,7 @@ public class ModelsController {
 
     @PostMapping("/predict")
     public EwsResult<?> predict(@RequestBody List<Integer> modelList){
-        List<Map<String,Object>> taskIdList = new ArrayList<>();
+//        List<Map<String,Object>> taskIdList = new ArrayList<>();
         for(Integer modelId : modelList) {
             //获取返回值
             Models model = modelsService.getById(modelId);
@@ -347,17 +348,16 @@ public class ModelsController {
             Integer algorithmId = model.getAlgorithmId();
             String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
             //算法调用
-            String taskId = modelsService.predict(alertInterval,modelLabel,algorithmLabel,modelId);
-            Map<String,Object> map= new HashMap<>();
-            map.put("modelId",modelId);
-            map.put("taskId",taskId);
-            taskIdList.add(map);
+            modelsService.predict(alertInterval, modelLabel, algorithmLabel, modelId);
+//            Map<String,Object> map= new HashMap<>();
+//            map.put("modelId",modelId);
+//            taskIdList.add(map);
             //修改模型状态为预测中
             UpdateWrapper<Models> modelsUpdateWrapper = new UpdateWrapper<>();
             modelsUpdateWrapper.eq("model_id", modelId).set("model_status", 3);
             modelsService.update(modelsUpdateWrapper);
         }
-        return EwsResult.OK(taskIdList);
+        return EwsResult.OK("模型开始预测");
     }
 
     @GetMapping("/list")
@@ -461,21 +461,21 @@ public class ModelsController {
         response.put("algorithmStandRelateList",algorithmStandRelateList);
         return EwsResult.OK("查询成功", response);
     }
-    // 查询任务状态
-    @PostMapping("/queryTask")
-    public EwsResult<?>  getTaskStatus(@RequestBody Map<String,Object> taskForm) {
-        List<String> taskIdList = (List<String>) taskForm.get("taskIdList");
-        List<Map<String, Object>> taskStatus = new ArrayList<>();
-        // 检查任务ID列表是否为空
-        if (taskIdList == null || taskIdList.isEmpty()) {
-            return EwsResult.error("任务ID列表不能为空");
-        }
-        for (String taskLabel : taskIdList) {
-            Map<String, Object> onetaskStatus = modelsService.getTaskStatus(taskLabel);
-            taskStatus.add(onetaskStatus);
-        }
-        return EwsResult.OK(taskStatus);
-    }
+//    // 查询任务状态
+//    @PostMapping("/queryTask")
+//    public EwsResult<?>  getTaskStatus(@RequestBody Map<String,Object> taskForm) {
+//        List<String> taskIdList = (List<String>) taskForm.get("taskIdList");
+//        List<Map<String, Object>> taskStatus = new ArrayList<>();
+//        // 检查任务ID列表是否为空
+//        if (taskIdList == null || taskIdList.isEmpty()) {
+//            return EwsResult.error("任务ID列表不能为空");
+//        }
+//        for (String taskLabel : taskIdList) {
+//            Map<String, Object> onetaskStatus = modelsService.getTaskStatus(taskLabel);
+//            taskStatus.add(onetaskStatus);
+//        }
+//        return EwsResult.OK(taskStatus);
+//    }
 
     /**
      * 根据模型id暂停任务
@@ -491,7 +491,7 @@ public class ModelsController {
             //修改模型状态为已完成
             model.setModelStatus(2);
             modelsService.updateById(model);
-            String str = modelsService.killTask(modelId);
+            String str = modelsService.killTask(model.getModelLabel());
 
             result.put("modelId", modelId);
             result.put("result", str);
