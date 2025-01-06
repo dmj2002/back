@@ -330,6 +330,9 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         while (iterator.hasNext()) {
             JSONObject alert = iterator.next();
             String alertInfo = alert.getString("alarm_info");
+            if(alertInfo.contains("正常")){
+                continue;
+            }
             LocalDateTime startTime = LocalDateTime.parse(alert.getString("start_time"), formatter);
             LocalDateTime endTime = LocalDateTime.parse(alert.getString("end_time"), formatter);
 
