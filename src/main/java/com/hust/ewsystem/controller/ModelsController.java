@@ -4,6 +4,7 @@ package com.hust.ewsystem.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hust.ewsystem.VO.StandPointVO;
 import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.exception.FileException;
 import com.hust.ewsystem.common.result.EwsResult;
@@ -86,12 +87,12 @@ public class ModelsController {
                     .setModelParameters(modelform.getModel().getModelParameters())
                     .setPatternId(modelform.getModel().getPatternId())
                     .setModuleId(modelform.getModel().getModuleId())
-                    .setAlertInterval(modelform.getModel().getAlertInterval() != null ? modelform.getModel().getAlertInterval() : 10);
+                    .setAlertInterval(modelform.getModel().getAlertInterval() != null ? modelform.getModel().getAlertInterval() : 10)
+                    .setAlertWindowSize(modelform.getModel().getAlertWindowSize() != null ? modelform.getModel().getAlertWindowSize() : 60);
             //后端自己生成的模型参数
             newModel.setTurbineId(turbineId)
                     .setModelVersion("V1.0")
-                    .setModelStatus(0)
-                    .setAlertWindowSize(60);
+                    .setModelStatus(0);
             modelsList.add(newModel);
         }
         boolean saveBatch1 = modelsService.saveBatch(modelsList);
@@ -346,9 +347,10 @@ public class ModelsController {
             Integer alertInterval = model.getAlertInterval();
             String modelLabel = model.getModelLabel();
             Integer algorithmId = model.getAlgorithmId();
+            Integer alertWindowSize = model.getAlertWindowSize();
             String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
             //算法调用
-            modelsService.predict(alertInterval, modelLabel, algorithmLabel, modelId);
+            modelsService.predict(alertInterval, modelLabel, algorithmLabel, modelId,alertWindowSize);
 //            Map<String,Object> map= new HashMap<>();
 //            map.put("modelId",modelId);
 //            taskIdList.add(map);
@@ -497,8 +499,12 @@ public class ModelsController {
             result.put("result", str);
             resultList.add(result);
         }
-
         return EwsResult.OK(resultList);
+    }
+    @GetMapping("getStandPoint/{AlgorithmId}")
+    public EwsResult<?> getStandPoint(@PathVariable Integer algorithmId){
+        List<StandPointVO> standPointByAlgorithmId = algorithmStandRelateMapper.getStandPointByAlgorithmId(algorithmId);
+        return EwsResult.OK(standPointByAlgorithmId);
     }
     public void toTrainCsv(Map<LocalDateTime, Map<String, Object>> alignedData,Map<String, String> realToStandLabel,String modelLabel){
         // 创建目标目录（如果不存在）
