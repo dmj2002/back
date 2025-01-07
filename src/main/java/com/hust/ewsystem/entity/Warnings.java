@@ -37,4 +37,8 @@ public class Warnings implements Serializable {
     private Integer transferredToWorkOrder; // 是否转入工单
 
     private Integer taskId; // 任务id
+
+    private int valid;//有效
+
+    private int repeat;//重复
 }
