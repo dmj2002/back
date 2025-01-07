@@ -4,6 +4,7 @@ package com.hust.ewsystem.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hust.ewsystem.VO.StandPointVO;
 import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.exception.FileException;
 import com.hust.ewsystem.common.result.EwsResult;
@@ -498,8 +499,12 @@ public class ModelsController {
             result.put("result", str);
             resultList.add(result);
         }
-
         return EwsResult.OK(resultList);
+    }
+    @GetMapping("getStandPoint/{AlgorithmId}")
+    public EwsResult<?> getStandPoint(@PathVariable Integer algorithmId){
+        List<StandPointVO> standPointByAlgorithmId = algorithmStandRelateMapper.getStandPointByAlgorithmId(algorithmId);
+        return EwsResult.OK(standPointByAlgorithmId);
     }
     public void toTrainCsv(Map<LocalDateTime, Map<String, Object>> alignedData,Map<String, String> realToStandLabel,String modelLabel){
         // 创建目标目录（如果不存在）
