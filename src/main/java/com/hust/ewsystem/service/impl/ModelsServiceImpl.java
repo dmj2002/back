@@ -215,6 +215,12 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                     alignedData.computeIfAbsent(datetime, k -> new HashMap<>()).put(entry.getValue(), value);
                 }
             }
+            // 移除 GridPower 小于等于 0 的数据
+            alignedData.entrySet().removeIf(entry -> {
+                Map<String, Object> labelMap = entry.getValue(); // 获取每个时间点的标签数据
+                // 如果 "Grid" 列的值小于或等于 0，移除该时间点的数据
+                return labelMap.containsKey("GridPower") && (Double)labelMap.get("GridPower") <= 0;
+            });
             toPredictCsv(alignedData, realToStandLabel, taskLabel);
 
             //准备setting.json
