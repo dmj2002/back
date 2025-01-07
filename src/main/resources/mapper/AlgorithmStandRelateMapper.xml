@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hust.ewsystem.mapper.AlgorithmStandRelateMapper">
 
-    <select id="getStandPointByAlgorithmId" resultMap="com.hust.ewsystem.VO.StandPointVO">
+    <select id="getStandPointByAlgorithmId" resultType="com.hust.ewsystem.VO.StandPointVO">
         SELECT m.point_id, m.point_label
         FROM algorithm_stand_relate w
         LEFT JOIN stand_point m ON w.stand_point_id = m.point_id
