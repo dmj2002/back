@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hust.ewsystem.mapper.WindFarmMapper">
+
+<!--    <resultMap id="windFarmWithTurbinesResultMap" type="com.hust.ewsystem.VO.WindFarmVO">-->
+<!--        <id property="windFarmId" column="wind_farm_id"/>-->
+<!--        <result property="windFarmName" column="wind_farm_name"/>-->
+<!--        <result property="companyId" column="company_id"/>-->
+<!--        <result property="companyName" column="company_name"/>-->
+<!--        <collection property="windTurbines" ofType="com.hust.ewsystem.entity.WindTurbine">-->
+<!--            <id property="turbineId" column="turbine_id"/>-->
+<!--            <result property="turbineName" column="turbine_name"/>-->
+<!--            <result property="turbineType" column="turbine_type"/>-->
+<!--            <result property="windFarmId" column="wind_farm_id"/>-->
+<!--        </collection>-->
+<!--    </resultMap>-->
+
+    <resultMap id="windFarmWithTurbinesResultMap" type="com.hust.ewsystem.DTO.WindFarmDTO">
+        <id property="windFarmId" column="wind_farm_id"/>
+        <result property="windFarmName" column="wind_farm_name"/>
+        <result property="companyId" column="company_id"/>
+        <result property="companyName" column="company_name"/>
+        <collection property="turbineWaitDoneInfo" ofType="com.hust.ewsystem.DTO.TurbineWaitDoneInfo">
+            <id property="turbineId" column="turbine_id"/>
+            <result property="turbineName" column="turbine_name"/>
+            <result property="turbineType" column="turbine_type"/>
+            <result property="windFarmId" column="wind_farm_id"/>
+            <result property="warningStatus" column="warning_status"/>
+            <result property="currentStatus" column="current_status"/>
+            <collection property="modelList" ofType="com.hust.ewsystem.DTO.ModelsDTO">
+                <id property="modelId" column="model_id"/>
+                <result property="modelName" column="model_name"/>
+<!--                <result property="warningLevel1Sum" column="warning_level_1_sum"/>-->
+<!--                <result property="warningLevel2Sum" column="warning_level_2_sum"/>-->
+            </collection>
+        </collection>
+    </resultMap>
+
+
+    <select id="getWindFarmsByCompanyId" resultMap="windFarmWithTurbinesResultMap">
+        SELECT
+        wf.wind_farm_id,
+        wf.wind_farm_name,
+        wf.company_id,
+        c.company_name,
+        wt.turbine_id,
+        wt.turbine_name,
+        wt.turbine_type,
+        wt.warning_status,
+        wt.current_status,
+        m.model_id,
+        m.model_name
+        FROM wind_farm wf
+        JOIN wind_turbine wt ON wf.wind_farm_id = wt.wind_farm_id
+        JOIN company c ON wf.company_id = c.company_id
+        LEFT JOIN models m ON wt.turbine_id = m.turbine_id
+        WHERE wf.company_id = #{param.companyId};
+<!--        SELECT-->
+<!--            wf.wind_farm_id,-->
+<!--            wf.wind_farm_name,-->
+<!--            wf.company_id,-->
+<!--            c.company_name,-->
+<!--            wt.turbine_id,-->
+<!--            wt.turbine_name,-->
+<!--            wt.turbine_type,-->
+<!--            wt.warning_status,-->
+<!--            wt.current_status,-->
+<!--            m.model_id,-->
+<!--            m.model_name,-->
+<!--            COUNT(CASE WHEN w.warning_level = 0 THEN 1 ELSE NULL END) AS warning_level_1_sum,-->
+<!--            COUNT(CASE WHEN w.warning_level = 2 THEN 1 ELSE NULL END) AS warning_level_2_sum-->
+<!--        FROM-->
+<!--            wind_farm wf-->
+<!--                JOIN-->
+<!--            wind_turbine wt ON wf.wind_farm_id = wt.wind_farm_id-->
+<!--                JOIN-->
+<!--            company c ON wf.company_id = c.company_id-->
+<!--                LEFT JOIN-->
+<!--            models m ON wt.turbine_id = m.turbine_id-->
+<!--                LEFT JOIN-->
+<!--            warnings w ON m.model_id = w.model_id-->
+<!--        <where>-->
+<!--            wf.company_id = #{param.companyId}-->
+<!--            <if test="param.startDate != null">-->
+<!--                AND w.start_time &gt;= #{param.startDate}-->
+<!--            </if>-->
+<!--            <if test="param.endDate != null">-->
+<!--                AND w.end_time &lt;= #{param.endDate}-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        GROUP BY-->
+<!--            wf.wind_farm_id,-->
+<!--            wf.wind_farm_name,-->
+<!--            wf.company_id,-->
+<!--            c.company_name,-->
+<!--            wt.turbine_id,-->
+<!--            wt.turbine_name,-->
+<!--            wt.turbine_type,-->
+<!--            wt.warning_status,-->
+<!--            wt.current_status,-->
+<!--            m.model_id,-->
+<!--            m.model_name-->
+    </select>
+</mapper>
