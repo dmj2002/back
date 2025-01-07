@@ -85,68 +85,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     @Override
     public void predict(Integer alertInterval, String modelLabel, String algorithmLabel,Integer modelId) {
         Runnable task = () ->{
-            try {
-                String taskLabel = UUID.randomUUID().toString();
-                tasks newtask = new tasks();
-                newtask.setModelId(modelId)
-                        .setTaskType(1)
-                        .setTaskLabel(taskLabel)
-                        .setStartTime(LocalDateTime.now(ZoneId.of("Asia/Shanghai")));
-                tasksMapper.insert(newtask);
-                Integer taskId= newtask.getTaskId();
-                File taskDir = new File(pythonFilePath + "/task_logs/" + taskLabel);
-                if (!taskDir.exists()) {
-                    if (!taskDir.mkdirs()) {
-                        throw new FileException("创建任务目录失败");
-                    }
-                }
-                //TODO 读取train.csv的最后100行并写入predict.csv(后续需要在定时任务中写)
-                String trainFilePath = pythonFilePath + "/" + modelLabel + "/train.csv"; // 训练数据路径
-                String predictFilePath = taskDir.getAbsolutePath() + "/predict.csv"; // 预测文件路径
-                try (BufferedReader reader = new BufferedReader(new FileReader(trainFilePath));
-                     BufferedWriter writer = new BufferedWriter(new FileWriter(predictFilePath))) {
-                    // 读取表头（第一行）
-                    String header = reader.readLine(); // 读取表头
-                    // 写入表头到predict.csv
-                    writer.write(header);
-                    writer.newLine();
-                    // 使用 LinkedList 保持最新的 100 行
-                    int maxLines = 100;
-                    LinkedList<String> lastLines = new LinkedList<>();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        // 如果超过100行，移除最旧的
-                        if (lastLines.size() == maxLines) {
-                            lastLines.poll();
-                        }
-                        lastLines.add(line); // 添加当前行
-                    }
-                    // 将最后100行写入predict.csv文件
-                    for (String lastLine : lastLines) {
-                        writer.write(lastLine);
-                        writer.newLine();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                //准备setting.json
-                File settingFile = new File(taskDir, "setting.json");
-                JSONObject settings = new JSONObject();
-                settings.put("modelPath", pythonFilePath + "/" + modelLabel);
-                settings.put("trainDataPath", pythonFilePath + "/" + modelLabel + "/train.csv");
-                settings.put("predictDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/predict.csv");
-                settings.put("resultDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/result.json");
-                settings.put("logPath", pythonFilePath + "/task_logs/" + taskLabel + "/" + taskLabel + ".log");
-                // 写入 setting.json 文件
-                try (FileWriter fileWriter = new FileWriter(settingFile)) {
-                    fileWriter.write(settings.toJSONString());
-                } catch (IOException e) {
-                    throw new FileException("setting.json文件配置失败",e);
-                }
-                executePredict(pythonFilePath, algorithmLabel, taskLabel, modelId, taskId);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            prePredict(modelId,modelLabel,algorithmLabel);
         };
         // 定期调度任务
         ScheduledFuture<?> scheduledTask =scheduler.scheduleWithFixedDelay(task, 0, alertInterval, TimeUnit.SECONDS);
@@ -217,6 +156,70 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             process.waitFor();
         } catch(InterruptedException e) {
             process.destroy();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public void prePredict(int modelId, String modelLabel, String algorithmLabel) {
+        try {
+            String taskLabel = UUID.randomUUID().toString();
+            tasks newtask = new tasks();
+            newtask.setModelId(modelId)
+                    .setTaskType(1)
+                    .setTaskLabel(taskLabel)
+                    .setStartTime(LocalDateTime.now());
+            tasksMapper.insert(newtask);
+            Integer taskId= newtask.getTaskId();
+            File taskDir = new File(pythonFilePath + "/task_logs/" + taskLabel);
+            if (!taskDir.exists()) {
+                if (!taskDir.mkdirs()) {
+                    throw new FileException("创建任务目录失败");
+                }
+            }
+            //TODO 读取train.csv的最后100行并写入predict.csv(后续需要在定时任务中写)
+            String trainFilePath = pythonFilePath + "/" + modelLabel + "/train.csv"; // 训练数据路径
+            String predictFilePath = taskDir.getAbsolutePath() + "/predict.csv"; // 预测文件路径
+            try (BufferedReader reader = new BufferedReader(new FileReader(trainFilePath));
+                 BufferedWriter writer = new BufferedWriter(new FileWriter(predictFilePath))) {
+                // 读取表头（第一行）
+                String header = reader.readLine(); // 读取表头
+                // 写入表头到predict.csv
+                writer.write(header);
+                writer.newLine();
+                // 使用 LinkedList 保持最新的 100 行
+                int maxLines = 100;
+                LinkedList<String> lastLines = new LinkedList<>();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // 如果超过100行，移除最旧的
+                    if (lastLines.size() == maxLines) {
+                        lastLines.poll();
+                    }
+                    lastLines.add(line); // 添加当前行
+                }
+                // 将最后100行写入predict.csv文件
+                for (String lastLine : lastLines) {
+                    writer.write(lastLine);
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            //准备setting.json
+            File settingFile = new File(taskDir, "setting.json");
+            JSONObject settings = new JSONObject();
+            settings.put("modelPath", pythonFilePath + "/" + modelLabel);
+            settings.put("trainDataPath", pythonFilePath + "/" + modelLabel + "/train.csv");
+            settings.put("predictDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/predict.csv");
+            settings.put("resultDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/result.json");
+            settings.put("logPath", pythonFilePath + "/task_logs/" + taskLabel + "/" + taskLabel + ".log");
+            // 写入 setting.json 文件
+            try (FileWriter fileWriter = new FileWriter(settingFile)) {
+                fileWriter.write(settings.toJSONString());
+            } catch (IOException e) {
+                throw new FileException("setting.json文件配置失败",e);
+            }
+            executePredict(pythonFilePath, algorithmLabel, taskLabel, modelId, taskId);
         } catch (Exception e) {
             e.printStackTrace();
         }
