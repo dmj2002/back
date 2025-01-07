@@ -56,4 +56,27 @@
         </where>
         ORDER BY w.start_time DESC
     </select>
+
+    <select id="getWarningsCount" resultType="int">
+        select COUNT(0) AS warning_count
+        from warnings w left join models m on w.model_id = m.model_id
+        where m.turbine_id = #{param.turbineId} and w.model_id = #{param.modelId} and warning_status = 0 and w.warning_level =#{param.warningLevel}
+        <if test="param.startTime != null">
+            AND w.start_time &gt;= #{param.startTime}
+        </if>
+        <if test="param.endTime != null">
+            AND w.end_time &lt;= #{param.endTime}
+        </if>
+    </select>
+
+    <select id="getCount" resultType="com.hust.ewsystem.DTO.WarnStatusDTO">
+        SELECT
+            COUNT(CASE WHEN warning_status = 0 THEN 1 ELSE NULL END) AS waitDoneSum,
+            COUNT(CASE WHEN warning_status = 1 THEN 1 ELSE NULL END) AS hangUp,
+            COUNT(CASE WHEN warning_status = 2 THEN 1 ELSE NULL END) AS processIng,
+            COUNT(CASE WHEN warning_status = 3 THEN 1 ELSE NULL END) AS closeWaitDoneSum
+        FROM warnings where model_id = #{modelId}
+        GROUP BY
+            model_id
+    </select>
 </mapper>
