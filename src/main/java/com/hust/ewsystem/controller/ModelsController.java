@@ -86,12 +86,12 @@ public class ModelsController {
                     .setModelParameters(modelform.getModel().getModelParameters())
                     .setPatternId(modelform.getModel().getPatternId())
                     .setModuleId(modelform.getModel().getModuleId())
-                    .setAlertInterval(modelform.getModel().getAlertInterval() != null ? modelform.getModel().getAlertInterval() : 10);
+                    .setAlertInterval(modelform.getModel().getAlertInterval() != null ? modelform.getModel().getAlertInterval() : 10)
+                    .setAlertWindowSize(modelform.getModel().getAlertWindowSize() != null ? modelform.getModel().getAlertWindowSize() : 60);
             //后端自己生成的模型参数
             newModel.setTurbineId(turbineId)
                     .setModelVersion("V1.0")
-                    .setModelStatus(0)
-                    .setAlertWindowSize(60);
+                    .setModelStatus(0);
             modelsList.add(newModel);
         }
         boolean saveBatch1 = modelsService.saveBatch(modelsList);
