@@ -4,13 +4,13 @@ package com.hust.ewsystem.service.impl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hust.ewsystem.common.exception.FileException;
-import com.hust.ewsystem.entity.Models;
-import com.hust.ewsystem.entity.Warnings;
-import com.hust.ewsystem.entity.tasks;
-import com.hust.ewsystem.mapper.ModelsMapper;
-import com.hust.ewsystem.mapper.TaskMapper;
+import com.hust.ewsystem.entity.*;
+import com.hust.ewsystem.mapper.*;
+import com.hust.ewsystem.service.CommonDataService;
+import com.hust.ewsystem.service.ModelRealRelateService;
 import com.hust.ewsystem.service.ModelsService;
 
 import com.hust.ewsystem.service.WarningService;
@@ -30,6 +30,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -44,6 +45,16 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     private WarningService warningService;
     @Autowired
     private TaskMapper tasksMapper;
+    @Autowired
+    private ModelRealRelateService modelRealRelateService;
+    @Autowired
+    private StandRealRelateMapper standRealRelateMapper;
+    @Autowired
+    private StandPointMapper standPointMapper;
+    @Autowired
+    private RealPointMapper realPointMapper;
+    @Autowired
+    private CommonDataService commonDataService;
     // 任务状态
     private final Map<String, ScheduledFuture<?>> taskMap = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
@@ -83,9 +94,9 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         return taskLabel;
     }
     @Override
-    public void predict(Integer alertInterval, String modelLabel, String algorithmLabel,Integer modelId) {
+    public void predict(Integer alertInterval, String modelLabel, String algorithmLabel,Integer modelId,Integer alertWindowSize) {
         Runnable task = () ->{
-            prePredict(modelId,modelLabel,algorithmLabel);
+            prePredict(modelId,modelLabel,algorithmLabel,alertWindowSize);
         };
         // 定期调度任务
         ScheduledFuture<?> scheduledTask =scheduler.scheduleWithFixedDelay(task, 0, alertInterval, TimeUnit.SECONDS);
@@ -160,7 +171,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             e.printStackTrace();
         }
     }
-    public void prePredict(int modelId, String modelLabel, String algorithmLabel) {
+    public void prePredict(int modelId, String modelLabel, String algorithmLabel,Integer alertWindowSize) {
         try {
             String taskLabel = UUID.randomUUID().toString();
             tasks newtask = new tasks();
@@ -176,35 +187,37 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                     throw new FileException("创建任务目录失败");
                 }
             }
-            //TODO 读取train.csv的最后100行并写入predict.csv(后续需要在定时任务中写)
+            //TODO 读取实时数据
             String trainFilePath = pythonFilePath + "/" + modelLabel + "/train.csv"; // 训练数据路径
             String predictFilePath = taskDir.getAbsolutePath() + "/predict.csv"; // 预测文件路径
-            try (BufferedReader reader = new BufferedReader(new FileReader(trainFilePath));
-                 BufferedWriter writer = new BufferedWriter(new FileWriter(predictFilePath))) {
-                // 读取表头（第一行）
-                String header = reader.readLine(); // 读取表头
-                // 写入表头到predict.csv
-                writer.write(header);
-                writer.newLine();
-                // 使用 LinkedList 保持最新的 100 行
-                int maxLines = 100;
-                LinkedList<String> lastLines = new LinkedList<>();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // 如果超过100行，移除最旧的
-                    if (lastLines.size() == maxLines) {
-                        lastLines.poll();
-                    }
-                    lastLines.add(line); // 添加当前行
+
+            List<Integer> realpointId = modelRealRelateService.list(
+                    new QueryWrapper<ModelRealRelate>().eq("model_id", modelId)
+            ).stream().map(ModelRealRelate::getRealPointId).collect(Collectors.toList());
+            //真实测点标签 -> 标准测点标签
+            Map<String, String> realToStandLabel = RealToStandLabel(realpointId);
+            Map<LocalDateTime, Map<String, Object>> alignedData = new TreeMap<>();
+            // 获取当前时间
+            LocalDateTime now = LocalDateTime.now();
+            // 计算结束时间 (当前时间 - 10 分钟)
+            LocalDateTime endTime = now.minusMinutes(10);
+            // 计算开始时间 (当前时间 - 10 - window 分钟)
+            LocalDateTime startTime = now.minusMinutes(10 + alertWindowSize);
+            // 定义时间格式
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            // 将 LocalDateTime 转换为 String 格式
+            String startTimeStr = startTime.format(formatter);
+            String endTimeStr = endTime.format(formatter);
+            for (Map.Entry<String,String> entry : realToStandLabel.entrySet()) {
+                List<CommonData> data = commonDataService.selectDataByTime(entry.getKey().toLowerCase(), startTimeStr, endTimeStr);
+                for (CommonData record : data) {
+                    LocalDateTime datetime = record.getDatetime();
+                    Double value = record.getValue();
+                    alignedData.computeIfAbsent(datetime, k -> new HashMap<>()).put(entry.getValue(), value);
                 }
-                // 将最后100行写入predict.csv文件
-                for (String lastLine : lastLines) {
-                    writer.write(lastLine);
-                    writer.newLine();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+            toPredictCsv(alignedData, realToStandLabel, taskLabel);
+
             //准备setting.json
             File settingFile = new File(taskDir, "setting.json");
             JSONObject settings = new JSONObject();
@@ -386,6 +399,59 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 LOGGER.error("Failed to save warning: " + warning, e);
             }
             prevAlert = alert;
+        }
+    }
+    //根据真实测点id查询标准测点标签和真实测点标签
+    public Map<String, String> RealToStandLabel(List<Integer> realpointList){
+        Map<String, String> RealTostandPointMap = new HashMap<>();
+        // 真实测点ID->标准测点ID
+        Map<Integer, Integer> standToRealMap = standRealRelateMapper.selectList(
+                new QueryWrapper<StandRealRelate>().in("real_point_id", realpointList)
+        ).stream().collect(Collectors.toMap(StandRealRelate::getRealPointId, StandRealRelate::getStandPointId));
+        //真实测点ID -> 真实测点标签
+        Map<Integer,String> RealPointMap = realPointMapper.selectList(
+                new QueryWrapper<RealPoint>().in("point_id", standToRealMap.keySet())
+        ).stream().collect(Collectors.toMap(RealPoint::getPointId, RealPoint::getPointLabel));
+        //标准测点ID->标准测点标签
+        Map<Integer, String> standPointMap = standPointMapper.selectList(
+                new QueryWrapper<StandPoint>().in("point_id", standToRealMap.values())
+        ).stream().collect(Collectors.toMap(StandPoint::getPointId, StandPoint::getPointLabel));
+        //真实测点标签 -> 标准测点标签
+        for (Integer realpointId : realpointList) {
+            Integer standPointId = standToRealMap.get(realpointId);
+            String realPointLabel = RealPointMap.get(realpointId);
+            String standPointLabel = standPointMap.get(standPointId);
+            RealTostandPointMap.put(realPointLabel, standPointLabel);
+        }
+        return RealTostandPointMap;
+    }
+    public void toPredictCsv(Map<LocalDateTime, Map<String, Object>> alignedData,Map<String, String> realToStandLabel,String taskLabel){
+        // 创建目标目录（如果不存在）
+        File modelDir = new File(String.format("%s/task_logs/%s", pythonFilePath,taskLabel));
+        if (!modelDir.exists()) {
+            if (!modelDir.mkdirs()) {
+                throw new FileException("创建文件目录失败");
+            }
+        }
+        // 写入 CSV 文件
+        try (FileWriter csvWriter = new FileWriter(String.format("%s/task_logs/%s/predict.csv", pythonFilePath, taskLabel))) {
+            // 写入表头
+            csvWriter.append("datetime");
+            for (String standPoint : realToStandLabel.values()) {
+                csvWriter.append(",").append(standPoint);
+            }
+            csvWriter.append("\n");
+            // 写入数据
+            for (Map.Entry<LocalDateTime, Map<String, Object>> entry : alignedData.entrySet()) {
+                StringBuilder line = new StringBuilder(entry.getKey().toString());
+                for (String standPoint : realToStandLabel.values()) {
+                    Double value = (Double) entry.getValue().get(standPoint);
+                    line.append(",").append(value);
+                }
+                csvWriter.append(line.toString()).append("\n");
+            }
+        } catch (IOException e) {
+            throw new FileException("写入CSV文件失败", e);
         }
     }
 }

@@ -346,9 +346,10 @@ public class ModelsController {
             Integer alertInterval = model.getAlertInterval();
             String modelLabel = model.getModelLabel();
             Integer algorithmId = model.getAlgorithmId();
+            Integer alertWindowSize = model.getAlertWindowSize();
             String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
             //算法调用
-            modelsService.predict(alertInterval, modelLabel, algorithmLabel, modelId);
+            modelsService.predict(alertInterval, modelLabel, algorithmLabel, modelId,alertWindowSize);
 //            Map<String,Object> map= new HashMap<>();
 //            map.put("modelId",modelId);
 //            taskIdList.add(map);
