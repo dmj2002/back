@@ -82,4 +82,19 @@ public class WarningsDTO implements Serializable {
      * 风机风场名称
      */
     private String farmTurbineName;
+
+    /**
+     * 是否有效，0否1是,
+     */
+    private int valid;
+
+    /**
+     * 是否重复，0否1是,
+     */
+    private int repeat;
+
+    /**
+     * 系统分类
+     */
+    private String systemSort;
 }

@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.DTO.QueryTurbineWarnMatrixDTO;
 import com.hust.ewsystem.DTO.QueryWarnDTO;
 import com.hust.ewsystem.DTO.QueryWarnDetailsDTO;
+import com.hust.ewsystem.DTO.QueryWarnInfoDTO;
 import com.hust.ewsystem.DTO.TrendDataDTO;
 import com.hust.ewsystem.DTO.TurbineWarnMatrixDTO;
 import com.hust.ewsystem.DTO.WarnCountDTO;
@@ -409,6 +410,17 @@ public class WarningController {
     @RequestMapping(value = "/getWarnList",method = RequestMethod.POST)
     public EwsResult<IPage<WarningsDTO>> getWarnList(@Valid @RequestBody QueryWarnDTO queryWarnDTO){
         IPage<WarningsDTO> warnInfo = warningService.getWarnInfo(queryWarnDTO);
+        return EwsResult.OK(warnInfo);
+    }
+
+    /**
+     * 待处理预警-预警列表
+     * @param queryWarnInfoDTO queryWarnInfoDTO
+     * @return EwsResult<IPage<WarningsDTO>>
+     */
+    @RequestMapping(value = "/getWarnInfoList",method = RequestMethod.POST)
+    public EwsResult<IPage<WarningsDTO>> getWarnInfoList(@RequestBody QueryWarnInfoDTO queryWarnInfoDTO){
+        IPage<WarningsDTO> warnInfo = warningService.getWarnInfo(queryWarnInfoDTO);
         return EwsResult.OK(warnInfo);
     }
 }
