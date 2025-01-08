@@ -16,7 +16,7 @@
         <result column="model_id" property="modelId"/>
         <result column="task_id" property="taskId"/>
         <result column="valid" property="valid"/>
-        <result column="repeat" property="repeat"/>
+        <result column="repetition" property="repetition"/>
         <result column="combined_name" property="farmTurbineName"/>
     </resultMap>
 

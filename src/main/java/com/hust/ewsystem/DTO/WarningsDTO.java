@@ -86,12 +86,12 @@ public class WarningsDTO implements Serializable {
     /**
      * 是否有效，0否1是,
      */
-    private int valid;
+    private Integer valid;
 
     /**
      * 是否重复，0否1是,
      */
-    private int repeat;
+    private Integer repetition;
 
     /**
      * 系统分类

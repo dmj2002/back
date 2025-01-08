@@ -420,18 +420,18 @@ public class WarningController {
      * @return EwsResult<IPage<WarningsDTO>>
      */
     @RequestMapping(value = "/getWarnInfoList",method = RequestMethod.POST)
-    public EwsResult<IPage<WarningsDTO>> getWarnInfoList(@RequestBody QueryWarnInfoDTO queryWarnInfoDTO){
+    public EwsResult<IPage<WarningsDTO>> getWarnInfoList(@Valid @RequestBody QueryWarnInfoDTO queryWarnInfoDTO){
         IPage<WarningsDTO> warnInfo = warningService.getWarnInfo(queryWarnInfoDTO);
         return EwsResult.OK(warnInfo);
     }
 
     /**
-     * 待处理预警-预警列表
+     * 预警处理（修改预警等级,关闭 挂起预警）
      * @param warnHandleDTO warnHandleDTO
      * @return EwsResult<Boolean>
      */
     @RequestMapping(value = "/warnHandle",method = RequestMethod.POST)
-    public EwsResult<Boolean> warnHandle(@RequestBody WarnHandleDTO warnHandleDTO){
+    public EwsResult<Boolean> warnHandle(@Valid @RequestBody WarnHandleDTO warnHandleDTO){
         Boolean result = warningService.warnHandle(warnHandleDTO);
         return EwsResult.OK("处理成功",result);
     }

@@ -33,7 +33,7 @@ public class Reports implements Serializable {
 
     private String reportText;  // 通知文本
 
-    private int valid;//有效
+    private Integer valid;//有效
 
-    private int repeat;//重复
+    private Integer repetition;//重复
 }

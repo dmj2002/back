@@ -15,11 +15,13 @@ import java.io.Serializable;
 @Builder
 public class ReportWarningRelate implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+
+    private static final long serialVersionUID = -6151687601604427556L;
+
     @TableId(type = IdType.AUTO)
     private Integer id; // 记录id
 
-    private Integer reportId; // 报警id
+    private Integer reportId; // 通知id
 
     private Integer warningId; // 预警id
 }
