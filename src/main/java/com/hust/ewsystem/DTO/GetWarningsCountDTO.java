@@ -19,9 +19,9 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 public class GetWarningsCountDTO {
 
-    private int warningLevel;
-    private int turbineId;
-    private int modelId;
+    private Integer warningLevel;
+    private Integer turbineId;
+    private Integer modelId;
     private LocalDateTime endTime;
     private LocalDateTime startTime;
 }

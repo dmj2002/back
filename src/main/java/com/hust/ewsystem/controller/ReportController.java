@@ -1,14 +1,15 @@
 package com.hust.ewsystem.controller;
 
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.hust.ewsystem.DTO.AddReportsDTO;
+import com.hust.ewsystem.DTO.QueryReportsDTO;
 import com.hust.ewsystem.DTO.ReportDTO;
 import com.hust.ewsystem.DTO.ReportsDTO;
-import com.hust.ewsystem.DTO.WarnHandleDTO;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.Reports;
 import com.hust.ewsystem.mapper.ReportsMapper;
 import com.hust.ewsystem.service.ReportsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,11 +23,12 @@ import javax.validation.Valid;
 @RequestMapping("/report")
 public class ReportController {
     
-    @Autowired
+    @Resource
     private ReportsMapper reportsMapper;
 
     @Resource
     private ReportsService reportsService;
+
     
     @PostMapping("/operate")
     public EwsResult<?> operationReport(@RequestBody ReportDTO reportDTO){
@@ -48,8 +50,19 @@ public class ReportController {
      * @return EwsResult<Boolean>
      */
     @RequestMapping(value = "/addReport",method = RequestMethod.POST)
-    public EwsResult<Boolean> addReport(@Valid @RequestBody ReportsDTO reportsDTO){
+    public EwsResult<Boolean> addReport(@Valid @RequestBody AddReportsDTO reportsDTO){
         int i = reportsService.addReport(reportsDTO);
         return i == 0 ? EwsResult.OK("操作成功",true) : EwsResult.error("操作成功",false);
+    }
+
+    /**
+     * 查询通知列表
+     * @param queryReportsDTO queryReportsDTO
+     * @return EwsResult<IPage<Reports>>
+     */
+    @RequestMapping(value = "/getReportList",method = RequestMethod.POST)
+    public EwsResult<IPage<ReportsDTO>>  getReportList(@Valid @RequestBody QueryReportsDTO queryReportsDTO){
+        IPage<ReportsDTO> reportList = reportsService.getReportList(queryReportsDTO);
+        return EwsResult.OK(reportList);
     }
 }

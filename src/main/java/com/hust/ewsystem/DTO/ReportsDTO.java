@@ -1,56 +1,66 @@
 package com.hust.ewsystem.DTO;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.hust.ewsystem.common.constant.CommonConstant;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * @BelongsProject: back
  * @BelongsPackage: com.hust.ewsystem.DTO
  * @Author: xdy
- * @CreateTime: 2025-01-08  10:46
+ * @CreateTime: 2025-01-08  12:13
  * @Description:
  * @Version: 1.0
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-public class ReportsDTO implements Serializable {
-    private static final long serialVersionUID = 7823974879600937010L;
+public class ReportsDTO {
 
-    @NotBlank(message = "通知文本不能为空")
-    private String reportText;  // 通知文本
+    /**
+     * 通知文本，用于存储报告的具体内容描述。
+     */
+    private String reportText;
 
-    private String reportLabel;  // 报告标签
+    /**
+     * 报告标签，用于对报告进行分类或标记，方便管理和查询。
+     */
+    private String reportLabel;
 
-    @NotNull(message = "风机id不能为空")
-    private Integer turbineId;  // 风机id
+    /**
+     * 风机的唯一标识符，关联到相应的风机信息。
+     */
+    private Integer turbineId;
 
-    @NotNull(message = "员工id不能为空")
-    private Integer employeeId;  // 员工id
+    /**
+     * 员工的唯一标识符，关联到生成该报告的员工信息。
+     */
+    private Integer employeeId;
 
-    @NotNull(message = "初始时间不能为空")
-    @JsonFormat(pattern = CommonConstant.DATETIME_FORMAT_1, timezone = CommonConstant.TIME_ZONE)
-    private LocalDateTime initialTime;  // 初始时间
+    /**
+     * 员工查姓名
+     */
+    private String employeeName;
 
-    @NotNull(message = "状态不能为空")
-    private Integer status;  // 状态
+    /**
+     * 初始时间，记录报告的创建或初始时间。
+     */
+    private LocalDateTime initialTime;
 
-    @NotNull(message = "是否重复不能为空")
-    private Integer valid;//有效
+    /**
+     * 状态
+     */
+    private Integer status;
 
-    @NotNull(message = "是否重复不能为空")
-    private Integer repetition;//重复
+    /**
+     * 有效标志，用于表示该报告是否有效。
+     */
+    private Integer valid;
 
-    @NotEmpty(message = "关联预警ID列表不能为空")
-    private List<Integer> warnIdList;
+    /**
+     * 重复标志，用于表示该报告是否为重复报告。
+     */
+    private Integer repetition;
+
 }
