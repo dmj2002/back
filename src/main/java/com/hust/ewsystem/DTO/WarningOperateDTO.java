@@ -1,5 +1,6 @@
 package com.hust.ewsystem.DTO;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -14,13 +15,13 @@ public class WarningOperateDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private List<Integer> WarningId;
+    private List<Integer> warningId;
 
-    private Integer OperateCode;
+    private Integer operateCode;
 
-    private Integer WarningLevel;
+    private Integer warningLevel;
 
-    private String ReportText;
+    private String reportText;
 
-    private Integer operateId;
+    private Integer operatorId;
 }

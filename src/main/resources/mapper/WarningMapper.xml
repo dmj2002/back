@@ -81,7 +81,7 @@
         GROUP BY
             model_id
     </select>
-    <select id="getTurbineIdCountByWarningIdList" resultMap="Integer">
+    <select id="getTurbineIdCountByWarningIdList" resultType="Integer">
         SELECT DISTINCT m.turbine_id
         FROM warnings w
         LEFT JOIN models m ON w.model_id = m.model_id
