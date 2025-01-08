@@ -31,30 +31,30 @@ public class ModelsDTO {
     /**
      * 一级预警数
      */
-    private int warningLevel1Sum;
+    private Integer warningLevel1Sum;
 
     /**
      * 二级预警数
      */
-    private int warningLevel2Sum;
+    private Integer warningLevel2Sum;
 
     /**
      * 待处理数量 预警状态为0的数量
      */
-    private int waitDoneSum;
+    private Integer waitDoneSum;
 
     /**
      * 挂起数量 预警状态为1的数量
      */
-    private int hangUp;
+    private Integer hangUp;
 
     /**
      * 处理中 预警状态为2的数量
      */
-    private int processIng;
+    private Integer processIng;
 
     /**
      * 关闭待确认数量 预警状态为3的数量
      */
-    private int closeWaitDoneSum;
+    private Integer closeWaitDoneSum;
 }

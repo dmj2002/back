@@ -23,7 +23,7 @@ public class TurbineWaitDoneInfo {
     /**
      * 风机ID
      */
-    private int turbineId;
+    private Integer turbineId;
 
     /**
      * 风机名称
@@ -33,22 +33,22 @@ public class TurbineWaitDoneInfo {
     /**
      * 一级预警数
      */
-    private int warningLevel1Sum;
+    private Integer warningLevel1Sum;
 
     /**
      * 二级预警数
      */
-    private int warningLevel2Sum;
+    private Integer warningLevel2Sum;
 
     /**
      * 通知总数
      */
-    private int reportSum;
+    private Integer reportSum;
 
     private String turbineType;
-    private int windFarmId;
-    private int warningStatus;
-    private int currentStatus;
+    private Integer windFarmId;
+    private Integer warningStatus;
+    private Integer currentStatus;
 
 
     /**

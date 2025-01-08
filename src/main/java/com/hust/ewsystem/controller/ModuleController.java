@@ -1,8 +1,10 @@
 package com.hust.ewsystem.controller;
 
 import com.hust.ewsystem.common.result.EwsResult;
+import com.hust.ewsystem.entity.Module;
 import com.hust.ewsystem.entity.Subsystem;
-import com.hust.ewsystem.service.SubsystemService;
+import com.hust.ewsystem.service.ModelsService;
+import com.hust.ewsystem.service.ModuleService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,24 +16,24 @@ import java.util.List;
  * @BelongsProject: back
  * @BelongsPackage: com.hust.ewsystem.controller
  * @Author: xdy
- * @CreateTime: 2025-01-08  14:46
+ * @CreateTime: 2025-01-08  16:14
  * @Description:
  * @Version: 1.0
  */
 @RestController
-@RequestMapping("/system")
-public class SubSystemController {
+@RequestMapping("/model")
+public class ModuleController {
 
     @Resource
-    private SubsystemService subsystemService;
+    private ModuleService moduleService;
 
     /**
      * 查询系统分类列表
-     * @return EwsResult<TurbineInfoDTO>
+     * @return EwsResult<List<Module>>
      */
-    @RequestMapping(value = "/getSubSystemList",method = RequestMethod.GET)
-    public EwsResult<List<Subsystem>> getTurbineList(){
-        List<Subsystem> windTurbines = subsystemService.list();
-        return EwsResult.OK(windTurbines);
+    @RequestMapping(value = "/getModelList",method = RequestMethod.GET)
+    public EwsResult<List<Module>> getModelList(){
+        List<Module> list = moduleService.list();
+        return EwsResult.OK(list);
     }
 }
