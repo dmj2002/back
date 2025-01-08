@@ -9,9 +9,9 @@ import com.hust.ewsystem.DTO.QueryWarnInfoDTO;
 import com.hust.ewsystem.DTO.WarnHandleDTO;
 import com.hust.ewsystem.DTO.WarningsDTO;
 import com.hust.ewsystem.common.constant.CommonConstant;
-import com.hust.ewsystem.entity.Subsystem;
+import com.hust.ewsystem.entity.Module;
 import com.hust.ewsystem.entity.Warnings;
-import com.hust.ewsystem.mapper.SubSystemMapper;
+import com.hust.ewsystem.mapper.ModuleMapper;
 import com.hust.ewsystem.mapper.WarningMapper;
 import com.hust.ewsystem.service.WarningService;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import java.util.Objects;
 public class WarningServiceImpl extends ServiceImpl<WarningMapper, Warnings> implements WarningService {
 
     @Resource
-    private SubSystemMapper subSystemMapper;
+    private ModuleMapper moduleMapper;
 
     @Resource
     private WarningMapper warningMapper;
@@ -49,13 +49,13 @@ public class WarningServiceImpl extends ServiceImpl<WarningMapper, Warnings> imp
     public IPage<WarningsDTO> getWarnInfo(QueryWarnInfoDTO queryWarnInfoDTO) {
         Page<Warnings> page = new Page<>(queryWarnInfoDTO.getPageNo(), queryWarnInfoDTO.getPageSize());
         IPage<WarningsDTO> warningsPage = warningMapper.selectWarningsPage(queryWarnInfoDTO, page);
-        LambdaQueryWrapper<Subsystem> queryWrapper;
+        LambdaQueryWrapper<Module> queryWrapper;
         for (WarningsDTO record : warningsPage.getRecords()) {
             queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(Subsystem::getTurbineId,queryWarnInfoDTO.getTurbineId());
-            Subsystem subSystem = subSystemMapper.selectOne(queryWrapper);
-            if (Objects.nonNull(subSystem)){
-                record.setSystemSort(subSystem.getSubsystemName());
+            queryWrapper.eq(Module::getTurbineId,queryWarnInfoDTO.getTurbineId());
+            Module module = moduleMapper.selectOne(queryWrapper);
+            if (Objects.nonNull(module)){
+                record.setSystemSort(module.getModuleName());
             }
         }
 
