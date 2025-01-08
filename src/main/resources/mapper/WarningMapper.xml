@@ -81,4 +81,20 @@
         GROUP BY
             model_id
     </select>
+    
+    <update id="warnHandle" parameterType="com.hust.ewsystem.DTO.WarnHandleDTO">
+        update warnings w
+        <set>
+            <if test="param.warnLevel!=null">
+                w.warning_level = #{param.warnLevel},
+            </if>
+            <if test="param.warnStatus!=null">
+                w.warning_status = #{param.warnStatus}
+            </if>
+        </set>
+        where w.warning_id in
+        <foreach collection="param.warnIdList" item="warnId" open="(" separator="," close=")">
+            #{warnId}
+        </foreach>
+    </update>
 </mapper>

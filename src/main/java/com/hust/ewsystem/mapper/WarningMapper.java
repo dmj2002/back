@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.DTO.GetWarningsCountDTO;
 import com.hust.ewsystem.DTO.QueryWarnDTO;
 import com.hust.ewsystem.DTO.QueryWarnInfoDTO;
+import com.hust.ewsystem.DTO.WarnHandleDTO;
 import com.hust.ewsystem.DTO.WarnStatusDTO;
 import com.hust.ewsystem.DTO.WarningsDTO;
 import com.hust.ewsystem.VO.WarningsVO;
@@ -35,4 +36,6 @@ public interface WarningMapper extends BaseMapper<Warnings> {
     int getWarningsCount(@Param("param") GetWarningsCountDTO getWarningsCountDTO);
 
     WarnStatusDTO getCount(@Param("modelId") Integer modelId);
+
+    Boolean warnHandle(@Param("param") WarnHandleDTO warnHandleDTO);
 }

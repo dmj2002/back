@@ -11,6 +11,7 @@ import com.hust.ewsystem.DTO.QueryWarnInfoDTO;
 import com.hust.ewsystem.DTO.TrendDataDTO;
 import com.hust.ewsystem.DTO.TurbineWarnMatrixDTO;
 import com.hust.ewsystem.DTO.WarnCountDTO;
+import com.hust.ewsystem.DTO.WarnHandleDTO;
 import com.hust.ewsystem.DTO.WarningOperateDTO;
 import com.hust.ewsystem.DTO.WarningsDTO;
 import com.hust.ewsystem.VO.WarningsVO;
@@ -422,5 +423,16 @@ public class WarningController {
     public EwsResult<IPage<WarningsDTO>> getWarnInfoList(@RequestBody QueryWarnInfoDTO queryWarnInfoDTO){
         IPage<WarningsDTO> warnInfo = warningService.getWarnInfo(queryWarnInfoDTO);
         return EwsResult.OK(warnInfo);
+    }
+
+    /**
+     * 待处理预警-预警列表
+     * @param warnHandleDTO warnHandleDTO
+     * @return EwsResult<Boolean>
+     */
+    @RequestMapping(value = "/warnHandle",method = RequestMethod.POST)
+    public EwsResult<Boolean> warnHandle(@RequestBody WarnHandleDTO warnHandleDTO){
+        Boolean result = warningService.warnHandle(warnHandleDTO);
+        return EwsResult.OK("处理成功",result);
     }
 }

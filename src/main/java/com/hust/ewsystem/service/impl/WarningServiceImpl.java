@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hust.ewsystem.DTO.QueryWarnDTO;
 import com.hust.ewsystem.DTO.QueryWarnInfoDTO;
+import com.hust.ewsystem.DTO.WarnHandleDTO;
 import com.hust.ewsystem.DTO.WarningsDTO;
 import com.hust.ewsystem.common.constant.CommonConstant;
 import com.hust.ewsystem.entity.Subsystem;
@@ -59,5 +60,10 @@ public class WarningServiceImpl extends ServiceImpl<WarningMapper, Warnings> imp
         }
 
         return warningsPage;
+    }
+
+    @Override
+    public Boolean warnHandle(WarnHandleDTO warnHandleDTO) {
+        return warningMapper.warnHandle(warnHandleDTO);
     }
 }
