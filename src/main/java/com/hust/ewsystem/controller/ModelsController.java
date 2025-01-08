@@ -501,11 +501,12 @@ public class ModelsController {
         }
         return EwsResult.OK(resultList);
     }
-    @GetMapping("getStandPoint/{algorithmId}")
-    public EwsResult<?> getStandPoint(@PathVariable Integer algorithmId){
+    @GetMapping("getStandPoint/{AlgorithmId}")
+    public EwsResult<?> getStandPoint(@PathVariable("AlgorithmId") Integer algorithmId) {
         List<StandPointVO> standPointByAlgorithmId = algorithmStandRelateMapper.getStandPointByAlgorithmId(algorithmId);
         return EwsResult.OK(standPointByAlgorithmId);
     }
+
     public void toTrainCsv(Map<LocalDateTime, Map<String, Object>> alignedData,Map<String, String> realToStandLabel,String modelLabel){
         // 创建目标目录（如果不存在）
         File modelDir = new File(String.format("%s/%s", pythonFilePath, modelLabel));
