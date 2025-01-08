@@ -41,14 +41,4 @@ public class ShareController {
         }
         return EwsResult.OK(result);
     }
-
-    @GetMapping("/getwindfarm")
-    public EwsResult<?> getWindFarm(@RequestParam(value = "companyId",required = false) Integer companyId){
-        QueryWrapper<WindFarm> queryWrapper = new QueryWrapper<>();
-        if(companyId != null){
-            queryWrapper.eq("company_id", companyId);
-        }
-        List<WindFarm> res = windFarmService.list(queryWrapper);
-        return EwsResult.OK(res);
-    }
 }

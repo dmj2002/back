@@ -1,11 +1,11 @@
 package com.hust.ewsystem.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.WindFarm;
 import com.hust.ewsystem.service.WindFarmService;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.Resource;
 import java.util.List;
 
@@ -29,5 +29,14 @@ public class WindFarmController {
         // TODO 暂未添加风场所属管理公司的过滤条件
         List<WindFarm> list = windFarmService.list();
         return EwsResult.OK(list);
+    }
+    @GetMapping("/getwindfarmList")
+    public EwsResult<?> getWindFarm(@RequestParam(value = "companyId",required = false) Integer companyId){
+        QueryWrapper<WindFarm> queryWrapper = new QueryWrapper<>();
+        if(companyId != null){
+            queryWrapper.eq("company_id", companyId);
+        }
+        List<WindFarm> res = windFarmService.list(queryWrapper);
+        return EwsResult.OK(res);
     }
 }
