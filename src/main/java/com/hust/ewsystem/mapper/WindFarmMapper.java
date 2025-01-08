@@ -10,5 +10,5 @@ import java.util.List;
 
 public interface WindFarmMapper extends BaseMapper<WindFarm> {
 
-    public List<WindFarmDTO> getWindFarmsByCompanyId(@Param("param") QueryWaitDoneInfoDTO queryWaitDoneInfoDTO);
+     List<WindFarmDTO> getWindFarmsByCompanyId(@Param("param") QueryWaitDoneInfoDTO queryWaitDoneInfoDTO);
 }
