@@ -23,6 +23,8 @@ public interface WarningMapper extends BaseMapper<Warnings> {
 
     Integer getTurbineIdByWarningId(@Param("warningId") Integer warningId);
 
+    List<Integer> getTurbineIdCountByWarningIdList(@Param("records") List<Integer> warningId);
+
     /**
      * 分页查询预警信息
      * @param param queryWarnDTO

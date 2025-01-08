@@ -81,6 +81,15 @@
         GROUP BY
             model_id
     </select>
+    <select id="getTurbineIdCountByWarningIdList" resultMap="Integer">
+        SELECT DISTINCT m.turbine_id
+        FROM warnings w
+        LEFT JOIN models m ON w.model_id = m.model_id
+        WHERE w.warning_id IN
+        <foreach item="warningId" index="index" collection="records" open="(" separator="," close=")">
+            #{warningId}
+        </foreach>
+    </select>
     
     <update id="warnHandle" parameterType="com.hust.ewsystem.DTO.WarnHandleDTO">
         update warnings w

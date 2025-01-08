@@ -289,19 +289,22 @@ public class WarningController {
         }
         //通知操作
         else if(warningOperateDTO.getOperateCode() == 3){
+            List<Integer> turbineIdList = warningMapper.getTurbineIdCountByWarningIdList(warningOperateDTO.getWarningId());
+            if(turbineIdList.size() > 1){
+                throw new CrudException("风机不唯一");
+            }
+            Reports report = Reports.builder()
+                    .reportText(warningOperateDTO.getReportText())
+                    .turbineId(turbineIdList.get(0))
+                    .status(0)
+                    .initialTime(LocalDateTime.now())
+                    .build();
+            reportsMapper.insert(report);
             for(Integer warningId : warningOperateDTO.getWarningId()){
-                Integer turbineId = warningMapper.getTurbineIdByWarningId(warningId);
-                Reports report = Reports.builder()
-                        .reportText(warningOperateDTO.getReportText())
-                        .turbineId(turbineId)
-                        .status(0)
-                        .initialTime(LocalDateTime.now())
-                        .build();
-                reportsMapper.insert(report);
                 reportWarningRelateMapper.insert(ReportWarningRelate.builder()
-                                        .reportId(report.getReportId())
-                                        .warningId(warningId)
-                                        .build());
+                        .reportId(report.getReportId())
+                        .warningId(warningId)
+                        .build());
             }
             return EwsResult.OK("通知成功");
         }
