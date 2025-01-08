@@ -3,13 +3,14 @@ package com.hust.ewsystem.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hust.ewsystem.DTO.OverviewDTO;
 import com.hust.ewsystem.common.result.EwsResult;
+import com.hust.ewsystem.entity.Models;
+import com.hust.ewsystem.entity.WindFarm;
 import com.hust.ewsystem.entity.WindTurbine;
+import com.hust.ewsystem.mapper.WindFarmMapper;
 import com.hust.ewsystem.mapper.WindTurbineMapper;
+import com.hust.ewsystem.service.WindFarmService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +23,8 @@ public class ShareController {
 
     @Autowired
     private WindTurbineMapper windTurbineMapper;
+    @Autowired
+    private WindFarmService windFarmService;
 
     @GetMapping("/overview")
     public EwsResult<?> overview(OverviewDTO overviewDTO) {
@@ -37,5 +40,15 @@ public class ShareController {
 
         }
         return EwsResult.OK(result);
+    }
+
+    @GetMapping("/getwindfarm")
+    public EwsResult<?> getWindFarm(@RequestParam(value = "companyId",required = false) Integer companyId){
+        QueryWrapper<WindFarm> queryWrapper = new QueryWrapper<>();
+        if(companyId != null){
+            queryWrapper.eq("company_id", companyId);
+        }
+        List<WindFarm> res = windFarmService.list(queryWrapper);
+        return EwsResult.OK(res);
     }
 }

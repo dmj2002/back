@@ -501,7 +501,7 @@ public class ModelsController {
         }
         return EwsResult.OK(resultList);
     }
-    @GetMapping("getStandPoint/{AlgorithmId}")
+    @GetMapping("getStandPoint/{algorithmId}")
     public EwsResult<?> getStandPoint(@PathVariable Integer algorithmId){
         List<StandPointVO> standPointByAlgorithmId = algorithmStandRelateMapper.getStandPointByAlgorithmId(algorithmId);
         return EwsResult.OK(standPointByAlgorithmId);
