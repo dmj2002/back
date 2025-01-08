@@ -29,7 +29,7 @@ public class ModuleController {
 
     /**
      * 查询系统分类列表
-     * @return EwsResult<TurbineInfoDTO>
+     * @return EwsResult<List<Module>>
      */
     @RequestMapping(value = "/getModelList",method = RequestMethod.GET)
     public EwsResult<List<Module>> getModelList(){
