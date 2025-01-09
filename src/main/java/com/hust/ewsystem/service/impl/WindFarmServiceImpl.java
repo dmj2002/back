@@ -50,17 +50,13 @@ public class WindFarmServiceImpl extends ServiceImpl<WindFarmMapper, WindFarm> i
         for (WindFarmDTO windFarmDTO : windFarmDTOList) {
             List<TurbineWaitDoneInfo> turbineWaitDoneInfo = windFarmDTO.getTurbineWaitDoneInfo();
             for (TurbineWaitDoneInfo waitDoneInfo : turbineWaitDoneInfo) {
-                int warningsCount1 = 0;
-                int warningsCount2 = 0;
+                int warningLevel1waitDoneSum = 0;
+                int warningLevel2waitDoneSum = 0;
+                int warningLevel1waitHangUpSum = 0;
+                int warningLevel2waitHangUpSum = 0;
+                int warningLevel1waitCloseWaitSum = 0;
+                int warningLevel2waitCloseWaitSum = 0;
                 for (ModelsDTO modelsDTO : waitDoneInfo.getModelList()) {
-
-                    WarnStatusDTO count = warningMapper.getCount(modelsDTO.getModelId());
-                    if (Objects.nonNull(count)){
-                        modelsDTO.setWaitDoneSum(count.getWaitDoneSum());
-                        modelsDTO.setHangUp(count.getHangUp());
-                        modelsDTO.setProcessIng(count.getProcessIng());
-                        modelsDTO.setCloseWaitDoneSum(count.getCloseWaitDoneSum());
-                    }
                     GetWarningsCountDTO getWarningsCountDTO = initGetWarningsCountDTO(queryWaitDoneInfoDTO, waitDoneInfo, modelsDTO);
                     // typeInfo传1查询一级预警  2查询二级预警
                     int warningsCount = warningMapper.getWarningsCount(getWarningsCountDTO);
@@ -76,11 +72,22 @@ public class WindFarmServiceImpl extends ServiceImpl<WindFarmMapper, WindFarm> i
                         warningsCount = warningMapper.getWarningsCount(getWarningsCountDTO);
                         modelsDTO.setWarningLevel2Sum(warningsCount);
                     }
-                    warningsCount1 += modelsDTO.getWarningLevel1Sum();
-                    warningsCount2 += modelsDTO.getWarningLevel2Sum();
+                    WarnStatusDTO count = warningMapper.getCount(modelsDTO.getModelId(),queryWaitDoneInfoDTO.getStartDate(),queryWaitDoneInfoDTO.getEndDate());
+                    if (Objects.nonNull(count)){
+                        warningLevel1waitDoneSum += count.getWarningLevel1waitDone();
+                        warningLevel2waitDoneSum += count.getWarningLevel2waitDone();
+                        warningLevel1waitHangUpSum += count.getWarningLevel1waitHangUp();
+                        warningLevel2waitHangUpSum += count.getWarningLevel2waitHangUp();
+                        warningLevel1waitCloseWaitSum += count.getWarningLevel2waitCloseWait();
+                        warningLevel2waitCloseWaitSum += count.getWarningLevel2waitCloseWait();
+                    }
                 }
-                waitDoneInfo.setWarningLevel1Sum(warningsCount1);
-                waitDoneInfo.setWarningLevel2Sum(warningsCount2);
+                waitDoneInfo.setWarningLevel1waitDoneSum(warningLevel1waitDoneSum);
+                waitDoneInfo.setWarningLevel2waitDoneSum(warningLevel2waitDoneSum);
+                waitDoneInfo.setWarningLevel1waitHangUpSum(warningLevel1waitHangUpSum);
+                waitDoneInfo.setWarningLevel2waitHangUpSum(warningLevel2waitHangUpSum);
+                waitDoneInfo.setWarningLevel1waitCloseWaitSum(warningLevel1waitCloseWaitSum);
+                waitDoneInfo.setWarningLevel2waitCloseWaitSum(warningLevel2waitCloseWaitSum);
 
                 if (CommonConstant.NUM_COMMON_3.equals(queryWaitDoneInfoDTO.getInfoType()) || CommonConstant.NUM_COMMON_0.equals(queryWaitDoneInfoDTO.getInfoType())){
                     queryWrapper = new LambdaQueryWrapper<>();

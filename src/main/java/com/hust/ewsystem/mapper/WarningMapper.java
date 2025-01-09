@@ -14,6 +14,7 @@ import com.hust.ewsystem.entity.Warnings;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -37,7 +38,7 @@ public interface WarningMapper extends BaseMapper<Warnings> {
 
     int getWarningsCount(@Param("param") GetWarningsCountDTO getWarningsCountDTO);
 
-    WarnStatusDTO getCount(@Param("modelId") Integer modelId);
+    WarnStatusDTO getCount(@Param("modelId") Integer modelId, @Param("startTime")LocalDateTime startTime,@Param("endTime")LocalDateTime endTime);
 
     Boolean warnHandle(@Param("param") WarnHandleDTO warnHandleDTO);
 }

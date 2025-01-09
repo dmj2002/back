@@ -30,8 +30,6 @@
             <collection property="modelList" ofType="com.hust.ewsystem.DTO.ModelsDTO">
                 <id property="modelId" column="model_id"/>
                 <result property="modelName" column="model_name"/>
-<!--                <result property="warningLevel1Sum" column="warning_level_1_sum"/>-->
-<!--                <result property="warningLevel2Sum" column="warning_level_2_sum"/>-->
             </collection>
         </collection>
     </resultMap>

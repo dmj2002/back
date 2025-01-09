@@ -62,7 +62,7 @@
     <select id="getWarningsCount" resultType="int">
         select COUNT(0) AS warning_count
         from warnings w left join models m on w.model_id = m.model_id
-        where m.turbine_id = #{param.turbineId} and w.model_id = #{param.modelId} and warning_status = 0 and w.warning_level =#{param.warningLevel}
+        where m.turbine_id = #{param.turbineId} and w.model_id = #{param.modelId} and w.warning_level =#{param.warningLevel}
         <if test="param.startTime != null">
             AND w.start_time &gt;= #{param.startTime}
         </if>
@@ -73,14 +73,21 @@
 
     <select id="getCount" resultType="com.hust.ewsystem.DTO.WarnStatusDTO">
         SELECT
-            COUNT(CASE WHEN warning_status = 0 THEN 1 ELSE NULL END) AS waitDoneSum,
-            COUNT(CASE WHEN warning_status = 1 THEN 1 ELSE NULL END) AS hangUp,
-            COUNT(CASE WHEN warning_status = 2 THEN 1 ELSE NULL END) AS processIng,
-            COUNT(CASE WHEN warning_status = 3 THEN 1 ELSE NULL END) AS closeWaitDoneSum
-        FROM warnings where model_id = #{modelId}
-        GROUP BY
-            model_id
+            COUNT(CASE WHEN w.warning_status = 0 AND w.warning_level = 1 THEN 1 ELSE 0 END) AS warningLevel1waitDone,
+            COUNT(CASE WHEN w.warning_status = 0 AND w.warning_level = 2 THEN 1 ELSE 0 END) AS warningLevel2waitDone,
+            COUNT(CASE WHEN w.warning_status = 1 AND w.warning_level = 1 THEN 1 ELSE 0 END) AS warningLevel1waitHangUp,
+            COUNT(CASE WHEN w.warning_status = 1 AND w.warning_level = 2 THEN 1 ELSE 0 END) AS warningLevel2waitHangUp,
+            COUNT(CASE WHEN w.warning_status = 3 AND w.warning_level = 1 THEN 1 ELSE 0 END) AS warningLevel1waitCloseWait,
+            COUNT(CASE WHEN w.warning_status = 3 AND w.warning_level = 2 THEN 1 ELSE 0 END) AS warningLevel2waitCloseWait
+        FROM warnings w where model_id = #{modelId}
+        <if test="startTime != null">
+            AND w.start_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND w.end_time &lt;= #{endTime}
+        </if>
     </select>
+
     <select id="getTurbineIdCountByWarningIdList" resultType="Integer">
         SELECT DISTINCT m.turbine_id
         FROM warnings w

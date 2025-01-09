@@ -31,23 +31,58 @@ public class TurbineWaitDoneInfo {
     private String turbineName;
 
     /**
-     * 一级预警数
+     * 风机的一级预警待处理数 预警状态为0 预警等级为1的数量
      */
-    private Integer warningLevel1Sum;
+    private int warningLevel1waitDoneSum;
 
     /**
-     * 二级预警数
+     * 风机的二级预警待处理数 预警状态为0 预警等级为2的数量
      */
-    private Integer warningLevel2Sum;
+    private int warningLevel2waitDoneSum;
+
+    /**
+     * 风机的一级预警挂起数 预警状态为1的数量 预警等级为1的数量
+     */
+    private int warningLevel1waitHangUpSum;
+
+    /**
+     * 风机的二级预警挂起数 预警状态为1的数量 预警等级为2的数量
+     */
+    private int warningLevel2waitHangUpSum;
+
+    /**
+     * 风机的一级预警关闭待确认数 预警状态为3 预警等级为1的数量
+     */
+    private int warningLevel1waitCloseWaitSum;
+
+    /**
+     * 风机的二级预警关闭待确认数 预警状态为3 预警等级为2的数量
+     */
+    private int warningLevel2waitCloseWaitSum;
 
     /**
      * 通知总数
      */
-    private Integer reportSum;
+    private int reportSum;
 
+    /**
+     * a设备类型
+     */
     private String turbineType;
+
+    /**
+     * 风场ID
+     */
     private Integer windFarmId;
+
+    /**
+     * 预警状态
+     */
     private Integer warningStatus;
+
+    /**
+     * 当前状态
+     */
     private Integer currentStatus;
 
 
