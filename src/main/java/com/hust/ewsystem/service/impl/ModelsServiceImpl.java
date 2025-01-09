@@ -394,6 +394,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                     } catch (Exception e) {
                         LOGGER.error("Failed to update prevWarning: ", e);
                     }
+                    prevAlert.put("end_time", endTime.format(formatter)); // 直接更新end_time字段
                     continue;
                 }
             }
