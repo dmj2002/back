@@ -14,6 +14,7 @@ import com.hust.ewsystem.service.ModelRealRelateService;
 import com.hust.ewsystem.service.ModelsService;
 
 import com.hust.ewsystem.service.WarningService;
+import org.apache.ibatis.exceptions.TooManyResultsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -353,10 +354,10 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
      */
     private void processAlerts(List<JSONObject> alertList, int modelId, int taskId,DateTimeFormatter formatter) {
         Iterator<JSONObject> iterator = alertList.iterator();
-        JSONObject prevAlert = null;
         while (iterator.hasNext()) {
             JSONObject alert = iterator.next();
             String alertInfo = alert.getString("alarm_info");
+            Integer warningLevel = Integer.parseInt(alert.getString("warning_level"));
             if(alertInfo.contains("正常")){
                 continue;
             }
@@ -371,40 +372,25 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             warning.setEndTime(endTime);
             warning.setTaskId(taskId);
             warning.setWarningStatus(0);
-            warning.setWarningLevel(0);
+            warning.setWarningLevel(warningLevel);
 
-            if (prevAlert!= null) {
-                LocalDateTime prevStartTime = LocalDateTime.parse(prevAlert.getString("start_time"), formatter);
-                LocalDateTime prevEndTime = LocalDateTime.parse(prevAlert.getString("end_time"), formatter);
-
-                // 判断当前警报的开始时间是否在上一个警报的结束时间之前预警信息相同
-                // 如果满足条件，更新上一个警告对象的结束时间为当前警报的结束时间，然后使用 continue 跳过保存当前警告对象
-                if (prevAlert.getString("alarm_info").equals(alert.getString("alarm_info"))
-                        && prevAlert.getString("alarm_level").equals(alert.getString("alarm_level"))
-                        && startTime.isBefore(prevEndTime)) {
-                    // 持久化更新上一个警告对象的结束时间
-                    try {
-                        LambdaQueryWrapper<Warnings> queryWrapper = new LambdaQueryWrapper<>();
-                        queryWrapper.eq(Warnings::getTaskId,taskId).eq(Warnings::getModelId,modelId)
-                                        .eq(Warnings::getWarningLevel,0).eq(Warnings::getWarningStatus,0)
-                                        .eq(Warnings::getWarningDescription,alertInfo).eq(Warnings::getStartTime,prevStartTime);
-                        Warnings one = warningService.getOne(queryWrapper);
-                        one.setEndTime(endTime);
-                        warningService.updateById(one);
-                    } catch (Exception e) {
-                        LOGGER.error("Failed to update prevWarning: ", e);
-                    }
-                    prevAlert.put("end_time", endTime.format(formatter)); // 直接更新end_time字段
-                    continue;
-                }
-            }
-
+            LambdaQueryWrapper<Warnings> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Warnings::getModelId,modelId)
+                        .eq(Warnings::getWarningLevel,warningLevel)
+                        .eq(Warnings::getWarningDescription,alertInfo)
+                        .le(Warnings::getEndTime,startTime)
+                        .ge(Warnings::getStartTime,startTime);
             try {
-                warningService.save(warning);
-            } catch (Exception e) {
-                LOGGER.error("Failed to save warning: " + warning, e);
+                Warnings one = warningService.getOne(queryWrapper);
+                if(one == null) warningService.save(warning);
+                else{
+                    one.setEndTime(endTime);
+                    one.setWarningStatus(0);
+                    warningService.updateById(one);
+                }
+            } catch (TooManyResultsException e) {
+                LOGGER.error("Too many results returned: ", e);
             }
-            prevAlert = alert;
         }
     }
     //根据真实测点id查询标准测点标签和真实测点标签
