@@ -378,8 +378,8 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             queryWrapper.eq(Warnings::getModelId,modelId)
                         .eq(Warnings::getWarningLevel,warningLevel)
                         .eq(Warnings::getWarningDescription,alertInfo)
-                        .le(Warnings::getEndTime,startTime)
-                        .ge(Warnings::getStartTime,startTime);
+                        .ge(Warnings::getEndTime,startTime)
+                        .le(Warnings::getStartTime,startTime);
             try {
                 Warnings one = warningService.getOne(queryWrapper);
                 if(one == null) warningService.save(warning);
