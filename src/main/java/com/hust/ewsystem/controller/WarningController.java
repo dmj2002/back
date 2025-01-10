@@ -168,18 +168,18 @@ public class WarningController {
         if (page1.getRecords().isEmpty()) {
             throw new CrudException("查询结果为空");
         }
-        QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
-        windTurbineQueryWrapper.select("turbine_id","turbine_type", "turbine_name","wind_farm_id");  // 指定你需要的字段
-        List<WindTurbine> turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
-
-
-        QueryWrapper<WindFarm> windFarmQueryWrapper = new QueryWrapper<>();
-        windFarmQueryWrapper.select("wind_farm_id", "wind_farm_name,company_id");
-        List<WindFarm> windFarmList = windFarmMapper.selectList(windFarmQueryWrapper);
-
-        QueryWrapper<Company> companyQueryWrapper = new QueryWrapper<>();
-        companyQueryWrapper.select("company_id", "company_name");
-        List<Company> companyList = companyMapper.selectList(companyQueryWrapper);
+//        QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
+//        windTurbineQueryWrapper.select("turbine_id","turbine_type", "turbine_name","wind_farm_id");  // 指定你需要的字段
+//        List<WindTurbine> turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
+//
+//
+//        QueryWrapper<WindFarm> windFarmQueryWrapper = new QueryWrapper<>();
+//        windFarmQueryWrapper.select("wind_farm_id", "wind_farm_name,company_id");
+//        List<WindFarm> windFarmList = windFarmMapper.selectList(windFarmQueryWrapper);
+//
+//        QueryWrapper<Company> companyQueryWrapper = new QueryWrapper<>();
+//        companyQueryWrapper.select("company_id", "company_name");
+//        List<Company> companyList = companyMapper.selectList(companyQueryWrapper);
 
         QueryWrapper<Models> modelsQueryWrapper = new QueryWrapper<>();
         modelsQueryWrapper.select("model_id","turbine_id");
@@ -193,9 +193,9 @@ public class WarningController {
         result.put("page_size",page1.getSize());
         result.put("total_pages",page1.getPages());
         result.put("warningList",WarningsListVO);
-        result.put("companyList",companyList);
-        result.put("windFarmList",windFarmList);
-        result.put("turbineList",turbineList);
+//        result.put("companyList",companyList);
+//        result.put("windFarmList",windFarmList);
+//        result.put("turbineList",turbineList);
         result.put("modelList",modelsList);
         return EwsResult.OK("查询成功", result);
     }
