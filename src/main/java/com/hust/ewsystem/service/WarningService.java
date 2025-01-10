@@ -8,10 +8,12 @@ import com.hust.ewsystem.DTO.WarnHandleDTO;
 import com.hust.ewsystem.DTO.WarningsDTO;
 import com.hust.ewsystem.entity.Warnings;
 
+import java.util.List;
+
 public interface WarningService extends IService<Warnings> {
 
     public IPage<WarningsDTO> getWarnInfo(QueryWarnDTO queryWarnDTO);
 
-    public IPage<WarningsDTO> getWarnInfo(QueryWarnInfoDTO queryWarnDTO);
+    public List<WarningsDTO> getWarnInfo(QueryWarnInfoDTO queryWarnDTO);
     public Boolean warnHandle(WarnHandleDTO warnHandleDTO);
 }

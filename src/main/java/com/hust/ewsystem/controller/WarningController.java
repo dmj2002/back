@@ -425,8 +425,8 @@ public class WarningController {
      * @return EwsResult<IPage<WarningsDTO>>
      */
     @RequestMapping(value = "/getWarnInfoList",method = RequestMethod.POST)
-    public EwsResult<IPage<WarningsDTO>> getWarnInfoList(@Valid @RequestBody QueryWarnInfoDTO queryWarnInfoDTO){
-        IPage<WarningsDTO> warnInfo = warningService.getWarnInfo(queryWarnInfoDTO);
+    public EwsResult<List<WarningsDTO>> getWarnInfoList(@Valid @RequestBody QueryWarnInfoDTO queryWarnInfoDTO){
+        List<WarningsDTO> warnInfo = warningService.getWarnInfo(queryWarnInfoDTO);
         return EwsResult.OK(warnInfo);
     }
 

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -46,11 +47,10 @@ public class WarningServiceImpl extends ServiceImpl<WarningMapper, Warnings> imp
     }
 
     @Override
-    public IPage<WarningsDTO> getWarnInfo(QueryWarnInfoDTO queryWarnInfoDTO) {
-        Page<Warnings> page = new Page<>(queryWarnInfoDTO.getPageNo(), queryWarnInfoDTO.getPageSize());
-        IPage<WarningsDTO> warningsPage = warningMapper.selectWarningsPage(queryWarnInfoDTO, page);
+    public List<WarningsDTO> getWarnInfo(QueryWarnInfoDTO queryWarnInfoDTO) {
+        List<WarningsDTO> warnings = warningMapper.selectWarningsNoPage(queryWarnInfoDTO);
         LambdaQueryWrapper<Module> queryWrapper;
-        for (WarningsDTO record : warningsPage.getRecords()) {
+        for (WarningsDTO record : warnings) {
             queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Module::getTurbineId,queryWarnInfoDTO.getTurbineId());
             Module module = moduleMapper.selectOne(queryWrapper);
@@ -59,7 +59,7 @@ public class WarningServiceImpl extends ServiceImpl<WarningMapper, Warnings> imp
             }
         }
 
-        return warningsPage;
+        return warnings;
     }
 
     @Override
