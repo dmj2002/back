@@ -268,7 +268,7 @@ public class WarningController {
                 if(warning == null){
                     throw new CrudException("预警不存在");
                 }
-                warning.setWarningStatus(3);
+                warning.setWarningStatus(1);
                 warning.setHandlerId(warningOperateDTO.getOperatorId());
                 warning.setHandleTime(LocalDateTime.now());
                 warningService.updateById(warning);
@@ -282,7 +282,6 @@ public class WarningController {
                 if(warning == null){
                     throw new CrudException("预警不存在");
                 }
-                warning.setWarningStatus(2);
                 warning.setHandleTime(LocalDateTime.now());
                 warning.setWarningLevel(warningOperateDTO.getWarningLevel());
                 warningService.updateById(warning);
