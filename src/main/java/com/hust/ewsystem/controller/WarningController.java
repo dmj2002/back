@@ -300,6 +300,8 @@ public class WarningController {
                     .turbineId(turbineIdList.get(0))
                     .status(0)
                     .initialTime(LocalDateTime.now())
+                    .valid(warningOperateDTO.getValid())
+                    .repetition(warningOperateDTO.getRepetition())
                     .build();
             reportsMapper.insert(report);
             for(Integer warningId : warningOperateDTO.getWarningId()){
