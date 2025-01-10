@@ -201,8 +201,8 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             LocalDateTime now = LocalDateTime.now();
             // 计算结束时间 (当前时间 - 10 分钟)
             LocalDateTime endTime = now.minusMinutes(10);
-            // 计算开始时间 (当前时间 - 10 - window 分钟)
-            LocalDateTime startTime = now.minusMinutes(10 + alertWindowSize);
+            // 计算开始时间 (当前时间 - 10 分钟 - window 秒)
+            LocalDateTime startTime = now.minusMinutes(10).minusSeconds(alertWindowSize);
             // 定义时间格式
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             // 将 LocalDateTime 转换为 String 格式
@@ -357,7 +357,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         while (iterator.hasNext()) {
             JSONObject alert = iterator.next();
             String alertInfo = alert.getString("alarm_info");
-            Integer warningLevel = Integer.parseInt(alert.getString("warning_level"));
+            Integer warningLevel = alert.getInteger("warning_level");
             if(alertInfo.contains("正常")){
                 continue;
             }
