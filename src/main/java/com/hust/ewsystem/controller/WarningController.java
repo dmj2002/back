@@ -302,6 +302,7 @@ public class WarningController {
                     .initialTime(LocalDateTime.now())
                     .valid(warningOperateDTO.getValid())
                     .repetition(warningOperateDTO.getRepetition())
+                    .employeeId(warningOperateDTO.getOperatorId())
                     .build();
             reportsMapper.insert(report);
             for(Integer warningId : warningOperateDTO.getWarningId()){
