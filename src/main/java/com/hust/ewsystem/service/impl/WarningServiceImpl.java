@@ -63,6 +63,13 @@ public class WarningServiceImpl extends ServiceImpl<WarningMapper, Warnings> imp
     }
 
     @Override
+    public List<Warnings> getWarnInfoListByReportId(List<Integer> warnIdList) {
+        LambdaQueryWrapper<Warnings> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(Warnings::getWarningId,warnIdList);
+        return warningMapper.selectList(wrapper);
+    }
+
+    @Override
     public Boolean warnHandle(WarnHandleDTO warnHandleDTO) {
         return warningMapper.warnHandle(warnHandleDTO);
     }

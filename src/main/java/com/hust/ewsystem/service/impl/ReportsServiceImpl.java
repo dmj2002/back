@@ -95,6 +95,7 @@ public class ReportsServiceImpl extends ServiceImpl<ReportsMapper, Reports> impl
      */
     public ReportsDTO initResult(Reports record,Employee employee){
         ReportsDTO reportsDTO = new ReportsDTO();
+        reportsDTO.setReportId(record.getReportId());
         reportsDTO.setReportText(record.getReportText());
         reportsDTO.setReportLabel(reportsDTO.getReportLabel());
         reportsDTO.setTurbineId(record.getTurbineId());

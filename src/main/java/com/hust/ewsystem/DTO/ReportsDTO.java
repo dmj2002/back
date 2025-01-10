@@ -19,6 +19,11 @@ import java.time.LocalDateTime;
 public class ReportsDTO {
 
     /**
+     * 通知ID
+     */
+    private Integer reportId;
+
+    /**
      * 通知文本，用于存储报告的具体内容描述。
      */
     private String reportText;

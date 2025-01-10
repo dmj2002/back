@@ -15,5 +15,8 @@ public interface WarningService extends IService<Warnings> {
     public IPage<WarningsDTO> getWarnInfo(QueryWarnDTO queryWarnDTO);
 
     public List<WarningsDTO> getWarnInfo(QueryWarnInfoDTO queryWarnDTO);
+
+    public List<Warnings> getWarnInfoListByReportId(List<Integer> warnIdList);
+
     public Boolean warnHandle(WarnHandleDTO warnHandleDTO);
 }
