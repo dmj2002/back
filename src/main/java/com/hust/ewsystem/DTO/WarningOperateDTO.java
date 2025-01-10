@@ -24,4 +24,8 @@ public class WarningOperateDTO implements Serializable {
     private String reportText;
 
     private Integer operatorId;
+
+    private Integer repetition;
+
+    private Integer valid;
 }

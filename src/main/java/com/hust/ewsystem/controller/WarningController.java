@@ -255,6 +255,8 @@ public class WarningController {
                 warning.setWarningStatus(3);
                 warning.setHandlerId(warningOperateDTO.getOperatorId());
                 warning.setHandleTime(LocalDateTime.now());
+                warning.setRepetition(warningOperateDTO.getRepetition());
+                warning.setValid(warningOperateDTO.getValid());
                 warningService.updateById(warning);
             }
             return EwsResult.OK("关闭成功");
