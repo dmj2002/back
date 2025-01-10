@@ -36,6 +36,7 @@ import com.hust.ewsystem.mapper.WindFarmMapper;
 import com.hust.ewsystem.mapper.WindTurbineMapper;
 import com.hust.ewsystem.service.ModelsService;
 import com.hust.ewsystem.service.RealPortService;
+import com.hust.ewsystem.service.ReportWarningRelateService;
 import com.hust.ewsystem.service.StandRealRelateService;
 import com.hust.ewsystem.service.WarningService;
 import com.hust.ewsystem.service.WindFarmService;
@@ -55,6 +56,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -110,6 +112,9 @@ public class WarningController {
 
     @Resource
     private WindTurbineService windTurbineService;
+
+    @Resource
+    private ReportWarningRelateService reportWarningRelateService;
 
     @GetMapping("/list")
     public EwsResult<?> getWarningList(@RequestParam(value = "page") int page,
@@ -441,5 +446,25 @@ public class WarningController {
     public EwsResult<Boolean> warnHandle(@Valid @RequestBody WarnHandleDTO warnHandleDTO){
         Boolean result = warningService.warnHandle(warnHandleDTO);
         return EwsResult.OK("处理成功",result);
+    }
+
+    /**
+     * 通知列表-根据通知ID查询预警列表
+     * @param reportId reportId
+     * @return EwsResult<Boolean>
+     */
+    @RequestMapping(value = "/getWarnInfoListByReportId",method = RequestMethod.GET)
+    public EwsResult<List<Warnings>> getWarnInfoListByReportId(@RequestParam(value = "reportId") @NotNull(message = "通知ID不能为空") Integer reportId){
+        LambdaQueryWrapper<ReportWarningRelate> relateWrapper = new LambdaQueryWrapper<>();
+        relateWrapper.eq(ReportWarningRelate::getReportId,reportId);
+        List<Integer> warnIdList = new ArrayList<>();
+        List<ReportWarningRelate> reportWarningRelateList = reportWarningRelateService.list(relateWrapper);
+        if (!CollectionUtils.isEmpty(reportWarningRelateList)){
+            for (ReportWarningRelate reportWarningRelate : reportWarningRelateList) {
+                warnIdList.add(reportWarningRelate.getWarningId());
+            }
+        }
+        List<Warnings> warnInfoListByReportId = warningService.getWarnInfoListByReportId(warnIdList);
+        return EwsResult.OK("处理成功",warnInfoListByReportId);
     }
 }
