@@ -73,12 +73,12 @@
 
     <select id="getCount" resultType="com.hust.ewsystem.DTO.WarnStatusDTO">
         SELECT
-            COUNT(CASE WHEN w.warning_status = 0 AND w.warning_level = 1 THEN 1 ELSE 0 END) AS warningLevel1waitDone,
-            COUNT(CASE WHEN w.warning_status = 0 AND w.warning_level = 2 THEN 1 ELSE 0 END) AS warningLevel2waitDone,
-            COUNT(CASE WHEN w.warning_status = 1 AND w.warning_level = 1 THEN 1 ELSE 0 END) AS warningLevel1waitHangUp,
-            COUNT(CASE WHEN w.warning_status = 1 AND w.warning_level = 2 THEN 1 ELSE 0 END) AS warningLevel2waitHangUp,
-            COUNT(CASE WHEN w.warning_status = 3 AND w.warning_level = 1 THEN 1 ELSE 0 END) AS warningLevel1waitCloseWait,
-            COUNT(CASE WHEN w.warning_status = 3 AND w.warning_level = 2 THEN 1 ELSE 0 END) AS warningLevel2waitCloseWait
+            COUNT(CASE WHEN w.warning_status = 0 AND w.warning_level = 1 THEN 1 ELSE NULL END) AS warningLevel1waitDone,
+            COUNT(CASE WHEN w.warning_status = 0 AND w.warning_level = 2 THEN 1 ELSE NULL END) AS warningLevel2waitDone,
+            COUNT(CASE WHEN w.warning_status = 1 AND w.warning_level = 1 THEN 1 ELSE NULL END) AS warningLevel1waitHangUp,
+            COUNT(CASE WHEN w.warning_status = 1 AND w.warning_level = 2 THEN 1 ELSE NULL END) AS warningLevel2waitHangUp,
+            COUNT(CASE WHEN w.warning_status = 3 AND w.warning_level = 1 THEN 1 ELSE NULL END) AS warningLevel1waitCloseWait,
+            COUNT(CASE WHEN w.warning_status = 3 AND w.warning_level = 2 THEN 1 ELSE NULL END) AS warningLevel2waitCloseWait
         FROM warnings w where model_id = #{modelId}
         <if test="startTime != null">
             AND w.start_time &gt;= #{startTime}

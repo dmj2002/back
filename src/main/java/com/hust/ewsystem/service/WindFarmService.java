@@ -18,7 +18,7 @@ import java.util.List;
 public interface WindFarmService extends IService<WindFarm> {
     /**
      * 查询风场风机信息
-     * @param companyId companyId
+     * @param queryWaitDoneInfoDTO queryWaitDoneInfoDTO
      * @return List<WindFarmVO>
      */
     public List<WindFarmDTO> getWindFarmsByCompanyId(QueryWaitDoneInfoDTO queryWaitDoneInfoDTO);
