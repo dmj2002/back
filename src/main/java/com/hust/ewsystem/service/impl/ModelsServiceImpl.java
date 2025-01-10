@@ -201,8 +201,8 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             LocalDateTime now = LocalDateTime.now();
             // 计算结束时间 (当前时间 - 10 分钟)
             LocalDateTime endTime = now.minusMinutes(10);
-            // 计算开始时间 (当前时间 - 10 - window 分钟)
-            LocalDateTime startTime = now.minusMinutes(10 + alertWindowSize);
+            // 计算开始时间 (当前时间 - 10 分钟 - window 秒)
+            LocalDateTime startTime = now.minusMinutes(10).minusSeconds(alertWindowSize);
             // 定义时间格式
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             // 将 LocalDateTime 转换为 String 格式
