@@ -357,7 +357,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         while (iterator.hasNext()) {
             JSONObject alert = iterator.next();
             String alertInfo = alert.getString("alarm_info");
-            Integer warningLevel = Integer.parseInt(alert.getString("warning_level"));
+            Integer warningLevel = alert.getInteger("warning_level");
             if(alertInfo.contains("正常")){
                 continue;
             }
