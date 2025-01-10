@@ -25,18 +25,6 @@ public class QueryWarnInfoDTO implements Serializable {
     private static final long serialVersionUID = 3612242938736654559L;
 
     /**
-     * 分页大小
-     */
-    @NotNull(message = "分页大小不能为空")
-    private int pageSize;
-
-    /**
-     * 页码
-     */
-    @NotNull(message = "页码不能为空")
-    private int pageNo;
-
-    /**
      * 风场ID
      */
     @NotNull(message = "风场ID不能为空")
