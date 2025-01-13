@@ -171,9 +171,9 @@ public class WarningController {
             queryWrapper2.eq("warning_level", warningLevel);
         }
         Page<Warnings> page1 = warningService.page(warningsPage, queryWrapper2);
-        if (page1.getRecords().isEmpty()) {
-            throw new CrudException("查询结果为空");
-        }
+//        if (page1.getRecords().isEmpty()) {
+//            throw new CrudException("查询结果为空");
+//        }
 //        QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
 //        windTurbineQueryWrapper.select("turbine_id","turbine_type", "turbine_name","wind_farm_id");  // 指定你需要的字段
 //        List<WindTurbine> turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
@@ -197,7 +197,11 @@ public class WarningController {
         result.put("page",page1.getCurrent());
         result.put("page_size",page1.getSize());
         result.put("total_pages",page1.getPages());
-        result.put("warningList",WarningsListVO);
+        if(!WarningsListVO.isEmpty()){
+            result.put("warningList",WarningsListVO);
+        }else{
+            result.put("warningList",new ArrayList<>());
+        }
 //        result.put("companyList",companyList);
 //        result.put("windFarmList",windFarmList);
 //        result.put("turbineList",turbineList);
@@ -281,7 +285,11 @@ public class WarningController {
         result.put("page",page1.getCurrent());
         result.put("page_size",page1.getSize());
         result.put("total_pages",page1.getPages());
-        result.put("warningList",WarningsListVO);
+        if(!WarningsListVO.isEmpty()){
+            result.put("warningList",WarningsListVO);
+        }else{
+            result.put("warningList",new ArrayList<>());
+        }
         result.put("companyList",companyList);
         result.put("windFarmList",windFarmList);
         result.put("turbineList",turbineList);
