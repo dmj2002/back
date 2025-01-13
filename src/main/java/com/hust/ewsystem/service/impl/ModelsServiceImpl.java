@@ -262,7 +262,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             processBuilder.command(command);
             processBuilder.redirectErrorStream(true);
             process = processBuilder.start();
-            System.out.println("Started Python process for model: " +modelId+ " task: " + taskLabel);
+            System.out.println("Started Python process for model: " +modelId+ " and task: " + taskLabel);
             StringBuilder outputString = null;
             //获取输入流
             InputStream inputStream = process.getInputStream();
