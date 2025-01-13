@@ -197,7 +197,11 @@ public class WarningController {
         result.put("page",page1.getCurrent());
         result.put("page_size",page1.getSize());
         result.put("total_pages",page1.getPages());
-        result.put("warningList",WarningsListVO);
+        if(!WarningsListVO.isEmpty()){
+            result.put("warningList",WarningsListVO);
+        }else{
+            result.put("warningList",new ArrayList<>());
+        }
         result.put("companyList",companyList);
         result.put("windFarmList",windFarmList);
         result.put("turbineList",turbineList);
@@ -281,7 +285,11 @@ public class WarningController {
         result.put("page",page1.getCurrent());
         result.put("page_size",page1.getSize());
         result.put("total_pages",page1.getPages());
-        result.put("warningList",WarningsListVO);
+        if(!WarningsListVO.isEmpty()){
+            result.put("warningList",WarningsListVO);
+        }else{
+            result.put("warningList",new ArrayList<>());
+        }
         result.put("companyList",companyList);
         result.put("windFarmList",windFarmList);
         result.put("turbineList",turbineList);
