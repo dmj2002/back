@@ -367,14 +367,13 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             LocalDateTime startTime = LocalDateTime.parse(alert.getString("start_time"), formatter);
             LocalDateTime endTime = LocalDateTime.parse(alert.getString("end_time"), formatter);
             //TODO 预警等级暂不知result返回的是int还是string
-            String warningLevelStr = (String) alert.getOrDefault("warning_level", "0");
+            String warningLevelStr = alert.getString("warning_level");
             Integer warningLevel;
             if (warningLevelStr != null && !warningLevelStr.isEmpty()) {
                 warningLevel = Integer.parseInt(warningLevelStr);  // 转换为整数
             } else {
                 warningLevel = 0;  // 如果为空或 null，则返回默认值 0
             }
-
             // 保存到数据库
             Warnings warning = new Warnings();
             warning.setModelId(modelId);
