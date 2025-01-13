@@ -191,17 +191,17 @@ public class WarningController {
         modelsQueryWrapper.select("model_id","turbine_id");
         List<Models> modelsList = modelsMapper.selectList(modelsQueryWrapper);
 
-        List<WarningsVO> WarningsListVO = warningMapper.getWarningsByModelId(page1.getRecords());
         Map<String,Object> result = new HashMap<>();
+        if(!page1.getRecords().isEmpty()){
+            List<WarningsVO> WarningsListVO = warningMapper.getWarningsByModelId(page1.getRecords());
+            result.put("warningList",WarningsListVO);
+        }else {
+            result.put("warningList",new ArrayList<>());
+        }
         result.put("total_count",page1.getTotal());
         result.put("page",page1.getCurrent());
         result.put("page_size",page1.getSize());
         result.put("total_pages",page1.getPages());
-        if(!WarningsListVO.isEmpty()){
-            result.put("warningList",WarningsListVO);
-        }else{
-            result.put("warningList",new ArrayList<>());
-        }
         result.put("companyList",companyList);
         result.put("windFarmList",windFarmList);
         result.put("turbineList",turbineList);
@@ -279,17 +279,18 @@ public class WarningController {
         modelsQueryWrapper.select("model_id","turbine_id");
         List<Models> modelsList = modelsMapper.selectList(modelsQueryWrapper);
 
-        List<WarningsVO> WarningsListVO = warningMapper.getWarningsByModelId(page1.getRecords());
         Map<String,Object> result = new HashMap<>();
+        if(!page1.getRecords().isEmpty()){
+            List<WarningsVO> WarningsListVO = warningMapper.getWarningsByModelId(page1.getRecords());
+            result.put("warningList",WarningsListVO);
+        }else {
+            result.put("warningList",new ArrayList<>());
+        }
         result.put("total_count",page1.getTotal());
         result.put("page",page1.getCurrent());
         result.put("page_size",page1.getSize());
         result.put("total_pages",page1.getPages());
-        if(!WarningsListVO.isEmpty()){
-            result.put("warningList",WarningsListVO);
-        }else{
-            result.put("warningList",new ArrayList<>());
-        }
+
         result.put("companyList",companyList);
         result.put("windFarmList",windFarmList);
         result.put("turbineList",turbineList);
