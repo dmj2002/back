@@ -45,6 +45,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -204,7 +205,91 @@ public class WarningController {
         result.put("modelList",modelsList);
         return EwsResult.OK("查询成功", result);
     }
+    
+    @GetMapping("/nowList")
+    public EwsResult<?> getNowWarningList(@RequestParam(value = "page") int page,
+                                       @RequestParam(value = "page_size") int pageSize,
+                                       @RequestParam(value = "warning_level", required = false) Integer warningLevel,
+                                       @RequestParam(value = "company_id", required = false) Integer companyId,
+                                       @RequestParam(value = "windfarm_id", required = false) Integer windfarmId,
+                                       @RequestParam(value = "module_id", required = false) Integer moduleId,
+                                       @RequestParam(value = "turbine_id", required = false) Integer turbineId) {
+        //先找modelId
+        QueryWrapper<Models> queryWrapper = new QueryWrapper<>();
+        if (moduleId != null) {
+            queryWrapper.eq("module_id", moduleId);
+        }
+        if (turbineId != null) {
+            queryWrapper.eq("turbine_id", turbineId);
+        }
+        else{
+            List<Integer> turbineList = new ArrayList<>();
+            if (companyId != null) {
+                if (windfarmId != null) {
+                    turbineList = windTurbineMapper.selectList(
+                            new QueryWrapper<WindTurbine>().eq("wind_farm_id", windfarmId)
+                    ).stream().map(WindTurbine::getTurbineId).collect(Collectors.toList());
+                }
+                else {
+                    List<Integer> windfarmList = windFarmMapper.selectList(
+                            new QueryWrapper<WindFarm>().eq("company_id", companyId)
+                    ).stream().map(WindFarm::getWindFarmId).collect(Collectors.toList());
+                    turbineList = windTurbineMapper.selectList(
+                            new QueryWrapper<WindTurbine>().in("wind_farm_id", windfarmList)
+                    ).stream().map(WindTurbine::getTurbineId).collect(Collectors.toList());
+                }
+            }
+            if (!turbineList.isEmpty()) {
+                queryWrapper.in("turbine_id", turbineList);
+            }
+        }
+        List<Integer> modelIdlist = modelsService.list(queryWrapper).stream().map(Models::getModelId).collect(Collectors.toList());
 
+        Page<Warnings> warningsPage = new Page<>(page, pageSize);
+        QueryWrapper<Warnings> queryWrapper2 = new QueryWrapper<>();
+        queryWrapper2.in("model_id", modelIdlist);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String endDate = LocalDateTime.now().format(formatter);
+        String startDate = LocalDateTime.now().minusHours(1).format(formatter);
+        queryWrapper2.ge("end_time", startDate).le("end_time", endDate);
+        if(warningLevel != null){
+            queryWrapper2.eq("warning_level", warningLevel);
+        }
+        Page<Warnings> page1 = warningService.page(warningsPage, queryWrapper2);
+        if (page1.getRecords().isEmpty()) {
+            throw new CrudException("查询结果为空");
+        }
+        QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
+        windTurbineQueryWrapper.select("turbine_id","turbine_type", "turbine_name","wind_farm_id");  // 指定你需要的字段
+        List<WindTurbine> turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
+
+
+        QueryWrapper<WindFarm> windFarmQueryWrapper = new QueryWrapper<>();
+        windFarmQueryWrapper.select("wind_farm_id", "wind_farm_name,company_id");
+        List<WindFarm> windFarmList = windFarmMapper.selectList(windFarmQueryWrapper);
+
+        QueryWrapper<Company> companyQueryWrapper = new QueryWrapper<>();
+        companyQueryWrapper.select("company_id", "company_name");
+        List<Company> companyList = companyMapper.selectList(companyQueryWrapper);
+
+        QueryWrapper<Models> modelsQueryWrapper = new QueryWrapper<>();
+        modelsQueryWrapper.select("model_id","turbine_id");
+        List<Models> modelsList = modelsMapper.selectList(modelsQueryWrapper);
+
+        //TODO: 什么意思？？？把所有数据都查出来吗？ or 根据模型Id查询(可能联表写的sql可能有点小bug)？
+        List<WarningsVO> WarningsListVO = warningMapper.getWarningsByModelId(page1.getRecords());
+        Map<String,Object> result = new HashMap<>();
+        result.put("total_count",page1.getTotal());
+        result.put("page",page1.getCurrent());
+        result.put("page_size",page1.getSize());
+        result.put("total_pages",page1.getPages());
+        result.put("warningList",WarningsListVO);
+        result.put("companyList",companyList);
+        result.put("windFarmList",windFarmList);
+        result.put("turbineList",turbineList);
+        result.put("modelList",modelsList);
+        return EwsResult.OK("查询成功", result);
+    }
     /**
      * 查询预警详情趋势数据
      * @param queryWarnDetailsDTO queryWarnDetailsDTO

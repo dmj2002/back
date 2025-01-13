@@ -96,7 +96,11 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     @Override
     public void predict(Integer alertInterval, String modelLabel, String algorithmLabel,Integer modelId,Integer alertWindowSize) {
         Runnable task = () ->{
-            prePredict(modelId,modelLabel,algorithmLabel,alertWindowSize);
+            try {
+                prePredict(modelId,modelLabel,algorithmLabel,alertWindowSize);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         };
         // 定期调度任务
         ScheduledFuture<?> scheduledTask =scheduler.scheduleWithFixedDelay(task, 0, alertInterval, TimeUnit.SECONDS);
@@ -258,7 +262,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             processBuilder.command(command);
             processBuilder.redirectErrorStream(true);
             process = processBuilder.start();
-            System.out.println("Started Python process for model: " +modelId+ " task: " + taskLabel);
+            System.out.println("Started Python process for model: " +modelId+ " and task: " + taskLabel);
             StringBuilder outputString = null;
             //获取输入流
             InputStream inputStream = process.getInputStream();
@@ -357,13 +361,19 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         while (iterator.hasNext()) {
             JSONObject alert = iterator.next();
             String alertInfo = alert.getString("alarm_info");
-            Integer warningLevel = alert.getInteger("warning_level");
             if(alertInfo.contains("正常")){
                 continue;
             }
             LocalDateTime startTime = LocalDateTime.parse(alert.getString("start_time"), formatter);
             LocalDateTime endTime = LocalDateTime.parse(alert.getString("end_time"), formatter);
-
+            //TODO 预警等级暂不知result返回的是int还是string
+            String warningLevelStr = alert.getString("warning_level");
+            Integer warningLevel;
+            if (warningLevelStr != null && !warningLevelStr.isEmpty()) {
+                warningLevel = Integer.parseInt(warningLevelStr);  // 转换为整数
+            } else {
+                warningLevel = 0;  // 如果为空或 null，则返回默认值 0
+            }
             // 保存到数据库
             Warnings warning = new Warnings();
             warning.setModelId(modelId);
