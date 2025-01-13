@@ -96,7 +96,11 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     @Override
     public void predict(Integer alertInterval, String modelLabel, String algorithmLabel,Integer modelId,Integer alertWindowSize) {
         Runnable task = () ->{
-            prePredict(modelId,modelLabel,algorithmLabel,alertWindowSize);
+            try {
+                prePredict(modelId,modelLabel,algorithmLabel,alertWindowSize);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         };
         // 定期调度任务
         ScheduledFuture<?> scheduledTask =scheduler.scheduleWithFixedDelay(task, 0, alertInterval, TimeUnit.SECONDS);
