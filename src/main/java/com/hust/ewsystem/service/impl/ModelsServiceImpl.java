@@ -192,9 +192,8 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 }
             }
             //TODO 读取实时数据
-            String trainFilePath = pythonFilePath + "/" + modelLabel + "/train.csv"; // 训练数据路径
-            String predictFilePath = taskDir.getAbsolutePath() + "/predict.csv"; // 预测文件路径
-
+//            String trainFilePath = pythonFilePath + "/" + modelLabel + "/train.csv"; // 训练数据路径
+//            String predictFilePath = taskDir.getAbsolutePath() + "/predict.csv"; // 预测文件路径
             List<Integer> realpointId = modelRealRelateService.list(
                     new QueryWrapper<ModelRealRelate>().eq("model_id", modelId)
             ).stream().map(ModelRealRelate::getRealPointId).collect(Collectors.toList());
@@ -220,14 +219,21 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                     alignedData.computeIfAbsent(datetime, k -> new HashMap<>()).put(entry.getValue(), value);
                 }
             }
+            int sizeBeforeRemoval = alignedData.size();
             // 移除 GridPower 小于等于 0 的数据
             alignedData.entrySet().removeIf(entry -> {
                 Map<String, Object> labelMap = entry.getValue(); // 获取每个时间点的标签数据
                 // 如果 "Grid" 列的值小于或等于 0，移除该时间点的数据
                 return labelMap.containsKey("GridPower") && (Double)labelMap.get("GridPower") <= 0;
             });
+            // 获取移除后的大小
+            int sizeAfterRemoval = alignedData.size();
+            // 判断是否有数据被移除
+            if(sizeBeforeRemoval > sizeAfterRemoval){
+                LOGGER.info("model: " +modelId+ " and task: " + taskLabel + "的数据有异常，取消此次预测任务");
+                return;
+            }
             toPredictCsv(alignedData, realToStandLabel, taskLabel);
-
             //准备setting.json
             File settingFile = new File(taskDir, "setting.json");
             JSONObject settings = new JSONObject();
