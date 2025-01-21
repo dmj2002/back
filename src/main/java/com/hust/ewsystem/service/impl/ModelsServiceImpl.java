@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -310,27 +311,29 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             String resultFilePath = filepath + "/task_logs/" + taskLabel + "/result.json";
 
             // 强制使用 UTF-8 编码读取文件内容
-            StringBuilder contentBuilder = new StringBuilder();
-            try (BufferedReader reader = Files.newBufferedReader(Paths.get(resultFilePath), StandardCharsets.UTF_8)) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    contentBuilder.append(line);
+            Path path = Paths.get(resultFilePath);              // 2025.1.21  判断文件是否存在
+            if (Files.exists(path)) {
+                StringBuilder contentBuilder = new StringBuilder();
+                try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        contentBuilder.append(line);
+                    }
                 }
-            }
-            String content = contentBuilder.toString();
+                String content = contentBuilder.toString();
 
-            // 解析 JSON 内容
-            JSONObject jsonObject = JSONObject.parseObject(content);
-            JSONArray alertList = jsonObject.getJSONArray("alarm_list");
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                // 解析 JSON 内容
+                JSONObject jsonObject = JSONObject.parseObject(content);
+                JSONArray alertList = jsonObject.getJSONArray("alarm_list");
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-            List<JSONObject> alertJsonList = new ArrayList<>();
-            for (int i = 0; i < alertList.size(); i++) {
-                alertJsonList.add(alertList.getJSONObject(i));
-            }
+                List<JSONObject> alertJsonList = new ArrayList<>();
+                for (int i = 0; i < alertList.size(); i++) {
+                    alertJsonList.add(alertList.getJSONObject(i));
+                }
 
-            // 预警信息入库及合并
-            processAlerts(alertJsonList,modelId,taskId,formatter);
+                // 预警信息入库及合并
+                processAlerts(alertJsonList, modelId, taskId, formatter);
 
 //            for (int i = 0; i < alertList.size(); i++) {
 //                JSONObject alert = alertList.getJSONObject(i);
@@ -349,6 +352,10 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
 //                warning.setWarningLevel(0);//set为一级先
 //                warningService.save(warning);
 //            }
+            }
+            else{
+                System.out.println("文件不存在: " + resultFilePath);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
