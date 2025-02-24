@@ -158,7 +158,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         try {
             // 准备命令
             List<String> command = new ArrayList<>();
-            command.add("python");
+            command.add("python3");
             command.add(String.format("alg/%s/train.py", algorithmLabel));
             command.add(String.format("task_logs/%s/setting.json", taskLabel));
             // 执行命令
@@ -284,6 +284,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 String s = new String(c, 0, len);
                 outputString.append(s);
             }
+            LOGGER.debug("算法执行结果：{}", outputString);
             inputStream.close();
             inputStreamReader.close();
             // 等待进程完成

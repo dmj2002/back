@@ -19,10 +19,6 @@ public class Module implements Serializable {
 
     private String moduleName; // 模块名称
 
-
-
-    private Integer turbineId; // 风机id
-
     private String moduleDescription; // 描述
 
 

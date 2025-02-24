@@ -34,4 +34,6 @@ public class WarningsVO {
     private Integer taskId; // 任务id
 
     private String turbineName; // 风机名称
+
+    private Integer turbineId; // 风机id
 }

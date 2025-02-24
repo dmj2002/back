@@ -208,7 +208,7 @@ public class ModelsController {
                 modelRealRelateService.remove(
                         new QueryWrapper<ModelRealRelate>().eq("model_id", modelform.getModel().getModelId())
                 );
-                break;
+                continue;
             }
             Map<String, List<Integer>> standToRealIdMap = standToRealId(standpointList);
             // 将 Map 的值收集到 Set中: A
