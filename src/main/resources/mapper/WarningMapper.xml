@@ -70,7 +70,7 @@
                 wt.wind_farm_id = #{param.windFarmId}
             </if>
             <if test="param.turbineId != null">
-                m.turbine_id = #{param.turbineId}
+                AND m.turbine_id = #{param.turbineId}
             </if>
             <if test="param.startTime != null">
                 AND w.start_time &gt;= #{param.startTime}
