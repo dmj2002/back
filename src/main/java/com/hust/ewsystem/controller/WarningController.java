@@ -299,7 +299,7 @@ public class WarningController {
 
     @PostMapping("/operate")
     public EwsResult<?> operateWarning(@RequestBody WarningOperateDTO warningOperateDTO) {
-        //关闭操作
+        //关闭待确认操作
         if(warningOperateDTO.getOperateCode() == 0){
             for(Integer warningId : warningOperateDTO.getWarningId()){
                 Warnings warning = warningService.getById(warningId);
@@ -337,6 +337,7 @@ public class WarningController {
                     throw new CrudException("预警不存在");
                 }
                 warning.setHandleTime(LocalDateTime.now());
+                warning.setHandlerId(warningOperateDTO.getOperatorId());
                 warning.setWarningLevel(warningOperateDTO.getWarningLevel());
                 warningService.updateById(warning);
             }
@@ -363,8 +364,30 @@ public class WarningController {
                         .reportId(report.getReportId())
                         .warningId(warningId)
                         .build());
+                Warnings warning = warningService.getById(warningId);
+                if(warning == null){
+                    throw new CrudException("预警不存在");
+                }
+                warning.setWarningStatus(2);
+                warning.setHandlerId(warningOperateDTO.getOperatorId());
+                warning.setHandleTime(LocalDateTime.now());
+                warningService.updateById(warning);
             }
             return EwsResult.OK("通知成功");
+        }
+        //确认关闭操作
+        else if(warningOperateDTO.getOperatorId() == 4){
+            for(Integer warningId : warningOperateDTO.getWarningId()){
+                Warnings warning = warningService.getById(warningId);
+                if(warning == null || warning.getWarningStatus() != 3){
+                    throw new CrudException("预警不存在或未关闭");
+                }
+                warning.setWarningStatus(4);
+                warning.setHandlerId(warningOperateDTO.getOperatorId());
+                warning.setHandleTime(LocalDateTime.now());
+                warningService.updateById(warning);
+            }
+            return EwsResult.OK("确认关闭成功");
         }
         else{
             throw new CrudException("操作码错误");
