@@ -373,7 +373,7 @@ public class WarningController {
                 warning.setHandleTime(LocalDateTime.now());
                 warningService.updateById(warning);
             }
-            return EwsResult.OK("通知成功");
+            return EwsResult.OK("通知成功",report);
         }
         //确认关闭操作
         else if(warningOperateDTO.getOperatorId() == 4){
@@ -389,6 +389,26 @@ public class WarningController {
             }
             return EwsResult.OK("确认关闭成功");
         }
+//        //通知办结操作
+//        else if(warningOperateDTO.getOperatorId() == 5){
+//            for(Integer warningId : warningOperateDTO.getWarningId()){
+//                //判断预警是否处于通知状态并修改
+//                Warnings warning = warningService.getById(warningId);
+//                if(warning == null || warning.getWarningStatus() != 2){
+//                    throw new CrudException("预警不存在或不处于通知状态");
+//                }
+//                warning.setWarningStatus(4);
+//                warning.setHandlerId(warningOperateDTO.getOperatorId());
+//                warning.setHandleTime(LocalDateTime.now());
+//                warningService.updateById(warning);
+//                // 修改通知状态为完结
+//                ReportWarningRelate warningRelate = reportWarningRelateMapper.selectOne(new QueryWrapper<ReportWarningRelate>().eq("warning_id", warningId));
+//                Reports report = reportsMapper.selectById(warningRelate.getReportId());
+//                report.setStatus(2);
+//                reportsMapper.updateById(report);
+//            }
+//            return EwsResult.OK("通知办结成功");
+//        }
         else{
             throw new CrudException("操作码错误");
         }

@@ -41,7 +41,6 @@ public class QueryWaitDoneInfoDTO implements Serializable {
      */
     private String name;
 
-
     /**
      * 公司编号
      */

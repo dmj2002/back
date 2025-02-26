@@ -1,23 +1,26 @@
 package com.hust.ewsystem.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.hust.ewsystem.DTO.AddReportsDTO;
 import com.hust.ewsystem.DTO.QueryReportsDTO;
 import com.hust.ewsystem.DTO.ReportDTO;
 import com.hust.ewsystem.DTO.ReportsDTO;
 import com.hust.ewsystem.common.result.EwsResult;
+import com.hust.ewsystem.entity.ReportWarningRelate;
 import com.hust.ewsystem.entity.Reports;
+import com.hust.ewsystem.entity.Warnings;
 import com.hust.ewsystem.mapper.ReportsMapper;
+import com.hust.ewsystem.service.ReportWarningRelateService;
 import com.hust.ewsystem.service.ReportsService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import com.hust.ewsystem.service.WarningService;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/report")
@@ -28,6 +31,12 @@ public class ReportController {
 
     @Resource
     private ReportsService reportsService;
+
+    @Resource
+    private ReportWarningRelateService reportWarningRelateService;
+
+    @Resource
+    private WarningService warningService;
 
     
     @PostMapping("/operate")
@@ -43,6 +52,21 @@ public class ReportController {
         int res = reportsMapper.updateById(newReport);
         return res == 1 ? EwsResult.OK("操作成功") : EwsResult.error("操作失败");
     }
+    @GetMapping("/deleteReport")
+    public EwsResult<?> deleteReport(@RequestParam("reportId") Integer reportId){
+        List<Integer> warning_ids = reportWarningRelateService.list(new QueryWrapper<ReportWarningRelate>().eq("report_id", reportId)).stream().map(ReportWarningRelate::getWarningId).collect(Collectors.toList());
+        boolean res = warningService.list(new QueryWrapper<Warnings>().in("warning_id", warning_ids)).stream().allMatch(
+                warning -> warning.getWarningStatus() == 4 || warning.getWarningStatus() == 3
+        );
+        if(res){
+            Reports report = reportsMapper.selectById(reportId);
+            report.setStatus(2);
+            reportsMapper.updateById(report);
+            return EwsResult.OK("通知办结成功");
+        }
+        return EwsResult.error("通知办结失败");
+    }
+
 
     /**
      * 新增待处理通知
