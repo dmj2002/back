@@ -376,7 +376,7 @@ public class WarningController {
             return EwsResult.OK("通知成功",report);
         }
         //确认关闭操作
-        else if(warningOperateDTO.getOperatorId() == 4){
+        else if(warningOperateDTO.getOperateCode() == 4){
             for(Integer warningId : warningOperateDTO.getWarningId()){
                 Warnings warning = warningService.getById(warningId);
                 if(warning == null || warning.getWarningStatus() != 3){
