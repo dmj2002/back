@@ -174,23 +174,6 @@ public class WarningController {
 //        if (page1.getRecords().isEmpty()) {
 //            throw new CrudException("查询结果为空");
 //        }
-        QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
-        windTurbineQueryWrapper.select("turbine_id","turbine_type", "turbine_name","wind_farm_id");  // 指定你需要的字段
-        List<WindTurbine> turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
-
-
-        QueryWrapper<WindFarm> windFarmQueryWrapper = new QueryWrapper<>();
-        windFarmQueryWrapper.select("wind_farm_id", "wind_farm_name,company_id");
-        List<WindFarm> windFarmList = windFarmMapper.selectList(windFarmQueryWrapper);
-
-        QueryWrapper<Company> companyQueryWrapper = new QueryWrapper<>();
-        companyQueryWrapper.select("company_id", "company_name");
-        List<Company> companyList = companyMapper.selectList(companyQueryWrapper);
-
-        QueryWrapper<Models> modelsQueryWrapper = new QueryWrapper<>();
-        modelsQueryWrapper.select("model_id","turbine_id");
-        List<Models> modelsList = modelsMapper.selectList(modelsQueryWrapper);
-
         Map<String,Object> result = new HashMap<>();
         if(!page1.getRecords().isEmpty()){
             List<WarningsVO> WarningsListVO = warningMapper.getWarningsByModelId(page1.getRecords());
@@ -202,10 +185,6 @@ public class WarningController {
         result.put("page",page1.getCurrent());
         result.put("page_size",page1.getSize());
         result.put("total_pages",page1.getPages());
-        result.put("companyList",companyList);
-        result.put("windFarmList",windFarmList);
-        result.put("turbineList",turbineList);
-        result.put("modelList",modelsList);
         return EwsResult.OK("查询成功", result);
     }
     
@@ -262,23 +241,6 @@ public class WarningController {
 //        if (page1.getRecords().isEmpty()) {
 //            throw new CrudException("查询结果为空");
 //        }
-        QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
-        windTurbineQueryWrapper.select("turbine_id","turbine_type", "turbine_name","wind_farm_id");  // 指定你需要的字段
-        List<WindTurbine> turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
-
-
-        QueryWrapper<WindFarm> windFarmQueryWrapper = new QueryWrapper<>();
-        windFarmQueryWrapper.select("wind_farm_id", "wind_farm_name,company_id");
-        List<WindFarm> windFarmList = windFarmMapper.selectList(windFarmQueryWrapper);
-
-        QueryWrapper<Company> companyQueryWrapper = new QueryWrapper<>();
-        companyQueryWrapper.select("company_id", "company_name");
-        List<Company> companyList = companyMapper.selectList(companyQueryWrapper);
-
-        QueryWrapper<Models> modelsQueryWrapper = new QueryWrapper<>();
-        modelsQueryWrapper.select("model_id","turbine_id");
-        List<Models> modelsList = modelsMapper.selectList(modelsQueryWrapper);
-
         Map<String,Object> result = new HashMap<>();
         if(!page1.getRecords().isEmpty()){
             List<WarningsVO> WarningsListVO = warningMapper.getWarningsByModelId(page1.getRecords());
@@ -290,11 +252,6 @@ public class WarningController {
         result.put("page",page1.getCurrent());
         result.put("page_size",page1.getSize());
         result.put("total_pages",page1.getPages());
-
-        result.put("companyList",companyList);
-        result.put("windFarmList",windFarmList);
-        result.put("turbineList",turbineList);
-        result.put("modelList",modelsList);
         return EwsResult.OK("查询成功", result);
     }
     /**
@@ -342,7 +299,7 @@ public class WarningController {
 
     @PostMapping("/operate")
     public EwsResult<?> operateWarning(@RequestBody WarningOperateDTO warningOperateDTO) {
-        //关闭操作
+        //关闭待确认操作
         if(warningOperateDTO.getOperateCode() == 0){
             for(Integer warningId : warningOperateDTO.getWarningId()){
                 Warnings warning = warningService.getById(warningId);
@@ -380,6 +337,7 @@ public class WarningController {
                     throw new CrudException("预警不存在");
                 }
                 warning.setHandleTime(LocalDateTime.now());
+                warning.setHandlerId(warningOperateDTO.getOperatorId());
                 warning.setWarningLevel(warningOperateDTO.getWarningLevel());
                 warningService.updateById(warning);
             }
@@ -406,9 +364,51 @@ public class WarningController {
                         .reportId(report.getReportId())
                         .warningId(warningId)
                         .build());
+                Warnings warning = warningService.getById(warningId);
+                if(warning == null){
+                    throw new CrudException("预警不存在");
+                }
+                warning.setWarningStatus(2);
+                warning.setHandlerId(warningOperateDTO.getOperatorId());
+                warning.setHandleTime(LocalDateTime.now());
+                warningService.updateById(warning);
             }
-            return EwsResult.OK("通知成功");
+            return EwsResult.OK("通知成功",report);
         }
+        //确认关闭操作
+        else if(warningOperateDTO.getOperateCode() == 4){
+            for(Integer warningId : warningOperateDTO.getWarningId()){
+                Warnings warning = warningService.getById(warningId);
+                if(warning == null || warning.getWarningStatus() != 3){
+                    throw new CrudException("预警不存在或未关闭");
+                }
+                warning.setWarningStatus(4);
+                warning.setHandlerId(warningOperateDTO.getOperatorId());
+                warning.setHandleTime(LocalDateTime.now());
+                warningService.updateById(warning);
+            }
+            return EwsResult.OK("确认关闭成功");
+        }
+//        //通知办结操作
+//        else if(warningOperateDTO.getOperatorId() == 5){
+//            for(Integer warningId : warningOperateDTO.getWarningId()){
+//                //判断预警是否处于通知状态并修改
+//                Warnings warning = warningService.getById(warningId);
+//                if(warning == null || warning.getWarningStatus() != 2){
+//                    throw new CrudException("预警不存在或不处于通知状态");
+//                }
+//                warning.setWarningStatus(4);
+//                warning.setHandlerId(warningOperateDTO.getOperatorId());
+//                warning.setHandleTime(LocalDateTime.now());
+//                warningService.updateById(warning);
+//                // 修改通知状态为完结
+//                ReportWarningRelate warningRelate = reportWarningRelateMapper.selectOne(new QueryWrapper<ReportWarningRelate>().eq("warning_id", warningId));
+//                Reports report = reportsMapper.selectById(warningRelate.getReportId());
+//                report.setStatus(2);
+//                reportsMapper.updateById(report);
+//            }
+//            return EwsResult.OK("通知办结成功");
+//        }
         else{
             throw new CrudException("操作码错误");
         }

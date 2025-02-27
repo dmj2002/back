@@ -15,11 +15,8 @@ import com.hust.ewsystem.service.WindTurbineService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -58,7 +55,7 @@ public class TurbineController {
     @RequestMapping(value = "/getTurbineInfo",method = RequestMethod.POST)
     public EwsResult<TurbineInfoDTO> getTurbineInfo(@Valid @RequestBody QueryTurbineInfoDTO queryTurbineInfoDTO){
         QueryWrapper<Module> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(Module::getTurbineId,queryTurbineInfoDTO.getTurbineId());
+//        queryWrapper.lambda().eq(Module::getTurbineId,queryTurbineInfoDTO.getTurbineId());
         List<Module> list = moduleService.list(queryWrapper);
         if (CollectionUtils.isEmpty(list)) {
             LOGGER.error(String.format("获取风机模块信息为空,风机id【%s】",queryTurbineInfoDTO.getTurbineId()));
@@ -66,6 +63,16 @@ public class TurbineController {
         }
         TurbineInfoDTO turbineInfoDTO = initResult(queryTurbineInfoDTO, list);
         return EwsResult.OK(turbineInfoDTO);
+    }
+
+    @GetMapping("/list")
+    public EwsResult<List<WindTurbine>> turbineList(@RequestParam(value = "windfarm_id", required = false) Integer windfarmId) {
+        QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
+        if (windfarmId != null) {
+            windTurbineQueryWrapper.eq("wind_farm_id", windfarmId);
+        }
+        List<WindTurbine> result = windTurbineService.list(windTurbineQueryWrapper);
+        return EwsResult.OK(result);
     }
 
     /**

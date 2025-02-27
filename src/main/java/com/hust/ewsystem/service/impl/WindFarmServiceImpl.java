@@ -48,6 +48,7 @@ public class WindFarmServiceImpl extends ServiceImpl<WindFarmMapper, WindFarm> i
         List<WindFarmDTO> windFarmDTOList = windFarmMapper.getWindFarmsByCompanyId(queryWaitDoneInfoDTO);
         LambdaQueryWrapper<Reports> queryWrapper;
         for (WindFarmDTO windFarmDTO : windFarmDTOList) {
+            // 获取风场待办信息
             List<TurbineWaitDoneInfo> turbineWaitDoneInfo = windFarmDTO.getTurbineWaitDoneInfo();
             for (TurbineWaitDoneInfo waitDoneInfo : turbineWaitDoneInfo) {
                 int warningLevel1waitDoneSum = 0;
@@ -56,15 +57,16 @@ public class WindFarmServiceImpl extends ServiceImpl<WindFarmMapper, WindFarm> i
                 int warningLevel2waitHangUpSum = 0;
                 int warningLevel1waitCloseWaitSum = 0;
                 int warningLevel2waitCloseWaitSum = 0;
+                int infoType = queryWaitDoneInfoDTO.getInfoType();
                 for (ModelsDTO modelsDTO : waitDoneInfo.getModelList()) {
                     GetWarningsCountDTO getWarningsCountDTO = initGetWarningsCountDTO(queryWaitDoneInfoDTO, waitDoneInfo, modelsDTO);
                     // typeInfo传1查询一级预警  2查询二级预警
                     int warningsCount = warningMapper.getWarningsCount(getWarningsCountDTO);
-                    if (CommonConstant.NUM_COMMON_1.equals(queryWaitDoneInfoDTO.getInfoType())){
+                    if (CommonConstant.NUM_COMMON_1.equals(infoType)){
                         modelsDTO.setWarningLevel1Sum(warningsCount);
-                    } else if (CommonConstant.NUM_COMMON_2.equals(queryWaitDoneInfoDTO.getInfoType())) {
+                    } else if (CommonConstant.NUM_COMMON_2.equals(infoType)) {
                         modelsDTO.setWarningLevel2Sum(warningsCount);
-                    } else if (CommonConstant.NUM_COMMON_0.equals(queryWaitDoneInfoDTO.getInfoType())) {
+                    } else if (CommonConstant.NUM_COMMON_0.equals(infoType)) {
                         getWarningsCountDTO.setWarningLevel(CommonConstant.NUM_COMMON_1);
                         warningsCount = warningMapper.getWarningsCount(getWarningsCountDTO);
                         modelsDTO.setWarningLevel1Sum(warningsCount);
@@ -82,14 +84,14 @@ public class WindFarmServiceImpl extends ServiceImpl<WindFarmMapper, WindFarm> i
                         warningLevel2waitCloseWaitSum += count.getWarningLevel2waitCloseWait();
                     }
                 }
-                waitDoneInfo.setWarningLevel1waitDoneSum(warningLevel1waitDoneSum);
-                waitDoneInfo.setWarningLevel2waitDoneSum(warningLevel2waitDoneSum);
-                waitDoneInfo.setWarningLevel1waitHangUpSum(warningLevel1waitHangUpSum);
-                waitDoneInfo.setWarningLevel2waitHangUpSum(warningLevel2waitHangUpSum);
-                waitDoneInfo.setWarningLevel1waitCloseWaitSum(warningLevel1waitCloseWaitSum);
-                waitDoneInfo.setWarningLevel2waitCloseWaitSum(warningLevel2waitCloseWaitSum);
+                waitDoneInfo.setWarningLevel1waitDoneSum(infoType == 0 || infoType == 1 ? warningLevel1waitDoneSum : 0);
+                waitDoneInfo.setWarningLevel2waitDoneSum(infoType == 0 || infoType == 2  ? warningLevel2waitDoneSum : 0);
+                waitDoneInfo.setWarningLevel1waitHangUpSum(infoType == 0 || infoType == 1 ? warningLevel1waitHangUpSum : 0);
+                waitDoneInfo.setWarningLevel2waitHangUpSum(infoType == 0 || infoType == 2  ? warningLevel2waitHangUpSum : 0);
+                waitDoneInfo.setWarningLevel1waitCloseWaitSum(infoType == 0 || infoType == 1 ?warningLevel1waitCloseWaitSum : 0);
+                waitDoneInfo.setWarningLevel2waitCloseWaitSum(infoType == 0 || infoType == 2  ? warningLevel2waitCloseWaitSum : 0);
 
-                if (CommonConstant.NUM_COMMON_3.equals(queryWaitDoneInfoDTO.getInfoType()) || CommonConstant.NUM_COMMON_0.equals(queryWaitDoneInfoDTO.getInfoType())){
+                if (CommonConstant.NUM_COMMON_3.equals(infoType) || CommonConstant.NUM_COMMON_0.equals(infoType)){
                     queryWrapper = new LambdaQueryWrapper<>();
                     queryWrapper.eq(Reports::getTurbineId,waitDoneInfo.getTurbineId()).eq(Reports::getStatus, CommonConstant.NUM_COMMON_0)
                             .ge(Reports::getInitialTime,queryWaitDoneInfoDTO.getStartDate())

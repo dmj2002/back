@@ -15,6 +15,7 @@
 <!--        </collection>-->
 <!--    </resultMap>-->
 
+
     <resultMap id="windFarmWithTurbinesResultMap" type="com.hust.ewsystem.DTO.WindFarmDTO">
         <id property="windFarmId" column="wind_farm_id"/>
         <result property="windFarmName" column="wind_farm_name"/>

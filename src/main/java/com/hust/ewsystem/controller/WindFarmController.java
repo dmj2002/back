@@ -3,6 +3,7 @@ package com.hust.ewsystem.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.WindFarm;
+import com.hust.ewsystem.entity.WindTurbine;
 import com.hust.ewsystem.service.WindFarmService;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,5 +39,15 @@ public class WindFarmController {
         }
         List<WindFarm> res = windFarmService.list(queryWrapper);
         return EwsResult.OK(res);
+    }
+
+    @GetMapping("/list")
+    public EwsResult<List<WindFarm>> windfarmList(@RequestParam(value = "companyId",required = false) Integer companyId) {
+        QueryWrapper<WindFarm> windFarmQueryWrapper = new QueryWrapper<>();
+        if (companyId != null) {
+            windFarmQueryWrapper.eq("company_id", companyId);
+        }
+        List<WindFarm> result = windFarmService.list(windFarmQueryWrapper);
+        return EwsResult.OK(result);
     }
 }
