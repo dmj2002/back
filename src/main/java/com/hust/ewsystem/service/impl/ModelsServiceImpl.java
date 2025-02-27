@@ -56,9 +56,13 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     private RealPointMapper realPointMapper;
     @Autowired
     private CommonDataService commonDataService;
+
+    @Value("${threadPoolSize}")
+    private int threadPoolSize;
     // 任务状态
     private final Map<String, ScheduledFuture<?>> taskMap = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(threadPoolSize);
     @Override
     public String train(String algorithmLabel, String modelLabel,Integer modelId) {
         String taskLabel = UUID.randomUUID().toString();
@@ -260,7 +264,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         try {
             // 准备命令
             List<String> command = new ArrayList<>();
-            command.add("python3");
+            command.add("python");
             command.add(String.format("alg/%s/predict.py", algorithmLabel));
             command.add(String.format("task_logs/%s/setting.json", taskLabel));
             // 执行命令
@@ -270,6 +274,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             processBuilder.redirectErrorStream(true);
             process = processBuilder.start();
             System.out.println("Started Python process for model: " +modelId+ " and task: " + taskLabel);
+            LOGGER.debug(command.toString());
             StringBuilder outputString = null;
             //获取输入流
             InputStream inputStream = process.getInputStream();
@@ -284,6 +289,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 String s = new String(c, 0, len);
                 outputString.append(s);
             }
+            LOGGER.debug("算法执行结果：{}", outputString);
             inputStream.close();
             inputStreamReader.close();
             // 等待进程完成
