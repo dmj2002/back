@@ -58,7 +58,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     private CommonDataService commonDataService;
     // 任务状态
     private final Map<String, ScheduledFuture<?>> taskMap = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(64);
     @Override
     public String train(String algorithmLabel, String modelLabel,Integer modelId) {
         String taskLabel = UUID.randomUUID().toString();
