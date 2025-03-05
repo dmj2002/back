@@ -23,17 +23,17 @@ public class QueryTurbineInfoDTO implements Serializable {
 
     private static final long serialVersionUID = -3089087508290375077L;
 
-    /**
-     * 所属风场ID
-     */
-    @NotNull(message = "所属风场ID不能为空")
-    private Integer windFarmId;
-
-    /**
-     * 所属风场名称
-     */
-    @NotBlank(message = "所属风场名称不能为空")
-    private String windFarmName;
+//    /**
+//     * 所属风场ID
+//     */
+//    @NotNull(message = "所属风场ID不能为空")
+//    private Integer windFarmId;
+//
+//    /**
+//     * 所属风场名称
+//     */
+//    @NotBlank(message = "所属风场名称不能为空")
+//    private String windFarmName;
 
     /**
      * 风机ID
@@ -41,9 +41,9 @@ public class QueryTurbineInfoDTO implements Serializable {
     @NotNull(message = "风机ID不能为空")
     private Integer turbineId;
 
-    /**
-     * 风机名称
-     */
-    @NotBlank(message = "风机名称不能为空")
-    private String turbineName;
+//    /**
+//     * 风机名称
+//     */
+//    @NotBlank(message = "风机名称不能为空")
+//    private String turbineName;
 }

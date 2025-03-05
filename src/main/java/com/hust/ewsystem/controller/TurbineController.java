@@ -49,19 +49,19 @@ public class TurbineController {
 
     /**
      * 查询风机信息
-     * @param queryTurbineInfoDTO queryTurbineInfoDTO
+     * @param  tubineId
      * @return EwsResult<TurbineInfoDTO>
      */
-    @RequestMapping(value = "/getTurbineInfo",method = RequestMethod.POST)
-    public EwsResult<TurbineInfoDTO> getTurbineInfo(@Valid @RequestBody QueryTurbineInfoDTO queryTurbineInfoDTO){
+    @RequestMapping(value = "/getTurbineInfo",method = RequestMethod.GET)
+    public EwsResult<TurbineInfoDTO> getTurbineInfo(@RequestParam(value = "turbine_id", required = true) Integer tubineId){
         QueryWrapper<Module> queryWrapper = new QueryWrapper<>();
-//        queryWrapper.lambda().eq(Module::getTurbineId,queryTurbineInfoDTO.getTurbineId());
+        queryWrapper.lambda().eq(Module::getTurbineId,tubineId);
         List<Module> list = moduleService.list(queryWrapper);
         if (CollectionUtils.isEmpty(list)) {
-            LOGGER.error(String.format("获取风机模块信息为空,风机id【%s】",queryTurbineInfoDTO.getTurbineId()));
-            return EwsResult.error(String.format("获取风机信息为空,风机id【%s】",queryTurbineInfoDTO.getTurbineId()));
+            LOGGER.error(String.format("获取风机模块信息为空,风机id【%s】",tubineId));
+            return EwsResult.error(String.format("获取风机信息为空,风机id【%s】",tubineId));
         }
-        TurbineInfoDTO turbineInfoDTO = initResult(queryTurbineInfoDTO, list);
+        TurbineInfoDTO turbineInfoDTO = initResult(tubineId, list);
         return EwsResult.OK(turbineInfoDTO);
     }
 
@@ -77,16 +77,13 @@ public class TurbineController {
 
     /**
      * 组装风机信息结果
-     * @param queryTurbineInfoDTO 风机信息结果
+     * @param turbineId 风机id
      * @param moduleList 风机信息结果
      * @return TurbineInfoDTO
      */
-    public TurbineInfoDTO initResult(QueryTurbineInfoDTO queryTurbineInfoDTO,List<Module> moduleList){
+    public TurbineInfoDTO initResult(Integer turbineId,List<Module> moduleList){
         TurbineInfoDTO result = new TurbineInfoDTO();
-        result.setTurbineId(queryTurbineInfoDTO.getTurbineId());
-        result.setTurbineName(queryTurbineInfoDTO.getTurbineName());
-        result.setWindFarmId(queryTurbineInfoDTO.getWindFarmId());
-        result.setWindFarmName(queryTurbineInfoDTO.getWindFarmName());
+        result.setTurbineId(turbineId);
         List<TurbineDetailsInfoDTO> detailsInfoList =  new ArrayList<>(moduleList.size());
         TurbineDetailsInfoDTO turbineDetailsInfoDTO;
         QueryWrapper<StandPoint> queryWrapper;

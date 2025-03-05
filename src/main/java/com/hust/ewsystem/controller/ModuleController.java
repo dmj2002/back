@@ -21,7 +21,7 @@ import java.util.List;
  * @Version: 1.0
  */
 @RestController
-@RequestMapping("/model")
+@RequestMapping("/module")
 public class ModuleController {
 
     @Resource

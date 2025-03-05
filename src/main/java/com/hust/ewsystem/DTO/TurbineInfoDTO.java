@@ -22,25 +22,25 @@ public class TurbineInfoDTO implements Serializable {
 
     private static final long serialVersionUID = 6018905405833679355L;
 
-    /**
-     * 所属风场ID
-     */
-    private Integer windFarmId;
-
-    /**
-     * 所属风场名称
-     */
-    private String windFarmName;
+//    /**
+//     * 所属风场ID
+//     */
+//    private Integer windFarmId;
+//
+//    /**
+//     * 所属风场名称
+//     */
+//    private String windFarmName;
 
     /**
      * 风机ID
      */
     private Integer turbineId;
 
-    /**
-     * 风机名称
-     */
-    private String turbineName;
+//    /**
+//     * 风机名称
+//     */
+//    private String turbineName;
 
     /**
      * 模块列表
