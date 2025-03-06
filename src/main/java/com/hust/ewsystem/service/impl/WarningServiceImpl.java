@@ -60,6 +60,9 @@ public class WarningServiceImpl extends ServiceImpl<WarningMapper, Warnings> imp
         }
         return warnings;
     }
+    public List<WarningsDTO> getWarnDesc(QueryWarnInfoDTO queryWarnInfoDTO) {
+        return warningMapper.selectWarningsDesc(queryWarnInfoDTO);
+    }
 
     @Override
     public List<Warnings> getWarnInfoListByReportId(List<Integer> warnIdList) {

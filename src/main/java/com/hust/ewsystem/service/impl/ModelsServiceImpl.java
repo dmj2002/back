@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hust.ewsystem.common.exception.FileException;
 import com.hust.ewsystem.entity.*;
@@ -88,7 +89,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         } catch (IOException e) {
             throw new FileException("setting.json文件配置失败",e);
         }
-        Runnable task = () -> executeTrain(pythonFilePath, algorithmLabel, taskLabel);
+        Runnable task = () -> executeTrain(pythonFilePath, algorithmLabel, taskLabel, modelId);
         // 调度任务一次性执行
         ScheduledFuture<?> scheduledTask = scheduler.schedule(task, 0, TimeUnit.SECONDS);
         taskMap.put(modelLabel + "_train", scheduledTask);
@@ -153,7 +154,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
      * @param algorithmLabel 算法标签
      * @param taskLabel 任务ID
      */
-    public void executeTrain(String filepath, String algorithmLabel, String taskLabel) {
+    public void executeTrain(String filepath, String algorithmLabel, String taskLabel, Integer modelId) {
         Process process = null;
         try {
             // 准备命令
@@ -169,7 +170,20 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             process = processBuilder.start();
             System.out.println("Started Python process for task: " + taskLabel);
             // 等待进程完成
-            process.waitFor();
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                System.out.println("Python process failed with exit code: " + exitCode);
+                //修改模型状态为训练失败
+                UpdateWrapper<Models> modelsUpdateWrapper = new UpdateWrapper<>();
+                modelsUpdateWrapper.eq("model_id", modelId).set("model_status", 3);
+                update(modelsUpdateWrapper);
+            } else {
+                System.out.println("Python process completed successfully for task: " + taskLabel);
+                //修改模型状态为训练成功
+                UpdateWrapper<Models> modelsUpdateWrapper = new UpdateWrapper<>();
+                modelsUpdateWrapper.eq("model_id", modelId).set("model_status", 2);
+                update(modelsUpdateWrapper);
+            }
         } catch(InterruptedException e) {
             process.destroy();
         } catch (Exception e) {

@@ -45,4 +45,9 @@ public class QueryWarnInfoDTO implements Serializable {
      * 结束时间
      */
     private LocalDateTime  endTime;
+
+    /**
+     * 预警描述
+     */
+    private String warningDescription;
 }

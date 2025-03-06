@@ -522,6 +522,12 @@ public class WarningController {
      */
     @RequestMapping(value = "/getWarnInfoList",method = RequestMethod.POST)
     public EwsResult<List<WarningsDTO>> getWarnInfoList(@Valid @RequestBody QueryWarnInfoDTO queryWarnInfoDTO){
+        List<WarningsDTO> warnInfo = warningService.getWarnDesc(queryWarnInfoDTO);
+        return EwsResult.OK(warnInfo);
+    }
+
+    @RequestMapping(value = "/getWarnInfoListByDesc",method = RequestMethod.POST)
+    public EwsResult<List<WarningsDTO>> getWarnInfoListByDesc(@Valid @RequestBody QueryWarnInfoDTO queryWarnInfoDTO){
         List<WarningsDTO> warnInfo = warningService.getWarnInfo(queryWarnInfoDTO);
         return EwsResult.OK(warnInfo);
     }

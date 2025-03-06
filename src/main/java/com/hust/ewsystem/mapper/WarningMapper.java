@@ -36,6 +36,8 @@ public interface WarningMapper extends BaseMapper<Warnings> {
 
     List<WarningsDTO> selectWarningsNoPage(@Param("param")QueryWarnInfoDTO queryWarnInfoDTO);
 
+    List<WarningsDTO> selectWarningsDesc(@Param("param")QueryWarnInfoDTO queryWarnInfoDTO);
+
     IPage<WarningsDTO> selectWarningsPage(@Param("param")QueryWarnInfoDTO queryWarnInfoDTO, @Param("page") Page<Warnings> page);
 
     int getWarningsCount(@Param("param") GetWarningsCountDTO getWarningsCountDTO);

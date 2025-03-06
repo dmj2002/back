@@ -331,9 +331,6 @@ public class ModelsController {
             map.put("modelId",modelId);
             map.put("taskId",taskId);
             taskIdList.add(map);
-            UpdateWrapper<Models> modelsUpdateWrapper = new UpdateWrapper<>();
-            modelsUpdateWrapper.eq("model_id", modelId).set("model_status", 2);
-            modelsService.update(modelsUpdateWrapper);
         }
         return EwsResult.OK(taskIdList);
     }
