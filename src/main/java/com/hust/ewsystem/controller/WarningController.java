@@ -493,16 +493,13 @@ public class WarningController {
         int warnCount = 0;
         LambdaQueryWrapper<Models> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Models::getTurbineId, turbineId);
-        List<Models> list = modelsService.list(queryWrapper);
-        for (Models models : list) {
-            Integer modelId = models.getModelId();
-            LambdaQueryWrapper<Warnings> warningsWrapper = new LambdaQueryWrapper<>();
-            warningsWrapper.eq(Warnings::getModelId,modelId)
-                    .ge(Warnings::getStartTime,queryTurbineWarnMatrixDTO.getStartDate()).le(Warnings::getEndTime,queryTurbineWarnMatrixDTO.getEndDate());
-            List<Warnings> warnings = warningService.list(warningsWrapper);
-            if (!CollectionUtils.isEmpty(warnings)){
-                warnCount += warnings.size();
-            }
+        List<Integer> modelIds = modelsService.list(queryWrapper).stream().map(Models::getModelId).collect(Collectors.toList());
+        LambdaQueryWrapper<Warnings> warningsWrapper = new LambdaQueryWrapper<>();
+        warningsWrapper.in(Warnings::getModelId,modelIds)
+                .ge(Warnings::getStartTime,queryTurbineWarnMatrixDTO.getStartDate()).le(Warnings::getEndTime,queryTurbineWarnMatrixDTO.getEndDate());
+        List<Warnings> warnings = warningService.list(warningsWrapper);
+        if (!CollectionUtils.isEmpty(warnings)){
+            warnCount += warnings.size();
         }
         return warnCount;
     }

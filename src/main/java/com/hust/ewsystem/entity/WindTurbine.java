@@ -26,7 +26,7 @@ public class WindTurbine implements Serializable {
 
     private Integer windFarmId; // 风场id
 
-    private Integer warningStatus; // 预警工况
-
-    private Integer currentStatus; // 当前工况
+//    private Integer warningStatus; // 预警工况
+//
+//    private Integer currentStatus; // 当前工况
 }

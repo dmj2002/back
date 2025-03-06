@@ -25,12 +25,12 @@ public class WindFarmController {
     @Resource
     private WindFarmService windFarmService;
 
-    @RequestMapping(value = "/getWindFarmList",method = RequestMethod.GET)
-    public EwsResult<List<WindFarm>> getWindFarmList(){
-        // TODO 暂未添加风场所属管理公司的过滤条件
-        List<WindFarm> list = windFarmService.list();
-        return EwsResult.OK(list);
-    }
+//    @RequestMapping(value = "/getWindFarmList",method = RequestMethod.GET)
+//    public EwsResult<List<WindFarm>> getWindFarmList(){
+//        // TODO 暂未添加风场所属管理公司的过滤条件
+//        List<WindFarm> list = windFarmService.list();
+//        return EwsResult.OK(list);
+//    }
     @GetMapping("/getwindfarmList")
     public EwsResult<?> getWindFarm(@RequestParam(value = "companyId",required = false) Integer companyId){
         QueryWrapper<WindFarm> queryWrapper = new QueryWrapper<>();
