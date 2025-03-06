@@ -27,7 +27,6 @@ public class WindFarmController {
 
 //    @RequestMapping(value = "/getWindFarmList",method = RequestMethod.GET)
 //    public EwsResult<List<WindFarm>> getWindFarmList(){
-//        // TODO 暂未添加风场所属管理公司的过滤条件
 //        List<WindFarm> list = windFarmService.list();
 //        return EwsResult.OK(list);
 //    }
