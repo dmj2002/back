@@ -85,7 +85,7 @@
         ORDER BY w.start_time DESC
     </select>
 
-    <select id="selectWarningsDesc" resultType = "WarningResultMap">
+    <select id="selectWarningsDesc" resultMap = "WarningResultMap">
         SELECT w.warning_description, CONCAT(wf.wind_farm_name, '-', wt.turbine_name) AS combined_name
         FROM warnings w
         JOIN models m ON w.model_id = m.model_id
