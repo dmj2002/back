@@ -457,9 +457,12 @@ public class WarningController {
      */
     public List<WindFarm> getWindFarmList(Integer windFarmId){
         List<WindFarm> list;
-        if (CommonConstant.ALL.equals(windFarmId)){
+//        if (CommonConstant.ALL.equals(windFarmId)){
+//            list = windFarmService.list();
+//        }
+        if(Objects.isNull(windFarmId)){
             list = windFarmService.list();
-        }else {
+        } else {
             LambdaQueryWrapper<WindFarm> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(WindFarm::getWindFarmId,windFarmId);
             list = windFarmService.list(wrapper);

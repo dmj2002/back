@@ -39,8 +39,13 @@ public class QueryReportsDTO implements Serializable {
     /**
      * 风机ID
      */
-    @NotNull(message = "风机ID不能为空")
+//    @NotNull(message = "风机ID不能为空")
     private Integer turbineId;
+
+    /**
+     * 风场ID
+     */
+    private Integer windFarmId;
 
     /**
      * 开始时间

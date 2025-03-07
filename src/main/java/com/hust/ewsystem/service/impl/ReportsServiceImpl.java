@@ -63,7 +63,13 @@ public class ReportsServiceImpl extends ServiceImpl<ReportsMapper, Reports> impl
     public IPage<ReportsDTO> getReportList(QueryReportsDTO queryReportsDTO) {
         Page<Reports> page = new Page<>(queryReportsDTO.getPageNo(), queryReportsDTO.getPageSize());
         QueryWrapper<Reports> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("turbine_id",queryReportsDTO.getTurbineId()).ge("initial_time",queryReportsDTO.getStartTime()).le("initial_time",queryReportsDTO.getEndTime());
+        if(queryReportsDTO.getTurbineId() != null){
+            queryWrapper.eq("turbine_id",queryReportsDTO.getTurbineId());
+        }
+        if(queryReportsDTO.getWindFarmId() != null){
+            queryWrapper.eq("wind_farm_id",queryReportsDTO.getWindFarmId());
+        }
+        queryWrapper.ge("initial_time",queryReportsDTO.getStartTime()).le("initial_time",queryReportsDTO.getEndTime());
         Page<Reports> reportsPage = reportsMapper.selectPage(page, queryWrapper);
         LambdaQueryWrapper<Employee> wrapper;
         Page<ReportsDTO> reportsDTOPage = new Page<>();
