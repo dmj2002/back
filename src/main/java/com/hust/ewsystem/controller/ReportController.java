@@ -15,6 +15,8 @@ import com.hust.ewsystem.mapper.ReportsMapper;
 import com.hust.ewsystem.service.ReportWarningRelateService;
 import com.hust.ewsystem.service.ReportsService;
 import com.hust.ewsystem.service.WarningService;
+import com.hust.ewsystem.service.WindTurbineService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -38,7 +40,7 @@ public class ReportController {
     @Resource
     private WarningService warningService;
 
-    
+
     @PostMapping("/operate")
     public EwsResult<?> operationReport(@RequestBody ReportDTO reportDTO){
         Reports newReport = Reports.builder()

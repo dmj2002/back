@@ -12,16 +12,20 @@ import com.hust.ewsystem.DTO.ReportsDTO;
 import com.hust.ewsystem.entity.Employee;
 import com.hust.ewsystem.entity.ReportWarningRelate;
 import com.hust.ewsystem.entity.Reports;
+import com.hust.ewsystem.entity.WindTurbine;
 import com.hust.ewsystem.mapper.EmployeeMapper;
 import com.hust.ewsystem.mapper.ReportWarningRelateMapper;
 import com.hust.ewsystem.mapper.ReportsMapper;
 import com.hust.ewsystem.service.ReportsService;
+import com.hust.ewsystem.service.WindTurbineService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @BelongsProject: back
@@ -44,6 +48,9 @@ public class ReportsServiceImpl extends ServiceImpl<ReportsMapper, Reports> impl
     @Resource
     private ReportWarningRelateMapper reportWarningRelateMapper;
 
+    @Autowired
+    private WindTurbineService windTurbineService;
+
     @Override
     public int addReport(AddReportsDTO reportDTO) {
         Reports repeat = Reports.builder().reportLabel(reportDTO.getReportLabel()).turbineId(reportDTO.getTurbineId()).employeeId(reportDTO.getEmployeeId())
@@ -63,11 +70,17 @@ public class ReportsServiceImpl extends ServiceImpl<ReportsMapper, Reports> impl
     public IPage<ReportsDTO> getReportList(QueryReportsDTO queryReportsDTO) {
         Page<Reports> page = new Page<>(queryReportsDTO.getPageNo(), queryReportsDTO.getPageSize());
         QueryWrapper<Reports> queryWrapper = new QueryWrapper<>();
+        List<Integer> turbineIds = new ArrayList<>();
         if(queryReportsDTO.getWindFarmId() != null){
-            queryWrapper.eq("wind_farm_id",queryReportsDTO.getWindFarmId());
+            turbineIds = windTurbineService.list(new QueryWrapper<WindTurbine>().eq("wind_farm_id", queryReportsDTO.getWindFarmId()))
+                                        .stream()
+                                        .map(WindTurbine::getTurbineId)
+                                        .collect(Collectors.toList());
         }
         if(queryReportsDTO.getTurbineId() != null){
             queryWrapper.eq("turbine_id",queryReportsDTO.getTurbineId());
+        }else if(!turbineIds.isEmpty()){
+            queryWrapper.in("turbine_id",turbineIds);
         }
         queryWrapper.ge("initial_time",queryReportsDTO.getStartTime()).le("initial_time",queryReportsDTO.getEndTime());
         Page<Reports> reportsPage = reportsMapper.selectPage(page, queryWrapper);
