@@ -52,6 +52,6 @@ public class QueryWarnDTO implements Serializable {
     /**
      * 分场id,"全部"用int 9999标识
      */
-    @NotNull(message = "分场id不能为空")
+//    @NotNull(message = "分场id不能为空")
     private Integer  windFarmId;
 }

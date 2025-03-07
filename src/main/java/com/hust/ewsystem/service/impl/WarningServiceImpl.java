@@ -40,9 +40,9 @@ public class WarningServiceImpl extends ServiceImpl<WarningMapper, Warnings> imp
     @Override
     public IPage<WarningsDTO> getWarnInfo(QueryWarnDTO queryWarnDTO) {
         Page<Warnings> page = new Page<>(queryWarnDTO.getPageNo(),queryWarnDTO.getPageSize());
-        if (CommonConstant.ALL.equals(queryWarnDTO.getWindFarmId())){
-            queryWarnDTO.setWindFarmId(null);
-        }
+//        if (CommonConstant.ALL.equals(queryWarnDTO.getWindFarmId())){
+//            queryWarnDTO.setWindFarmId(null);
+//        }
         return warningMapper.selectWarningsPage(queryWarnDTO,page);
     }
 
