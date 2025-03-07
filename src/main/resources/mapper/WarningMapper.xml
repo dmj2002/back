@@ -81,6 +81,7 @@
             <if test="param.warningDescription != null">
                 AND w.warning_description = #{param.warningDescription}
             </if>
+            AND w.warning_status != 4
         </where>
         ORDER BY w.start_time DESC
     </select>
