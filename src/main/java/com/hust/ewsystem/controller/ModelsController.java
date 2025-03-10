@@ -327,6 +327,7 @@ public class ModelsController {
             String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
             // 算法调用
             String taskId = modelsService.train(algorithmLabel, modelLabel,modelId);
+
             Map<String,Object> map= new HashMap<>();
             map.put("modelId",modelId);
             map.put("taskId",taskId);

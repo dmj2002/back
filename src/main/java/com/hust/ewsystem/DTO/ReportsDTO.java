@@ -39,6 +39,20 @@ public class ReportsDTO {
     private Integer turbineId;
 
     /**
+     * 风机名称
+     */
+    private String turbineName;
+
+    /*
+     * 风场的唯一标识符，关联到相应的风场信息。
+     */
+    private Integer windFarmId;
+    /*
+     * 风场名称
+     */
+    private String windFarmName;
+
+    /**
      * 员工的唯一标识符，关联到生成该报告的员工信息。
      */
     private Integer employeeId;

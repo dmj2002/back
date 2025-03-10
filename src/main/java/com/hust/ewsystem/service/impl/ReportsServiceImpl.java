@@ -9,14 +9,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hust.ewsystem.DTO.QueryReportsDTO;
 import com.hust.ewsystem.DTO.AddReportsDTO;
 import com.hust.ewsystem.DTO.ReportsDTO;
-import com.hust.ewsystem.entity.Employee;
-import com.hust.ewsystem.entity.ReportWarningRelate;
-import com.hust.ewsystem.entity.Reports;
-import com.hust.ewsystem.entity.WindTurbine;
+import com.hust.ewsystem.entity.*;
 import com.hust.ewsystem.mapper.EmployeeMapper;
 import com.hust.ewsystem.mapper.ReportWarningRelateMapper;
 import com.hust.ewsystem.mapper.ReportsMapper;
 import com.hust.ewsystem.service.ReportsService;
+import com.hust.ewsystem.service.WindFarmService;
 import com.hust.ewsystem.service.WindTurbineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,6 +48,9 @@ public class ReportsServiceImpl extends ServiceImpl<ReportsMapper, Reports> impl
 
     @Autowired
     private WindTurbineService windTurbineService;
+
+    @Autowired
+    private WindFarmService windFarmService;
 
     @Override
     public int addReport(AddReportsDTO reportDTO) {
@@ -85,6 +86,8 @@ public class ReportsServiceImpl extends ServiceImpl<ReportsMapper, Reports> impl
         queryWrapper.ge("initial_time",queryReportsDTO.getStartTime()).le("initial_time",queryReportsDTO.getEndTime());
         Page<Reports> reportsPage = reportsMapper.selectPage(page, queryWrapper);
         LambdaQueryWrapper<Employee> wrapper;
+        LambdaQueryWrapper<WindTurbine> wrapper2;
+        LambdaQueryWrapper<WindFarm> wrapper3;
         Page<ReportsDTO> reportsDTOPage = new Page<>();
         List<ReportsDTO> list = new ArrayList<>();
         for (Reports record : reportsPage.getRecords()) {
@@ -92,7 +95,17 @@ public class ReportsServiceImpl extends ServiceImpl<ReportsMapper, Reports> impl
             wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(Employee::getEmployeeId,employeeId);
             Employee employee = employeeMapper.selectOne(wrapper);
-            ReportsDTO reportsDTO = initResult(record, employee);
+
+            wrapper2 = new LambdaQueryWrapper<>();
+            wrapper2.eq(WindTurbine::getTurbineId,record.getTurbineId());
+            WindTurbine turbine = windTurbineService.getOne(wrapper2);
+            String turbineName = turbine.getTurbineName();
+
+            wrapper3 = new LambdaQueryWrapper<>();
+            wrapper3.eq(WindFarm::getWindFarmId,turbine.getWindFarmId());
+            String windFarmName = windFarmService.getOne(wrapper3).getWindFarmName();
+
+            ReportsDTO reportsDTO = initResult(record, employee,turbineName,turbine.getWindFarmId(),windFarmName);
             list.add(reportsDTO);
         }
         reportsDTOPage.setRecords(list);
@@ -112,11 +125,11 @@ public class ReportsServiceImpl extends ServiceImpl<ReportsMapper, Reports> impl
      * @param employee employee
      * @return ReportsDTO
      */
-    public ReportsDTO initResult(Reports record,Employee employee){
+    public ReportsDTO initResult(Reports record,Employee employee,String turbineName,Integer windFarmId,String windFarmName){
         ReportsDTO reportsDTO = new ReportsDTO();
         reportsDTO.setReportId(record.getReportId());
         reportsDTO.setReportText(record.getReportText());
-        reportsDTO.setReportLabel(reportsDTO.getReportLabel());
+        reportsDTO.setReportLabel(record.getReportLabel());
         reportsDTO.setTurbineId(record.getTurbineId());
         reportsDTO.setEmployeeId(record.getEmployeeId());
         reportsDTO.setEmployeeName(employee.getEmployeeName());
@@ -124,6 +137,9 @@ public class ReportsServiceImpl extends ServiceImpl<ReportsMapper, Reports> impl
         reportsDTO.setStatus(record.getStatus());
         reportsDTO.setValid(record.getValid());
         reportsDTO.setRepetition(record.getRepetition());
+        reportsDTO.setTurbineName(turbineName);
+        reportsDTO.setWindFarmId(windFarmId);
+        reportsDTO.setWindFarmName(windFarmName);
         return reportsDTO;
     }
 }
