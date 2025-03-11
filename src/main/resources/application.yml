@@ -47,7 +47,7 @@ mybatis-plus:
 # Python 脚本位置
 algorithm:
   pythonFilePath: C:/data
-
+  threshold: 0.95
 logging:
   level:
     com.hust.encrypt: info

@@ -42,6 +42,8 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
 
     @Value("${algorithm.pythonFilePath}")
     public String pythonFilePath;
+    @Value("${algorithm.threshold}")
+    public Double threshold;
 
     @Autowired
     private WarningService warningService;
@@ -485,8 +487,8 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 }
             }
             double validRatio = (double) validSize / totalSize;
-            //TODO 0.95是一个阈值，可以根据实际情况调整
-            if(validRatio < 0.95){
+            //阈值，可以根据实际情况调整
+            if(validRatio < threshold){
                 LOGGER.info("model: " + taskLabel + "的数据有异常，取消此次预测任务");
                 return false;
             }
