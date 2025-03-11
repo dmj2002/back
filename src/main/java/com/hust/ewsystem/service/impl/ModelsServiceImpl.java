@@ -231,7 +231,9 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 for (CommonData record : data) {
                     LocalDateTime datetime = record.getDatetime();
                     Double value = record.getValue();
+                    Integer status = record.getStatus();
                     alignedData.computeIfAbsent(datetime, k -> new HashMap<>()).put(entry.getValue(), value);
+                    alignedData.get(datetime).put(entry.getValue() + "_status", status);
                 }
             }
             int sizeBeforeRemoval = alignedData.size();
@@ -248,7 +250,8 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 LOGGER.info("model: " +modelId+ " and task: " + taskLabel + "的数据有异常，取消此次预测任务");
                 return;
             }
-            toPredictCsv(alignedData, realToStandLabel, taskLabel);
+            boolean res = toPredictCsv(alignedData, realToStandLabel, taskLabel);
+            if(!res)return;
             //准备setting.json
             File settingFile = new File(taskDir, "setting.json");
             JSONObject settings = new JSONObject();
@@ -455,7 +458,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         }
         return RealTostandPointMap;
     }
-    public void toPredictCsv(Map<LocalDateTime, Map<String, Object>> alignedData,Map<String, String> realToStandLabel,String taskLabel){
+    public boolean toPredictCsv(Map<LocalDateTime, Map<String, Object>> alignedData,Map<String, String> realToStandLabel,String taskLabel) {
         // 创建目标目录（如果不存在）
         File modelDir = new File(String.format("%s/task_logs/%s", pythonFilePath,taskLabel));
         if (!modelDir.exists()) {
@@ -463,8 +466,30 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 throw new FileException("创建文件目录失败");
             }
         }
+        int totalSize = 0;
+        int validSize = 0;
         // 写入 CSV 文件
         try (FileWriter csvWriter = new FileWriter(String.format("%s/task_logs/%s/predict.csv", pythonFilePath, taskLabel))) {
+            for (Map.Entry<LocalDateTime, Map<String, Object>> entry : alignedData.entrySet()) {
+                totalSize++;
+                boolean allStatusValid = true;
+                for(String standPoint : realToStandLabel.values()){
+                    Integer status = (Integer) entry.getValue().get(standPoint + "_status");
+                    if (status == null || status == 0) {
+                        allStatusValid = false;
+                        break;
+                    }
+                }
+                if (allStatusValid) {
+                    validSize++;
+                }
+            }
+            double validRatio = (double) validSize / totalSize;
+            //TODO 0.95是一个阈值，可以根据实际情况调整
+            if(validRatio < 0.95){
+                LOGGER.info("model: " + taskLabel + "的数据有异常，取消此次预测任务");
+                return false;
+            }
             // 写入表头
             csvWriter.append("datetime");
             for (String standPoint : realToStandLabel.values()) {
@@ -473,15 +498,27 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             csvWriter.append("\n");
             // 写入数据
             for (Map.Entry<LocalDateTime, Map<String, Object>> entry : alignedData.entrySet()) {
+                boolean isValid = true;
+                for(String standPoint : realToStandLabel.values()){
+                    Integer status = (Integer) entry.getValue().get(standPoint + "_status");
+                    if (status == null || status == 0) {
+                        isValid = false;
+                        break;
+                    }
+                }
+                // 过滤当前数据行，不满足条件的数据行不写入 CSV 文件
+                if(!isValid)continue;
                 StringBuilder line = new StringBuilder(entry.getKey().toString());
                 for (String standPoint : realToStandLabel.values()) {
                     Double value = (Double) entry.getValue().get(standPoint);
                     line.append(",").append(value);
+                    csvWriter.append(line.toString()).append("\n");
                 }
-                csvWriter.append(line.toString()).append("\n");
             }
+            return true;
         } catch (IOException e) {
-            throw new FileException("写入CSV文件失败", e);
+            LOGGER.error("写入 CSV 文件失败", e);
+            return false;
         }
     }
 }
