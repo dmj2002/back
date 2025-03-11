@@ -53,7 +53,7 @@ public class TurbineController {
      * @return EwsResult<TurbineInfoDTO>
      */
     @RequestMapping(value = "/getTurbineInfo",method = RequestMethod.GET)
-    public EwsResult<TurbineInfoDTO> getTurbineInfo(@RequestParam(value = "turbine_id", required = true) Integer tubineId){
+    public EwsResult<TurbineInfoDTO> getTurbineInfo(@RequestParam(value = "turbineId", required = true) Integer tubineId){
         QueryWrapper<Module> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(Module::getTurbineId,tubineId);
         List<Module> list = moduleService.list(queryWrapper);
