@@ -49,15 +49,15 @@ public class WarningServiceImpl extends ServiceImpl<WarningMapper, Warnings> imp
     @Override
     public List<WarningsDTO> getWarnInfo(QueryWarnInfoDTO queryWarnInfoDTO) {
         List<WarningsDTO> warnings = warningMapper.selectWarningsNoPage(queryWarnInfoDTO);
-        LambdaQueryWrapper<Module> queryWrapper;
-        for (WarningsDTO record : warnings) {
-            queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(Module::getTurbineId,queryWarnInfoDTO.getTurbineId());
-            Module module = moduleMapper.selectOne(queryWrapper);
-            if (Objects.nonNull(module)){
-                record.setSystemSort(module.getModuleName());
-            }
-        }
+//        LambdaQueryWrapper<Module> queryWrapper;
+//        for (WarningsDTO record : warnings) {
+//            queryWrapper = new LambdaQueryWrapper<>();
+//            queryWrapper.eq(Module::getTurbineId,queryWarnInfoDTO.getTurbineId());
+//            Module module = moduleMapper.selectOne(queryWrapper);
+//            if (Objects.nonNull(module)){
+//                record.setSystemSort(module.getModuleName());
+//            }
+//        }
         return warnings;
     }
     public List<WarningsDTO> getWarnDesc(QueryWarnInfoDTO queryWarnInfoDTO) {
