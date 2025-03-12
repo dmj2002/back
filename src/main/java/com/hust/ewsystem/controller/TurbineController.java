@@ -7,8 +7,10 @@ import com.hust.ewsystem.DTO.TurbineDetailsInfoDTO;
 import com.hust.ewsystem.DTO.TurbineInfoDTO;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.Module;
+import com.hust.ewsystem.entity.ModuleStandRelate;
 import com.hust.ewsystem.entity.StandPoint;
 import com.hust.ewsystem.entity.WindTurbine;
+import com.hust.ewsystem.mapper.ModuleStandRelateMapper;
 import com.hust.ewsystem.service.ModuleService;
 import com.hust.ewsystem.service.StandPointService;
 import com.hust.ewsystem.service.WindTurbineService;
@@ -22,6 +24,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @BelongsProject: back
@@ -46,23 +49,23 @@ public class TurbineController {
     @Resource
     private WindTurbineService windTurbineService;
 
+    @Resource
+    private ModuleStandRelateMapper moduleStandRelateMapper;
+
 
     /**
      * 查询风机信息
-     * @param  tubineId
+     * @param
      * @return EwsResult<TurbineInfoDTO>
      */
     @RequestMapping(value = "/getTurbineInfo",method = RequestMethod.GET)
-    public EwsResult<TurbineInfoDTO> getTurbineInfo(@RequestParam(value = "turbineId", required = true) Integer tubineId){
-        QueryWrapper<Module> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(Module::getTurbineId,tubineId);
-        List<Module> list = moduleService.list(queryWrapper);
+    public EwsResult<List<TurbineDetailsInfoDTO>> getTurbineInfo(){
+        List<Module> list = moduleService.list();
         if (CollectionUtils.isEmpty(list)) {
-            LOGGER.error(String.format("获取风机模块信息为空,风机id【%s】",tubineId));
-            return EwsResult.error(String.format("获取风机信息为空,风机id【%s】",tubineId));
+            return EwsResult.error(String.format("获取风机模块信息为空"));
         }
-        TurbineInfoDTO turbineInfoDTO = initResult(tubineId, list);
-        return EwsResult.OK(turbineInfoDTO);
+        List<TurbineDetailsInfoDTO> turbineDetailsInfoDTOS = initResult(list);
+        return EwsResult.OK(turbineDetailsInfoDTOS);
     }
 
     @GetMapping("/list")
@@ -77,28 +80,25 @@ public class TurbineController {
 
     /**
      * 组装风机信息结果
-     * @param turbineId 风机id
      * @param moduleList 风机信息结果
      * @return TurbineInfoDTO
      */
-    public TurbineInfoDTO initResult(Integer turbineId,List<Module> moduleList){
-        TurbineInfoDTO result = new TurbineInfoDTO();
-        result.setTurbineId(turbineId);
+    public List<TurbineDetailsInfoDTO> initResult(List<Module> moduleList){
         List<TurbineDetailsInfoDTO> detailsInfoList =  new ArrayList<>(moduleList.size());
         TurbineDetailsInfoDTO turbineDetailsInfoDTO;
-        QueryWrapper<StandPoint> queryWrapper;
+        QueryWrapper<ModuleStandRelate> queryWrapper;
         for (Module module : moduleList) {
             turbineDetailsInfoDTO = new TurbineDetailsInfoDTO();
             turbineDetailsInfoDTO.setModuleId(module.getModuleId());
             turbineDetailsInfoDTO.setModuleName(module.getModuleName());
             queryWrapper = new QueryWrapper<>();
-            queryWrapper.lambda().eq(StandPoint::getModuleId,module.getModuleId());
-            List<StandPoint> list = standPointService.list(queryWrapper);
+            queryWrapper.lambda().eq(ModuleStandRelate::getModuleId,module.getModuleId());
+            List<Integer> StandPointIds = moduleStandRelateMapper.selectList(queryWrapper).stream().map(ModuleStandRelate::getStandPointId).collect(Collectors.toList());
+            List<StandPoint> list = standPointService.listByIds(StandPointIds);
             turbineDetailsInfoDTO.setPointList(list);
             detailsInfoList.add(turbineDetailsInfoDTO);
         }
-        result.setTurbineDetailsInfoList(detailsInfoList);
-        return result;
+        return detailsInfoList;
     }
 
 

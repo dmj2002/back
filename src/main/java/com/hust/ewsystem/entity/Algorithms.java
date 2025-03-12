@@ -27,4 +27,6 @@ public class Algorithms implements Serializable {
     private String algorithmVersion; // 算法版本
 
     private String description; // 算法描述
+
+    private Integer moduleId; // 模块id
 }

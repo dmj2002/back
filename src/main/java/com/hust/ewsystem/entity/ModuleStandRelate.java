@@ -6,19 +6,15 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
-import java.io.Serializable;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-public class Module implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class ModuleStandRelate {
 
     @TableId(type = IdType.AUTO)
-    private Integer moduleId; // 模块id
+    private Integer id; // 记录id
 
-    private String moduleName; // 模块名称
+    private Integer moduleId; // 模型id
 
-    private String moduleDescription; // 描述
-
+    private Integer standPointId; // 真实测点id
 }

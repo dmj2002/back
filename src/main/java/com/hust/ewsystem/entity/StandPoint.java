@@ -24,8 +24,4 @@ public class StandPoint implements Serializable {
 
     private Integer pointType; // 测点类型
 
-    /**
-     * 模块ID
-     */
-    private Integer moduleId;
 }
