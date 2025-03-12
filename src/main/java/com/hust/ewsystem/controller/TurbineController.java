@@ -54,7 +54,7 @@ public class TurbineController {
 
 
     /**
-     * 查询风机信息
+     * 查询模块信息
      * @param
      * @return EwsResult<TurbineInfoDTO>
      */
@@ -62,7 +62,7 @@ public class TurbineController {
     public EwsResult<List<TurbineDetailsInfoDTO>> getTurbineInfo(){
         List<Module> list = moduleService.list();
         if (CollectionUtils.isEmpty(list)) {
-            return EwsResult.error(String.format("获取风机模块信息为空"));
+            return EwsResult.error(String.format("获取模块信息为空"));
         }
         List<TurbineDetailsInfoDTO> turbineDetailsInfoDTOS = initResult(list);
         return EwsResult.OK(turbineDetailsInfoDTOS);
