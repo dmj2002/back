@@ -1,6 +1,7 @@
 package com.hust.ewsystem.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hust.ewsystem.DTO.FarmDTO;
 import com.hust.ewsystem.DTO.QueryWaitDoneInfoDTO;
 import com.hust.ewsystem.DTO.WindFarmDTO;
 import com.hust.ewsystem.entity.WindFarm;
@@ -11,4 +12,6 @@ import java.util.List;
 public interface WindFarmMapper extends BaseMapper<WindFarm> {
 
      List<WindFarmDTO> getWindFarmsByCompanyId(@Param("param") QueryWaitDoneInfoDTO queryWaitDoneInfoDTO);
+
+    FarmDTO getWindFarmsByTurbineId(@Param("turbineId")Integer turbineId);
 }

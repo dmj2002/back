@@ -34,6 +34,12 @@
             </collection>
         </collection>
     </resultMap>
+    <resultMap id="windFarmWithTurbinesResultMap" type="com.hust.ewsystem.DTO.FarmDTO">
+        <id property="windFarmId" column="wind_farm_id"/>
+        <result property="windFarmName" column="wind_farm_name"/>
+        <result property="turbineId" column="turbine_id"/>
+        <result property="turbineName" column="turbine_name"/>
+    </resultMap>
 
 
     <select id="getWindFarmsByCompanyId" resultMap="windFarmWithTurbinesResultMap">
@@ -99,5 +105,15 @@
 <!--            wt.current_status,-->
 <!--            m.model_id,-->
 <!--            m.model_name-->
+    </select>
+    <select id="getWindFarmsByTurbineId" resultMap = "windFarmWithTurbinesResultMap">
+        SELECT
+        wf.wind_farm_id,
+        wf.wind_farm_name,
+        wt.turbine_id,
+        wt.turbine_name,
+        FROM wind_farm wf
+        JOIN wind_turbine wt ON wf.wind_farm_id = wt.wind_farm_id
+        WHERE wt.turbine_id = #{turbineId};
     </select>
 </mapper>

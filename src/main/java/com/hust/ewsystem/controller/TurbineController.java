@@ -2,15 +2,15 @@ package com.hust.ewsystem.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.hust.ewsystem.DTO.QueryTurbineInfoDTO;
+import com.hust.ewsystem.DTO.FarmDTO;
 import com.hust.ewsystem.DTO.TurbineDetailsInfoDTO;
-import com.hust.ewsystem.DTO.TurbineInfoDTO;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.Module;
 import com.hust.ewsystem.entity.ModuleStandRelate;
 import com.hust.ewsystem.entity.StandPoint;
 import com.hust.ewsystem.entity.WindTurbine;
 import com.hust.ewsystem.mapper.ModuleStandRelateMapper;
+import com.hust.ewsystem.mapper.WindFarmMapper;
 import com.hust.ewsystem.service.ModuleService;
 import com.hust.ewsystem.service.StandPointService;
 import com.hust.ewsystem.service.WindTurbineService;
@@ -52,6 +52,9 @@ public class TurbineController {
     @Resource
     private ModuleStandRelateMapper moduleStandRelateMapper;
 
+    @Resource
+    private WindFarmMapper windFarmMapper;
+
 
     /**
      * 查询模块信息
@@ -67,7 +70,11 @@ public class TurbineController {
         List<TurbineDetailsInfoDTO> turbineDetailsInfoDTOS = initResult(list);
         return EwsResult.OK(turbineDetailsInfoDTOS);
     }
-
+    @GetMapping("/getfarmInfo")
+    public EwsResult<FarmDTO>getfarmInfo(@RequestParam(value = "turbineId") Integer turbineId){
+        FarmDTO res = windFarmMapper.getWindFarmsByTurbineId(turbineId);
+        return EwsResult.OK(res);
+    }
     @GetMapping("/list")
     public EwsResult<List<WindTurbine>> turbineList(@RequestParam(value = "windfarm_id", required = false) Integer windfarmId) {
         QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
