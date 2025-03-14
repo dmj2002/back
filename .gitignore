@@ -34,3 +34,5 @@ build/
 
 ### Logs ###
 logs/
+ews_error.log
+ews_info.log

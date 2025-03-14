@@ -15,10 +15,8 @@ import com.hust.ewsystem.DTO.WarnHandleDTO;
 import com.hust.ewsystem.DTO.WarningOperateDTO;
 import com.hust.ewsystem.DTO.WarningsDTO;
 import com.hust.ewsystem.VO.WarningsVO;
-import com.hust.ewsystem.common.constant.CommonConstant;
 import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.result.EwsResult;
-import com.hust.ewsystem.entity.Company;
 import com.hust.ewsystem.entity.Models;
 import com.hust.ewsystem.entity.RealPoint;
 import com.hust.ewsystem.entity.ReportWarningRelate;
@@ -35,7 +33,7 @@ import com.hust.ewsystem.mapper.WarningMapper;
 import com.hust.ewsystem.mapper.WindFarmMapper;
 import com.hust.ewsystem.mapper.WindTurbineMapper;
 import com.hust.ewsystem.service.ModelsService;
-import com.hust.ewsystem.service.RealPortService;
+import com.hust.ewsystem.service.RealPointService;
 import com.hust.ewsystem.service.ReportWarningRelateService;
 import com.hust.ewsystem.service.StandRealRelateService;
 import com.hust.ewsystem.service.WarningService;
@@ -45,7 +43,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -97,7 +94,7 @@ public class WarningController {
     private ModelsService modelsService;
 
     @Autowired
-    private RealPortService realPortService;
+    private RealPointService realPointService;
 
     @Resource
     private StandRealRelateService standRealRelateService;
@@ -281,7 +278,7 @@ public class WarningController {
             }
             realPointQueryWrapper = new QueryWrapper<>();
             realPointQueryWrapper.lambda().in(RealPoint::getPointId,realPointList).eq(RealPoint::getTurbineId,queryWarnDetailsDTO.getTurbineId());
-            RealPoint realPoint = realPortService.getOne(realPointQueryWrapper);
+            RealPoint realPoint = realPointService.getOne(realPointQueryWrapper);
             if (Objects.isNull(realPoint)){
                 String realIdList = StringUtils.join(realPointList, ",");
                 LOGGER.error(String.format("获取真实测点信息为空,真实测点id【%s】,风机id【%d】",realIdList,queryWarnDetailsDTO.getTurbineId()));
@@ -293,7 +290,7 @@ public class WarningController {
         }
 
         // 查询测点值
-        List<TrendDataDTO> realPointValueList = realPortService.getRealPointValueList(relPointAndLableList, queryWarnDetailsDTO);
+        List<TrendDataDTO> realPointValueList = realPointService.getRealPointValueList(relPointAndLableList, queryWarnDetailsDTO);
         return EwsResult.OK(realPointValueList);
     }
 
