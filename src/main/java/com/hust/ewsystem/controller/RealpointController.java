@@ -6,6 +6,7 @@ import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.RealPoint;
 import com.hust.ewsystem.mapper.RealPointMapper;
 import com.hust.ewsystem.service.RealPointService;
+import com.hust.ewsystem.service.impl.RealPointServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/realpoint")
-public class RealpointController {
+public class RealPointController {
 
     @Autowired
     private RealPointMapper realPointMapper;
