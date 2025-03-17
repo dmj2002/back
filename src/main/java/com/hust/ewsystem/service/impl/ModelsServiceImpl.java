@@ -470,28 +470,28 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         }
         int totalSize = 0;
         int validSize = 0;
+        for (Map.Entry<LocalDateTime, Map<String, Object>> entry : alignedData.entrySet()) {
+            totalSize++;
+            boolean allStatusValid = true;
+            for(String standPoint : realToStandLabel.values()){
+                Integer status = (Integer) entry.getValue().get(standPoint + "_status");
+                if (status == null || status == 0) {
+                    allStatusValid = false;
+                    break;
+                }
+            }
+            if (allStatusValid) {
+                validSize++;
+            }
+        }
+        double validRatio = (double) validSize / totalSize;
+        //阈值，可以根据实际情况调整
+        if(validRatio < threshold){
+            LOGGER.info("model: " + taskLabel + "的数据有异常，取消此次预测任务");
+            return false;
+        }
         // 写入 CSV 文件
         try (FileWriter csvWriter = new FileWriter(String.format("%s/task_logs/%s/predict.csv", pythonFilePath, taskLabel))) {
-            for (Map.Entry<LocalDateTime, Map<String, Object>> entry : alignedData.entrySet()) {
-                totalSize++;
-                boolean allStatusValid = true;
-                for(String standPoint : realToStandLabel.values()){
-                    Integer status = (Integer) entry.getValue().get(standPoint + "_status");
-                    if (status == null || status == 0) {
-                        allStatusValid = false;
-                        break;
-                    }
-                }
-                if (allStatusValid) {
-                    validSize++;
-                }
-            }
-            double validRatio = (double) validSize / totalSize;
-            //阈值，可以根据实际情况调整
-            if(validRatio < threshold){
-                LOGGER.info("model: " + taskLabel + "的数据有异常，取消此次预测任务");
-                return false;
-            }
             // 写入表头
             csvWriter.append("datetime");
             for (String standPoint : realToStandLabel.values()) {
