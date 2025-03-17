@@ -105,6 +105,7 @@
             <if test="param.endTime != null">
                 AND w.end_time &lt;= #{param.endTime}
             </if>
+            AND w.warning_status != 4
         </where>
         GROUP BY w.warning_description, wf.wind_farm_name, wt.turbine_name
     </select>
