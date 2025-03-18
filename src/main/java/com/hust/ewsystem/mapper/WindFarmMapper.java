@@ -13,5 +13,5 @@ public interface WindFarmMapper extends BaseMapper<WindFarm> {
 
      List<WindFarmDTO> getWindFarmsByCompanyId(@Param("param") QueryWaitDoneInfoDTO queryWaitDoneInfoDTO);
 
-    FarmDTO getWindFarmsByTurbineId(@Param("turbineId")Integer turbineId);
+    FarmDTO getWindFarmByTurbineId(@Param("turbineId")Integer turbineId);
 }

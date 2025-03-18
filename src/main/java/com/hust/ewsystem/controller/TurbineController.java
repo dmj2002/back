@@ -72,7 +72,7 @@ public class TurbineController {
     }
     @GetMapping("/getfarmInfo")
     public EwsResult<FarmDTO>getfarmInfo(@RequestParam(value = "turbineId") Integer turbineId){
-        FarmDTO res = windFarmMapper.getWindFarmsByTurbineId(turbineId);
+        FarmDTO res = windFarmMapper.getWindFarmByTurbineId(turbineId);
         return EwsResult.OK(res);
     }
     @GetMapping("/list")
