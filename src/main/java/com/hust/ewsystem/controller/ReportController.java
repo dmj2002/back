@@ -52,6 +52,13 @@ public class ReportController {
             newReport.setReportText(reportDTO.getReportText());
         }
         int res = reportsMapper.updateById(newReport);
+        // 如果通知状态为已处理，则将对应的预警状态设置为已处理
+        if(reportDTO.getReportStatus() == 2){
+            List<Integer> warning_ids = reportWarningRelateService.list(new QueryWrapper<ReportWarningRelate>().eq("report_id", reportDTO.getReportId())).stream().map(ReportWarningRelate::getWarningId).collect(Collectors.toList());
+            List<Warnings> warnings = warningService.list(new QueryWrapper<Warnings>().in("warning_id", warning_ids));
+            warnings.forEach(warning -> warning.setWarningStatus(4));
+            warningService.updateBatchById(warnings);
+        }
         return res == 1 ? EwsResult.OK("操作成功") : EwsResult.error("操作失败");
     }
     @GetMapping("/deleteReport")
