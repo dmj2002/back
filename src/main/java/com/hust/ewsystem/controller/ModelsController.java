@@ -14,6 +14,7 @@ import com.hust.ewsystem.mapper.*;
 import com.hust.ewsystem.service.CommonDataService;
 import com.hust.ewsystem.service.ModelRealRelateService;
 import com.hust.ewsystem.service.ModelsService;
+import com.hust.ewsystem.service.WarningService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,8 +67,12 @@ public class ModelsController {
 
     @Autowired
     private ModuleMapper moduleMapper;
+
     @Autowired
     private CompanyMapper companyMapper;
+
+    @Autowired
+    private WarningService warningService;
 
     /**
      * 添加模型
@@ -364,6 +369,8 @@ public class ModelsController {
         Integer modelId = (Integer) FileForm.get("modelId");
         String startTime = (String)FileForm.get("startTime");
         String endTime = (String)FileForm.get("endTime");
+        //删除对应时间段的所有预警重新生成
+        warningService.remove(new QueryWrapper<Warnings>().eq("model_id", modelId).ge("start_time", startTime).le("end_time", endTime));
         //获取返回值
         Models model = modelsService.getById(modelId);
         Integer alertInterval = model.getAlertInterval();
@@ -372,8 +379,8 @@ public class ModelsController {
         Integer alertWindowSize = model.getAlertWindowSize();
         String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
         //算法调用
-        modelsService.predict(alertInterval, modelLabel, algorithmLabel, modelId,alertWindowSize);
-        return null;
+        modelsService.testPredict(alertInterval, modelLabel, algorithmLabel, modelId,alertWindowSize,startTime,endTime);
+        return EwsResult.OK("模型开始测试");
     }
 
     @GetMapping("/list")

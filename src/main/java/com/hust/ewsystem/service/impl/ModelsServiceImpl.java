@@ -111,6 +111,100 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         taskMap.put(modelLabel + "_predict", scheduledTask);
     }
 
+    @Override
+    public void testPredict(Integer alertInterval, String modelLabel, String algorithmLabel, Integer modelId, Integer alertWindowSize, String startTime, String endTime) {
+        Runnable task = () ->{
+            try {
+                String taskLabel = UUID.randomUUID().toString();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                LocalDateTime startTimeDate = LocalDateTime.parse(startTime, formatter);
+                LocalDateTime endTimeDate = LocalDateTime.parse(endTime, formatter);
+                tasks newtask = new tasks();
+                newtask.setModelId(modelId)
+                        .setTaskType(1)
+                        .setTaskLabel(taskLabel)
+                        .setStartTime(startTimeDate)
+                        .setEndTime(endTimeDate);
+                tasksMapper.insert(newtask);
+                Integer taskId= newtask.getTaskId();
+                File taskDir = new File(pythonFilePath + "/task_logs/" + taskLabel);
+                if (!taskDir.exists()) {
+                    if (!taskDir.mkdirs()) {
+                        throw new FileException("创建任务目录失败");
+                    }
+                }
+                List<Integer> realpointId = modelRealRelateService.list(
+                        new QueryWrapper<ModelRealRelate>().eq("model_id", modelId)
+                ).stream().map(ModelRealRelate::getRealPointId).collect(Collectors.toList());
+                //真实测点标签 -> 标准测点标签
+                Map<String, String> realToStandLabel = RealToStandLabel(realpointId);
+                Map<LocalDateTime, Map<String, Object>> alignedData = new TreeMap<>();
+
+                while (startTimeDate.isBefore(endTimeDate)) {
+                    LocalDateTime windowEndTime = startTimeDate.plusSeconds(alertWindowSize);
+                    if (windowEndTime.isAfter(endTimeDate)) {
+                        System.out.println("窗口数据不足,当前预测任务取消");
+                        break;
+                    }
+                    alignedData.clear();
+                    String startTimeStr = startTimeDate.format(formatter);
+                    String windowEndTimeStr = windowEndTime.format(formatter);
+
+                    for (Map.Entry<String, String> entry : realToStandLabel.entrySet()) {
+                        List<CommonData> data = commonDataService.selectDataByTime(entry.getKey().toLowerCase(), startTimeStr, windowEndTimeStr);
+                        for (CommonData record : data) {
+                            LocalDateTime datetime = record.getDatetime();
+                            Double value = record.getValue();
+                            Integer status = record.getStatus();
+                            alignedData.computeIfAbsent(datetime, k -> new HashMap<>()).put(entry.getValue(), value);
+                            alignedData.get(datetime).put(entry.getValue() + "_status", status);
+                        }
+                    }
+                    int sizeBeforeRemoval = alignedData.size();
+                    // 移除 GridPower 小于等于 0 的数据
+                    alignedData.entrySet().removeIf(entry -> {
+                        Map<String, Object> labelMap = entry.getValue(); // 获取每个时间点的标签数据
+                        // 如果 "Grid" 列的值小于或等于 0，移除该时间点的数据
+                        return labelMap.containsKey("GridPower") && (Double)labelMap.get("GridPower") <= 0;
+                    });
+                    // 获取移除后的大小
+                    int sizeAfterRemoval = alignedData.size();
+                    // 判断是否有数据被移除,如果有数据被移除，说明数据有异常，取消此次预测任务
+                    if(sizeBeforeRemoval > sizeAfterRemoval){
+                        LOGGER.info("model: " +modelId+ " and task: " + taskLabel + "的数据有异常，取消此次预测任务");
+                        startTimeDate = startTimeDate.plusSeconds(alertInterval);
+                        continue;
+                    }
+                    boolean res = toPredictCsv(alignedData, realToStandLabel, taskLabel);
+                    if(!res) {
+                        startTimeDate = startTimeDate.plusSeconds(alertInterval);
+                        continue;
+                    }
+                    //准备setting.json
+                    File settingFile = new File(taskDir, "setting.json");
+                    JSONObject settings = new JSONObject();
+                    settings.put("modelPath", pythonFilePath + "/" + modelLabel);
+                    settings.put("trainDataPath", pythonFilePath + "/" + modelLabel + "/train.csv");
+                    settings.put("predictDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/predict.csv");
+                    settings.put("resultDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/result.json");
+                    settings.put("logPath", pythonFilePath + "/task_logs/" + taskLabel + "/" + taskLabel + ".log");
+                    // 写入 setting.json 文件
+                    try (FileWriter fileWriter = new FileWriter(settingFile)) {
+                        fileWriter.write(settings.toJSONString());
+                    } catch (IOException e) {
+                        throw new FileException("setting.json文件配置失败",e);
+                    }
+                    executePredict(pythonFilePath, algorithmLabel, taskLabel, modelId, taskId);
+                    startTimeDate = startTimeDate.plusSeconds(alertInterval);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
+        // 定期调度任务
+        ScheduledFuture<?> scheduledTask = scheduler.schedule(task, 0, TimeUnit.SECONDS);
+    }
+
 //    // 提供查询任务状态的接口
 //    @Override
 //    public Map<String, Object> getTaskStatus(String taskLabel) {
@@ -320,6 +414,9 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            if (process != null) {
+                process.destroy();
+            }
             if (!interrupted) {
                 readAndSaveResults(filepath, taskLabel, modelId, taskId);
                 LOGGER.info("Finished reading and saving results for task: " + taskLabel);

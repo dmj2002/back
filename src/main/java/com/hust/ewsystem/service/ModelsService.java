@@ -10,4 +10,5 @@ public interface ModelsService extends IService<Models> {
     String killTask(String modelLabel);
     void predict(Integer alertInterval, String modelLabel, String algorithmLabel,Integer modelId,Integer alertWindowSize);
 
+    void testPredict(Integer alertInterval, String modelLabel, String algorithmLabel, Integer modelId, Integer alertWindowSize, String startTime, String endTime);
 }
