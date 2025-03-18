@@ -133,6 +133,20 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                         throw new FileException("创建任务目录失败");
                     }
                 }
+                //准备setting.json
+                File settingFile = new File(taskDir, "setting.json");
+                JSONObject settings = new JSONObject();
+                settings.put("modelPath", pythonFilePath + "/" + modelLabel);
+                settings.put("trainDataPath", pythonFilePath + "/" + modelLabel + "/train.csv");
+                settings.put("predictDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/predict.csv");
+                settings.put("resultDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/result.json");
+                settings.put("logPath", pythonFilePath + "/task_logs/" + taskLabel + "/" + taskLabel + ".log");
+                // 写入 setting.json 文件
+                try (FileWriter fileWriter = new FileWriter(settingFile)) {
+                    fileWriter.write(settings.toJSONString());
+                } catch (IOException e) {
+                    throw new FileException("setting.json文件配置失败",e);
+                }
                 List<Integer> realpointId = modelRealRelateService.list(
                         new QueryWrapper<ModelRealRelate>().eq("model_id", modelId)
                 ).stream().map(ModelRealRelate::getRealPointId).collect(Collectors.toList());
@@ -177,22 +191,9 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                     }
                     boolean res = toPredictCsv(alignedData, realToStandLabel, taskLabel);
                     if(!res) {
+                        LOGGER.info("数据有异常，取消此次预测任务");
                         startTimeDate = startTimeDate.plusSeconds(alertInterval);
                         continue;
-                    }
-                    //准备setting.json
-                    File settingFile = new File(taskDir, "setting.json");
-                    JSONObject settings = new JSONObject();
-                    settings.put("modelPath", pythonFilePath + "/" + modelLabel);
-                    settings.put("trainDataPath", pythonFilePath + "/" + modelLabel + "/train.csv");
-                    settings.put("predictDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/predict.csv");
-                    settings.put("resultDataPath", pythonFilePath + "/task_logs/" + taskLabel + "/result.json");
-                    settings.put("logPath", pythonFilePath + "/task_logs/" + taskLabel + "/" + taskLabel + ".log");
-                    // 写入 setting.json 文件
-                    try (FileWriter fileWriter = new FileWriter(settingFile)) {
-                        fileWriter.write(settings.toJSONString());
-                    } catch (IOException e) {
-                        throw new FileException("setting.json文件配置失败",e);
                     }
                     executePredict(pythonFilePath, algorithmLabel, taskLabel, modelId, taskId);
                     startTimeDate = startTimeDate.plusSeconds(alertInterval);
@@ -496,7 +497,6 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             }
             LocalDateTime startTime = LocalDateTime.parse(alert.getString("start_time"), formatter);
             LocalDateTime endTime = LocalDateTime.parse(alert.getString("end_time"), formatter);
-            //TODO 预警等级暂不知result返回的是int还是string
             String warningLevelStr = alert.getString("warning_level");
             Integer warningLevel;
             if (warningLevelStr != null && !warningLevelStr.isEmpty()) {
