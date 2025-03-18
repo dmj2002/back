@@ -514,8 +514,8 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 for (String standPoint : realToStandLabel.values()) {
                     Double value = (Double) entry.getValue().get(standPoint);
                     line.append(",").append(value);
-                    csvWriter.append(line.toString()).append("\n");
                 }
+                csvWriter.append(line.toString()).append("\n");
             }
             return true;
         } catch (IOException e) {
