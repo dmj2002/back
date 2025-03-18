@@ -359,6 +359,22 @@ public class ModelsController {
         }
         return EwsResult.OK("模型开始预测");
     }
+    @PostMapping("/test")
+    public EwsResult<?> testModel(@RequestBody Map<String, Object> FileForm){
+        Integer modelId = (Integer) FileForm.get("modelId");
+        String startTime = (String)FileForm.get("startTime");
+        String endTime = (String)FileForm.get("endTime");
+        //获取返回值
+        Models model = modelsService.getById(modelId);
+        Integer alertInterval = model.getAlertInterval();
+        String modelLabel = model.getModelLabel();
+        Integer algorithmId = model.getAlgorithmId();
+        Integer alertWindowSize = model.getAlertWindowSize();
+        String algorithmLabel = algorithmsMapper.selectById(algorithmId).getAlgorithmLabel();
+        //算法调用
+        modelsService.predict(alertInterval, modelLabel, algorithmLabel, modelId,alertWindowSize);
+        return null;
+    }
 
     @GetMapping("/list")
     public EwsResult<?> listModel(@RequestParam(value = "page") int page,
