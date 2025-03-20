@@ -4,6 +4,7 @@ package com.hust.ewsystem.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hust.ewsystem.DTO.ModelChangeDTO;
 import com.hust.ewsystem.VO.StandPointVO;
 import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.exception.FileException;
@@ -170,19 +171,27 @@ public class ModelsController {
 
     /**
      * 修改模型
-     * @param model
+     * @param modelChangeDTO
      * @return
      */
     @PostMapping("/change")
     @Transactional
-    public EwsResult<?> changemodel(@RequestBody List<ModelForm> model){
-        //models表修改
+    public EwsResult<?> changemodel(@RequestBody ModelChangeDTO modelChangeDTO){
         List<Models> modelsList = new ArrayList<>();
-        for(ModelForm modelform : model){
-            //传过来的参数直接修改
-            Models newModel = modelform.getModel();
-//            String oldVersion = modelsService.getById(newModel.getModelId()).getModelVersion();
-            String[] versionParts = newModel.getModelVersion().split("\\.");
+        modelChangeDTO.getModelIds().forEach(modelId -> {
+            Models model = modelsService.getById(modelId);
+            //TODO: 修改模型名称逻辑不确定对不对
+            if(modelChangeDTO.getModelName() != null){
+                String nameSuffix = model.getModelName().split("_")[1];
+                model.setModelName(modelChangeDTO.getModelName() + "_" + nameSuffix);
+            }
+            if(modelChangeDTO.getAlertWindowSize() != null){
+                model.setAlertWindowSize(modelChangeDTO.getAlertWindowSize());
+            }
+            if(modelChangeDTO.getAlertInterval() != null){
+                model.setAlertInterval(modelChangeDTO.getAlertInterval());
+            }
+            String[] versionParts = model.getModelVersion().split("\\.");
             int majorVersion = Integer.parseInt(versionParts[0].substring(1)); //去掉v
             int minorVersion = Integer.parseInt(versionParts[1]);
             if (minorVersion < 9) {
@@ -193,88 +202,114 @@ public class ModelsController {
             }
             String newVersion = "v" + majorVersion + "." + minorVersion;
             //像版本号这种
-            newModel.setModelVersion(newVersion);
-            newModel.setModelStatus(0);
-            modelsList.add(newModel);
-        }
-        boolean updateBatch = modelsService.updateBatchById(modelsList);
-        if(!updateBatch){
-            throw new CrudException("修改模型失败");
-        }
-        //model_real_relate表修改(可能会变多可能会变少)
-        //两种方案，目前采用法二
-        //法一：先全部删除再插入
-        //法二：先查出所有的，然后对比，删除不需要的，插入需要的（通过集合的差进行判断）
-        List<ModelRealRelate> modelRealRelateList = new ArrayList<>();
-        for(ModelForm modelform : model){
-            List<String> standpointList = modelform.getPointList();
-            //表示当前模型没有任何测点
-            if(standpointList == null || standpointList.isEmpty()){
-                modelRealRelateService.remove(
-                        new QueryWrapper<ModelRealRelate>().eq("model_id", modelform.getModel().getModelId())
-                );
-                continue;
-            }
-            Map<String, List<Integer>> standToRealIdMap = standToRealId(standpointList);
-            // 将 Map 的值收集到 Set中: A
-            Set<Integer> realPointIdSet = new HashSet<>();
-            for(String standpoint:standpointList){
-                List<Integer> RealIds = standToRealIdMap.getOrDefault(standpoint, new ArrayList<>());
-                Integer realId = findUniqueRealId(RealIds, modelform.getModel().getTurbineId());
-                realPointIdSet.add(realId);
-            }
-            //当前模型的测点:B
-            Set<Integer> exitrealPointIdSet = modelRealRelateService.list(
-                    new QueryWrapper<ModelRealRelate>().eq("model_id", modelform.getModel().getModelId())
-                    ).stream().map(ModelRealRelate::getRealPointId).collect(Collectors.toSet());
-            //A - B = 需要插入的测点
-            Set<Integer> insertSet = realPointIdSet.stream()
-                    .filter(item -> !exitrealPointIdSet.contains(item))
-                    .collect(Collectors.toSet());
-            //B - A = 需要删除的测点
-            Set<Integer> deleteSet = exitrealPointIdSet.stream()
-                    .filter(item -> !realPointIdSet.contains(item))
-                    .collect(Collectors.toSet());
-            //插入(不需要主键，最后统一插入)
-            if(!insertSet.isEmpty()){
-                for(Integer realPointId : insertSet){
-                    ModelRealRelate modelRealRelate = new ModelRealRelate();
-                    modelRealRelate.setModelId(modelform.getModel().getModelId())
-                                   .setRealPointId(realPointId);
-                    modelRealRelateList.add(modelRealRelate);
-                }
-            }
-            //删除
-            if (!deleteSet.isEmpty()) {
-                boolean remove = modelRealRelateService.remove(
-                        new QueryWrapper<ModelRealRelate>()
-                                .eq("model_id", modelform.getModel().getModelId())
-                                .in("real_point_id", deleteSet)
-                );
-                if (!remove) {
-                    throw new CrudException("修改模型失败");
-                }
-            }
-        }
-        if(!modelRealRelateList.isEmpty()){
-            boolean saveBatch = modelRealRelateService.saveBatch(modelRealRelateList);
-            if(!saveBatch){
-                throw new CrudException("修改模型失败");
-            }
-        }
-        List<Map<String,Object>> result = new ArrayList<>();
-        //返回值(可以自行修改)
-        for (Models models : modelsList) {
-            Map<String,Object> map = new HashMap<>();
-            map.put("modelId",models.getModelId());
-            map.put("modelName",models.getModelName());
-            map.put("modelVersion",models.getModelVersion());
-            map.put("modelStatus",models.getModelStatus());
-            map.put("turbinId",models.getTurbineId());
-            result.add(map);
-        }
-        return EwsResult.OK("修改模型成功",result);
+            model.setModelVersion(newVersion);
+            modelsList.add(model);
+        });
+        modelsService.updateBatchById(modelsList);
+        return EwsResult.OK("修改模型成功");
     }
+//    @PostMapping("/change")
+//    @Transactional
+//    public EwsResult<?> changemodel(@RequestBody List<ModelForm> model){
+//        //models表修改
+//        List<Models> modelsList = new ArrayList<>();
+//        for(ModelForm modelform : model){
+//            //传过来的参数直接修改
+//            Models newModel = modelform.getModel();
+////            String oldVersion = modelsService.getById(newModel.getModelId()).getModelVersion();
+//            String[] versionParts = newModel.getModelVersion().split("\\.");
+//            int majorVersion = Integer.parseInt(versionParts[0].substring(1)); //去掉v
+//            int minorVersion = Integer.parseInt(versionParts[1]);
+//            if (minorVersion < 9) {
+//                minorVersion++;
+//            } else {
+//                majorVersion += 1;
+//                minorVersion = 0;
+//            }
+//            String newVersion = "v" + majorVersion + "." + minorVersion;
+//            //像版本号这种
+//            newModel.setModelVersion(newVersion);
+//            newModel.setModelStatus(0);
+//            modelsList.add(newModel);
+//        }
+//        boolean updateBatch = modelsService.updateBatchById(modelsList);
+//        if(!updateBatch){
+//            throw new CrudException("修改模型失败");
+//        }
+//        //model_real_relate表修改(可能会变多可能会变少)
+//        //两种方案，目前采用法二
+//        //法一：先全部删除再插入
+//        //法二：先查出所有的，然后对比，删除不需要的，插入需要的（通过集合的差进行判断）
+//        List<ModelRealRelate> modelRealRelateList = new ArrayList<>();
+//        for(ModelForm modelform : model){
+//            List<String> standpointList = modelform.getPointList();
+//            //表示当前模型没有任何测点
+//            if(standpointList == null || standpointList.isEmpty()){
+//                modelRealRelateService.remove(
+//                        new QueryWrapper<ModelRealRelate>().eq("model_id", modelform.getModel().getModelId())
+//                );
+//                continue;
+//            }
+//            Map<String, List<Integer>> standToRealIdMap = standToRealId(standpointList);
+//            // 将 Map 的值收集到 Set中: A
+//            Set<Integer> realPointIdSet = new HashSet<>();
+//            for(String standpoint:standpointList){
+//                List<Integer> RealIds = standToRealIdMap.getOrDefault(standpoint, new ArrayList<>());
+//                Integer realId = findUniqueRealId(RealIds, modelform.getModel().getTurbineId());
+//                realPointIdSet.add(realId);
+//            }
+//            //当前模型的测点:B
+//            Set<Integer> exitrealPointIdSet = modelRealRelateService.list(
+//                    new QueryWrapper<ModelRealRelate>().eq("model_id", modelform.getModel().getModelId())
+//                    ).stream().map(ModelRealRelate::getRealPointId).collect(Collectors.toSet());
+//            //A - B = 需要插入的测点
+//            Set<Integer> insertSet = realPointIdSet.stream()
+//                    .filter(item -> !exitrealPointIdSet.contains(item))
+//                    .collect(Collectors.toSet());
+//            //B - A = 需要删除的测点
+//            Set<Integer> deleteSet = exitrealPointIdSet.stream()
+//                    .filter(item -> !realPointIdSet.contains(item))
+//                    .collect(Collectors.toSet());
+//            //插入(不需要主键，最后统一插入)
+//            if(!insertSet.isEmpty()){
+//                for(Integer realPointId : insertSet){
+//                    ModelRealRelate modelRealRelate = new ModelRealRelate();
+//                    modelRealRelate.setModelId(modelform.getModel().getModelId())
+//                                   .setRealPointId(realPointId);
+//                    modelRealRelateList.add(modelRealRelate);
+//                }
+//            }
+//            //删除
+//            if (!deleteSet.isEmpty()) {
+//                boolean remove = modelRealRelateService.remove(
+//                        new QueryWrapper<ModelRealRelate>()
+//                                .eq("model_id", modelform.getModel().getModelId())
+//                                .in("real_point_id", deleteSet)
+//                );
+//                if (!remove) {
+//                    throw new CrudException("修改模型失败");
+//                }
+//            }
+//        }
+//        if(!modelRealRelateList.isEmpty()){
+//            boolean saveBatch = modelRealRelateService.saveBatch(modelRealRelateList);
+//            if(!saveBatch){
+//                throw new CrudException("修改模型失败");
+//            }
+//        }
+//        List<Map<String,Object>> result = new ArrayList<>();
+//        //返回值(可以自行修改)
+//        for (Models models : modelsList) {
+//            Map<String,Object> map = new HashMap<>();
+//            map.put("modelId",models.getModelId());
+//            map.put("modelName",models.getModelName());
+//            map.put("modelVersion",models.getModelVersion());
+//            map.put("modelStatus",models.getModelStatus());
+//            map.put("turbinId",models.getTurbineId());
+//            result.add(map);
+//        }
+//        return EwsResult.OK("修改模型成功",result);
+//    }
 
     @DeleteMapping("/delete")
     @Transactional

@@ -1,5 +1,6 @@
 package com.hust.ewsystem.DTO;
 
+import com.hust.ewsystem.VO.StandPointUsedVO;
 import com.hust.ewsystem.entity.RealPoint;
 import com.hust.ewsystem.entity.StandPoint;
 import lombok.Data;
@@ -37,5 +38,5 @@ public class TurbineDetailsInfoDTO implements Serializable {
     /**
      * 模块关联的标准测点列表
      */
-    private List<StandPoint> pointList;
+    private List<StandPointUsedVO> pointList;
 }

@@ -20,6 +20,14 @@
         <result column="combined_name" property="farmTurbineName"/>
     </resultMap>
 
+    <resultMap id="ModulePointResultMap" type="com.hust.ewsystem.VO.ModulePointVO">
+        <result property="moduleId" column="module_id"/>
+        <collection property="pointIds" ofType="java.lang.Integer">
+            <result column="stand_point_id" />
+        </collection>
+    </resultMap>
+
+
     <!-- 根据 Warning 对象列表中的 modelId 查询对应的 WarningsVO -->
     <select id="getWarningsByModelId" resultType="com.hust.ewsystem.VO.WarningsVO">
         SELECT w.*,t.turbine_name,t.turbine_id
@@ -148,6 +156,16 @@
             #{warningId}
         </foreach>
     </select>
+
+    <select id="getModuleIdByWarningId" resultMap="ModulePointResultMap">
+        SELECT asr.stand_point_id, a.module_id
+        FROM warnings w
+        JOIN models m ON w.model_id = m.model_id
+        JOIN algorithms a ON m.algorithm_id = a.algorithm_id
+        JOIN algorithms_stand_relate asr ON a.algorithm_id = asr.algorithm_id
+        WHERE w.warning_id = #{warningId}
+    </select>
+
     
     <update id="warnHandle" parameterType="com.hust.ewsystem.DTO.WarnHandleDTO">
         update warnings w

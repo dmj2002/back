@@ -9,6 +9,7 @@ import com.hust.ewsystem.DTO.QueryWarnInfoDTO;
 import com.hust.ewsystem.DTO.WarnHandleDTO;
 import com.hust.ewsystem.DTO.WarnStatusDTO;
 import com.hust.ewsystem.DTO.WarningsDTO;
+import com.hust.ewsystem.VO.ModulePointVO;
 import com.hust.ewsystem.VO.WarningsVO;
 import com.hust.ewsystem.entity.Warnings;
 import org.apache.ibatis.annotations.Mapper;
@@ -19,6 +20,8 @@ import java.util.List;
 
 @Mapper
 public interface WarningMapper extends BaseMapper<Warnings> {
+
+    ModulePointVO getModuleIdByWarningId(@Param("warningId")Integer warningId);
 
     List<WarningsVO> getWarningsByModelId(@Param("records") List<Warnings> records);
 

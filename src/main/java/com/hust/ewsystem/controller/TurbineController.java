@@ -4,12 +4,15 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hust.ewsystem.DTO.FarmDTO;
 import com.hust.ewsystem.DTO.TurbineDetailsInfoDTO;
+import com.hust.ewsystem.VO.ModulePointVO;
+import com.hust.ewsystem.VO.StandPointUsedVO;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.Module;
 import com.hust.ewsystem.entity.ModuleStandRelate;
 import com.hust.ewsystem.entity.StandPoint;
 import com.hust.ewsystem.entity.WindTurbine;
 import com.hust.ewsystem.mapper.ModuleStandRelateMapper;
+import com.hust.ewsystem.mapper.WarningMapper;
 import com.hust.ewsystem.mapper.WindFarmMapper;
 import com.hust.ewsystem.service.ModuleService;
 import com.hust.ewsystem.service.StandPointService;
@@ -20,7 +23,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +57,8 @@ public class TurbineController {
     @Resource
     private WindFarmMapper windFarmMapper;
 
+    @Resource
+    private WarningMapper warningMapper;
 
     /**
      * 查询模块信息
@@ -62,12 +66,24 @@ public class TurbineController {
      * @return EwsResult<TurbineInfoDTO>
      */
     @RequestMapping(value = "/getTurbineInfo",method = RequestMethod.GET)
-    public EwsResult<List<TurbineDetailsInfoDTO>> getTurbineInfo(){
+    public EwsResult<List<TurbineDetailsInfoDTO>> getTurbineInfo(@RequestParam(value = "warningId") Integer warningId){
         List<Module> list = moduleService.list();
         if (CollectionUtils.isEmpty(list)) {
             return EwsResult.error(String.format("获取模块信息为空"));
         }
         List<TurbineDetailsInfoDTO> turbineDetailsInfoDTOS = initResult(list);
+        if(warningId != null){
+            ModulePointVO StandPointIds = warningMapper.getModuleIdByWarningId(warningId);
+            for (TurbineDetailsInfoDTO turbineDetailsInfoDTO : turbineDetailsInfoDTOS) {
+                if(turbineDetailsInfoDTO.getModuleId().equals(StandPointIds.getModuleId())){
+                    for (StandPointUsedVO standPointUsedVO : turbineDetailsInfoDTO.getPointList()) {
+                        if(StandPointIds.getPointIds().contains(standPointUsedVO.getPointId())){
+                            standPointUsedVO.setUsed(1);
+                        }
+                    }
+                }
+            }
+        }
         return EwsResult.OK(turbineDetailsInfoDTOS);
     }
     @GetMapping("/getfarmInfo")
@@ -76,7 +92,7 @@ public class TurbineController {
         return EwsResult.OK(res);
     }
     @GetMapping("/list")
-    public EwsResult<List<WindTurbine>> turbineList(@RequestParam(value = "windfarm_id", required = false) Integer windfarmId) {
+    public EwsResult<List<WindTurbine>> turbineList(@RequestParam(value = "windfarmId", required = false) Integer windfarmId) {
         QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
         if (windfarmId != null) {
             windTurbineQueryWrapper.eq("wind_farm_id", windfarmId);
@@ -101,7 +117,17 @@ public class TurbineController {
             queryWrapper = new QueryWrapper<>();
             queryWrapper.lambda().eq(ModuleStandRelate::getModuleId,module.getModuleId());
             List<Integer> StandPointIds = moduleStandRelateMapper.selectList(queryWrapper).stream().map(ModuleStandRelate::getStandPointId).collect(Collectors.toList());
-            List<StandPoint> list = standPointService.listByIds(StandPointIds);
+            List<StandPoint> standPoints = standPointService.listByIds(StandPointIds);
+            List<StandPointUsedVO> list = standPoints.stream()
+                    .map(standPoint -> {
+                        StandPointUsedVO vo = new StandPointUsedVO();
+                        vo.setPointId(standPoint.getPointId());
+                        vo.setPointLabel(standPoint.getPointLabel());
+                        vo.setPointDescription(standPoint.getPointDescription());
+                        vo.setUsed(0);
+                        return vo;
+                    })
+                    .collect(Collectors.toList());
             turbineDetailsInfoDTO.setPointList(list);
             detailsInfoList.add(turbineDetailsInfoDTO);
         }
