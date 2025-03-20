@@ -107,7 +107,14 @@ public class ModelsController {
         }
         for (Models models : modelsList) {
             //插入后才有modelId
-            models.setModelLabel("M" + String.format("%04d", models.getModelId()));
+            String modelLabel = "M" + String.format("%04d", models.getModelId());
+            models.setModelLabel(modelLabel);
+            File modelDir = new File(String.format("%s/%s", pythonFilePath, modelLabel));
+            if (!modelDir.exists()) {
+                if (!modelDir.mkdirs()) {
+                    throw new FileException("创建文件目录失败");
+                }
+            }
         }
         boolean updateBatch = modelsService.updateBatchById(modelsList);
         if(!updateBatch){
