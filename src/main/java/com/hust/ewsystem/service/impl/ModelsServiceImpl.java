@@ -1,12 +1,15 @@
 package com.hust.ewsystem.service.impl;
 
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hust.ewsystem.VO.ThresholdVO;
 import com.hust.ewsystem.common.exception.FileException;
 import com.hust.ewsystem.entity.*;
 import com.hust.ewsystem.mapper.*;
@@ -243,6 +246,39 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         } else {
             return "任务已终止";
         }
+    }
+    public List<ThresholdVO> showThreshold(String modelLabel){
+        List<ThresholdVO> res = new ArrayList<>();
+        try {
+            String resultFilePath = pythonFilePath + modelLabel + "/model.json";
+            // 强制使用 UTF-8 编码读取文件内容
+            Path path = Paths.get(resultFilePath);
+            if (Files.exists(path)) {
+                StringBuilder contentBuilder = new StringBuilder();
+                try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        contentBuilder.append(line);
+                    }
+                }
+                String content = contentBuilder.toString();
+                // 解析 JSON 内容
+                res = JSON.parseObject(content, new TypeReference<List<ThresholdVO>>() {});
+                // 输出解析后的数据
+//                for (ThresholdVO data : res) {
+//                    System.out.println("下限: " + data.getLowerLimit());
+//                    System.out.println("上限: " + data.getUpperLimit());
+//                    System.out.println("范围: " + data.getRange());
+//                    System.out.println("-----------");
+//                }
+            }
+            else{
+                System.out.println("文件不存在: " + resultFilePath);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return res;
     }
 
     /**

@@ -1,7 +1,10 @@
 package com.hust.ewsystem.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hust.ewsystem.VO.ThresholdVO;
 import com.hust.ewsystem.entity.Models;
+
+import java.util.List;
 
 
 public interface ModelsService extends IService<Models> {
@@ -11,4 +14,6 @@ public interface ModelsService extends IService<Models> {
     void predict(Integer alertInterval, String modelLabel, String algorithmLabel,Integer modelId,Integer alertWindowSize);
 
     void testPredict(Integer alertInterval, String modelLabel, String algorithmLabel, Integer modelId, Integer alertWindowSize, String startTime, String endTime);
+
+    List<ThresholdVO> showThreshold(String modelLabel);
 }

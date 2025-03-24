@@ -7,6 +7,10 @@ server:
     enabled: false
   servlet:
     context-path: /ews
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      enabled: true
 # 数据库连接配置
 spring:
   datasource:
@@ -51,6 +55,7 @@ algorithm:
 logging:
   level:
     com.hust.encrypt: info
+
 
 # Redis 单节点配置（如果需要，可以解开注释）
 # redis:

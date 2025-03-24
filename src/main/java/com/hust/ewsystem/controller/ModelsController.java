@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.DTO.ModelChangeDTO;
 import com.hust.ewsystem.VO.StandPointVO;
+import com.hust.ewsystem.VO.ThresholdVO;
 import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.exception.FileException;
 import com.hust.ewsystem.common.result.EwsResult;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -425,6 +427,20 @@ public class ModelsController {
         return EwsResult.OK("模型开始测试");
     }
 
+    @PostMapping("/testZip")
+    public EwsResult<?> testModelZip(@RequestParam("file") MultipartFile file,
+                                     @RequestParam("modelId") Integer modelId){
+        return null;
+    }
+
+    @GetMapping("/showThreshold")
+    public EwsResult<?> showThreshold(@RequestParam("modelId") Integer modelId){
+        Models model = modelsService.getById(modelId);
+        String modelLabel = model.getModelLabel();
+        List<ThresholdVO> thresholdList = modelsService.showThreshold(modelLabel);
+        return EwsResult.OK(thresholdList);
+    }
+
     @GetMapping("/list")
     public EwsResult<?> listModel(@RequestParam(value = "page") int page,
                                   @RequestParam(value = "page_size") int pageSize,
@@ -569,7 +585,6 @@ public class ModelsController {
         List<StandPointVO> standPointByAlgorithmId = algorithmStandRelateMapper.getStandPointByAlgorithmId(algorithmId);
         return EwsResult.OK(standPointByAlgorithmId);
     }
-
     public void toTrainCsv(Map<LocalDateTime, Map<String, Object>> alignedData,Map<String, String> realToStandLabel,String modelLabel){
         // 创建目标目录（如果不存在）
         File modelDir = new File(String.format("%s/%s", pythonFilePath, modelLabel));
