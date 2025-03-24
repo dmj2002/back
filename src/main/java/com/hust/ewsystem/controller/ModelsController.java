@@ -1,10 +1,12 @@
 package com.hust.ewsystem.controller;
 
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.DTO.ModelChangeDTO;
+import com.hust.ewsystem.DTO.ThresholdDTO;
 import com.hust.ewsystem.VO.StandPointVO;
 import com.hust.ewsystem.VO.ThresholdVO;
 import com.hust.ewsystem.common.exception.CrudException;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -441,6 +444,35 @@ public class ModelsController {
         return EwsResult.OK(thresholdList);
     }
 
+    @PostMapping("/changeThreshold")
+    public EwsResult<?> changeThreshold(@RequestBody ThresholdDTO thresholdDTO){
+        Integer modelId = thresholdDTO.getModelId();
+        String modelLabel = modelsService.getById(modelId).getModelLabel();
+        List<ThresholdVO> items = thresholdDTO.getItems();
+        File resultFile = new File(pythonFilePath + modelLabel + "/new_model.json");
+        // 尝试创建文件或覆盖已有文件
+        try {
+            if (resultFile.exists()) {
+                boolean deleted = resultFile.delete();
+                if (!deleted) {
+                    return EwsResult.error("修改阈值失败"); // 如果无法删除文件，结束方法
+                }
+            }
+            // 创建新文件
+            boolean fileCreated = resultFile.createNewFile();
+            if (fileCreated) {
+                System.out.println("文件创建成功: " + resultFile.getAbsolutePath());
+                //写入结果到文件
+                writeFileContent(resultFile.getAbsoluteFile(), items);
+            } else {
+                return EwsResult.error("修改阈值失败");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return EwsResult.OK("修改阈值成功");
+    }
+
     @GetMapping("/list")
     public EwsResult<?> listModel(@RequestParam(value = "page") int page,
                                   @RequestParam(value = "page_size") int pageSize,
@@ -687,5 +719,12 @@ public class ModelsController {
         }
         return standToRealPointMap;
     }
-
+    public static void writeFileContent(File file, List<ThresholdVO> items) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            String content = JSON.toJSONString(items); // 转换为 JSON 字符串
+            writer.write(content);  // 写入内容
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
