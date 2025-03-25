@@ -208,6 +208,94 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         // 定期调度任务
         ScheduledFuture<?> scheduledTask = scheduler.schedule(task, 0, TimeUnit.SECONDS);
     }
+    @Override
+    public void zipPredict(String modelLabel,String algorithmLabel,File resultDir,File[] csvFile,String label){
+        Runnable task = () ->{
+            try {
+                tasks newtask = new tasks();
+                newtask.setTaskType(0)
+                        .setTaskLabel(label);
+                tasksMapper.insert(newtask);
+                //准备setting.json
+                for(File file : csvFile){
+                    File resultFile = new File(resultDir, file.getName().replace(".csv", "_predict.json"));
+                    File settingFile = new File(resultDir, "setting.json");
+                    JSONObject settings = new JSONObject();
+                    settings.put("modelPath", pythonFilePath + "/" + modelLabel);
+                    settings.put("trainDataPath", pythonFilePath + "/" + modelLabel + "/train.csv");
+                    settings.put("predictDataPath", file.getAbsolutePath());
+                    settings.put("resultDataPath", resultFile.getAbsolutePath());
+                    settings.put("logPath", resultDir.getAbsolutePath() + "/" + "result.log");
+                    // 写入 setting.json 文件
+                    try (FileWriter fileWriter = new FileWriter(settingFile)) {
+                        fileWriter.write(settings.toJSONString());
+                    } catch (IOException e) {
+                        throw new FileException("setting.json文件配置失败",e);
+                    }
+                    Process process = null;
+                    try {
+                        // 准备命令
+                        List<String> command = new ArrayList<>();
+                        command.add("python");
+                        command.add(String.format("alg/%s/predict.py", algorithmLabel));
+                        command.add(settingFile.getAbsolutePath());
+                        // 执行命令
+                        ProcessBuilder processBuilder = new ProcessBuilder();
+                        processBuilder.directory(new File(pythonFilePath));
+                        processBuilder.command(command);
+                        processBuilder.redirectErrorStream(true);
+                        process = processBuilder.start();
+                        StringBuilder outputString = null;
+                        //获取输入流
+                        InputStream inputStream = process.getInputStream();
+                        //转成字符输入流
+                        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+
+                        int len = -1;
+                        char[] c = new char[2048];
+                        outputString = new StringBuilder();
+                        //读取进程输入流中的内容
+                        while ((len = inputStreamReader.read(c)) != -1) {
+                            String s = new String(c, 0, len);
+                            outputString.append(s);
+                        }
+                        inputStream.close();
+                        inputStreamReader.close();
+                        // 等待进程完成
+                        process.waitFor();
+                        int exitValue = process.exitValue();
+                        if (exitValue == 0) {
+                            System.out.println("进程正常结束");
+                        } else {
+                            System.out.println("进程异常结束");
+                        }
+                    } catch (InterruptedException e) {
+                        process.destroy();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (process != null) {
+                            process.destroy();
+                        }
+                    }
+                }
+                newtask.setTaskType(1);
+                tasksMapper.updateById(newtask);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
+        ScheduledFuture<?> scheduledTask = scheduler.schedule(task, 0, TimeUnit.SECONDS);
+        taskMap.put(modelLabel + "_test", scheduledTask);
+    }
+
+    @Override
+    public void deleteTask(String label, String mode) {
+        String key = label + "_" + mode;
+        if (taskMap.containsKey(key)) {
+            taskMap.remove(key);
+        }
+    }
 
 //    // 提供查询任务状态的接口
 //    @Override
@@ -308,7 +396,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                 System.out.println("Python process failed with exit code: " + exitCode);
                 //修改模型状态为训练失败
                 UpdateWrapper<Models> modelsUpdateWrapper = new UpdateWrapper<>();
-                modelsUpdateWrapper.eq("model_id", modelId).set("model_status", 3);
+                modelsUpdateWrapper.eq("model_id", modelId).set("model_status", 4);
                 update(modelsUpdateWrapper);
             } else {
                 System.out.println("Python process completed successfully for task: " + taskLabel);

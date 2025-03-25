@@ -21,17 +21,19 @@ import com.hust.ewsystem.service.ModelsService;
 import com.hust.ewsystem.service.WarningService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 
 @RestController
@@ -79,6 +81,10 @@ public class ModelsController {
 
     @Autowired
     private WarningService warningService;
+
+    @Autowired
+    private TaskMapper taskMapper;
+
 
     /**
      * 添加模型
@@ -432,8 +438,65 @@ public class ModelsController {
 
     @PostMapping("/testZip")
     public EwsResult<?> testModelZip(@RequestParam("file") MultipartFile file,
-                                     @RequestParam("modelId") Integer modelId){
-        return null;
+                                                            @RequestParam("modelId") Integer modelId){
+        if(file.isEmpty()){
+            return EwsResult.error("文件为空");
+        }
+        String label = UUID.randomUUID().toString();
+        File tempDir = new File(String.format("%s/temp_%s/", pythonFilePath, label));
+        if (!tempDir.exists()) {
+            tempDir.mkdirs();
+        }
+        // 解压 ZIP 文件到临时文件夹
+        try {
+            unzip(file.getInputStream(), tempDir);
+
+            // 获取所有 CSV 文件
+            File[] files = tempDir.listFiles((dir, name) -> name.endsWith(".csv"));
+            if (files == null || files.length == 0) {
+                return EwsResult.error("文件为空");
+            }
+            // 创建一个临时目录用于存储预测结果
+            File resultDir = new File(tempDir + "/result");
+            if (!resultDir.exists()) {
+                resultDir.mkdirs();
+            }
+
+            // 对每个 CSV 文件进行模型预测，并保存结果
+            Models model = modelsService.getById(modelId);
+            String algorithmLabel = "A" + String.format("%04d", model.getAlgorithmId());
+            String modelLabel = model.getModelLabel();
+            runModel(resultDir,files, modelLabel, algorithmLabel,label);
+            return EwsResult.OK("模型开始测试",label);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            return EwsResult.error("文件解压失败");
+        }
+    }
+    @GetMapping("/download")
+    public ResponseEntity<InputStreamResource> download(@RequestParam("label") String label) throws IOException {
+        tasks nowTask = taskMapper.selectOne(new QueryWrapper<tasks>().eq("task_label", label));
+        if(nowTask == null || nowTask.getTaskType() != 2){
+            return ResponseEntity.notFound().build();
+        }
+        // 打包所有结果文件为一个新的 ZIP 文件
+        File tempDir = new File(String.format("%s/temp_%s/", pythonFilePath, label));
+        File resultDir = new File(tempDir, "result");
+        File zipFile = new File(resultDir , "result.zip");
+        zipDirectory(resultDir, zipFile);
+        File resultFile = new File(pythonFilePath + "/temp_" + label + "/result.zip");
+        if (!resultFile.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(resultFile));
+        // 删除临时文件夹或者不删除
+//        deleteDirectory(tempDir);
+        modelsService.deleteTask(label,"test");
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"result.zip\"")
+                .contentType(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM)
+                .contentLength(resultFile.length())
+                .body(resource);
     }
 
     @GetMapping("/showThreshold")
@@ -617,6 +680,24 @@ public class ModelsController {
         List<StandPointVO> standPointByAlgorithmId = algorithmStandRelateMapper.getStandPointByAlgorithmId(algorithmId);
         return EwsResult.OK(standPointByAlgorithmId);
     }
+    @GetMapping("getModelStatus/{modelId}")
+    public EwsResult<?> getModelStatus(@PathVariable("modelId") Integer modelId) {
+        Integer modelStatus = modelsService.getById(modelId).getModelStatus();
+        switch(modelStatus){
+            case 0:
+                return EwsResult.OK("模型状态：未训练");
+            case 1:
+                return EwsResult.OK("模型状态：训练中");
+            case 2:
+                return EwsResult.OK("模型状态：训练成功带开启");
+            case 3:
+                return EwsResult.OK("模型状态：预测中");
+            case 4:
+                return EwsResult.OK("模型状态：训练失败");
+            default:
+                return EwsResult.OK("模型状态：未知");
+        }
+    }
     public void toTrainCsv(Map<LocalDateTime, Map<String, Object>> alignedData,Map<String, String> realToStandLabel,String modelLabel){
         // 创建目标目录（如果不存在）
         File modelDir = new File(String.format("%s/%s", pythonFilePath, modelLabel));
@@ -726,5 +807,70 @@ public class ModelsController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    // 解压 ZIP 文件
+    private void unzip(InputStream zipInputStream, File targetDir) throws IOException {
+        try (ZipInputStream zipIn = new ZipInputStream(zipInputStream)) {
+            ZipEntry entry;
+            while ((entry = zipIn.getNextEntry()) != null) {
+                File file = new File(targetDir, entry.getName());
+//                if (entry.isDirectory()) {
+//                    file.mkdirs();
+//                } else {
+//                    try (FileOutputStream fos = new FileOutputStream(file)) {
+//                        byte[] buffer = new byte[1024];
+//                        int length;
+//                        while ((length = zipIn.read(buffer)) != -1) {
+//                            fos.write(buffer, 0, length);
+//                        }
+//                    }
+//                }
+                try (FileOutputStream fos = new FileOutputStream(file)) {
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = zipIn.read(buffer)) != -1) {
+                        fos.write(buffer, 0, length);
+                    }
+                }
+                zipIn.closeEntry();
+            }
+        }
+    }
+    // 选择csv并将模型运行结果写到json
+    private void runModel(File resultDir,File[] csvFile,String modelLabel,String algorithmLabel,String label)  {
+        modelsService.zipPredict(modelLabel,algorithmLabel, resultDir, csvFile,label);
+    }
+    // 打包目录为 ZIP 文件
+    private void zipDirectory(File sourceDir, File zipFile) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(zipFile);
+             ZipOutputStream zos = new ZipOutputStream(fos)) {
+            for (File file : sourceDir.listFiles()) {
+                if (file.isDirectory()) continue;
+                try (FileInputStream fis = new FileInputStream(file)) {
+                    ZipEntry zipEntry = new ZipEntry(file.getName());
+                    zos.putNextEntry(zipEntry);
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = fis.read(buffer)) > 0) {
+                        zos.write(buffer, 0, length);
+                    }
+                    zos.closeEntry();
+                }
+            }
+        }
+    }
+    // 删除临时目录
+    private void deleteDirectory(File dir) {
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    deleteDirectory(file);
+                } else {
+                    file.delete();
+                }
+            }
+        }
+        dir.delete();
     }
 }
