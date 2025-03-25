@@ -4,41 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.hust.ewsystem.DTO.QueryTurbineWarnMatrixDTO;
-import com.hust.ewsystem.DTO.QueryWarnDTO;
-import com.hust.ewsystem.DTO.QueryWarnDetailsDTO;
-import com.hust.ewsystem.DTO.QueryWarnInfoDTO;
-import com.hust.ewsystem.DTO.TrendDataDTO;
-import com.hust.ewsystem.DTO.TurbineWarnMatrixDTO;
-import com.hust.ewsystem.DTO.WarnCountDTO;
-import com.hust.ewsystem.DTO.WarnHandleDTO;
-import com.hust.ewsystem.DTO.WarningOperateDTO;
-import com.hust.ewsystem.DTO.WarningsDTO;
+import com.hust.ewsystem.DTO.*;
+import com.hust.ewsystem.VO.PicturesVO;
 import com.hust.ewsystem.VO.WarningsVO;
 import com.hust.ewsystem.common.exception.CrudException;
 import com.hust.ewsystem.common.result.EwsResult;
-import com.hust.ewsystem.entity.Models;
-import com.hust.ewsystem.entity.RealPoint;
-import com.hust.ewsystem.entity.ReportWarningRelate;
-import com.hust.ewsystem.entity.Reports;
-import com.hust.ewsystem.entity.StandRealRelate;
-import com.hust.ewsystem.entity.Warnings;
-import com.hust.ewsystem.entity.WindFarm;
-import com.hust.ewsystem.entity.WindTurbine;
-import com.hust.ewsystem.mapper.CompanyMapper;
-import com.hust.ewsystem.mapper.ModelsMapper;
-import com.hust.ewsystem.mapper.ReportWarningRelateMapper;
-import com.hust.ewsystem.mapper.ReportsMapper;
-import com.hust.ewsystem.mapper.WarningMapper;
-import com.hust.ewsystem.mapper.WindFarmMapper;
-import com.hust.ewsystem.mapper.WindTurbineMapper;
-import com.hust.ewsystem.service.ModelsService;
-import com.hust.ewsystem.service.RealPointService;
-import com.hust.ewsystem.service.ReportWarningRelateService;
-import com.hust.ewsystem.service.StandRealRelateService;
-import com.hust.ewsystem.service.WarningService;
-import com.hust.ewsystem.service.WindFarmService;
-import com.hust.ewsystem.service.WindTurbineService;
+import com.hust.ewsystem.entity.*;
+import com.hust.ewsystem.mapper.*;
+import com.hust.ewsystem.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,6 +78,12 @@ public class WarningController {
     @Autowired
     private ReportWarningRelateMapper reportWarningRelateMapper;
 
+    @Autowired
+    private PicturesMapper picturesMapper;
+
+    @Autowired
+    private PictureStandRelateMapper pictureStandRelateMapper;
+
     @Resource
     private WindFarmService windFarmService;
 
@@ -113,6 +92,12 @@ public class WarningController {
 
     @Resource
     private ReportWarningRelateService reportWarningRelateService;
+
+    @Resource
+    private StandPointService standPointService;
+
+    @Resource
+    private CommonDataService commonDataService;
 
     @GetMapping("/list")
     public EwsResult<?> getWarningList(@RequestParam(value = "page") int page,
@@ -561,5 +546,51 @@ public class WarningController {
         }
         List<Warnings> warnInfoListByReportId = warningService.getWarnInfoListByReportId(warnIdList);
         return EwsResult.OK("处理成功",warnInfoListByReportId);
+    }
+    @PostMapping("/showPictures")
+    public EwsResult<?> showPictures(@RequestBody Map<String, Object> warningForm) {
+        Integer warningId = (Integer) warningForm.get("warningId");
+        String startTime= (String) warningForm.get("startTime");
+        String endTime= (String) warningForm.get("endTime");
+        Warnings warning = warningService.getById(warningId);
+        Models model = modelsService.getById(warning.getModelId());
+        Integer algorithmId = model.getAlgorithmId();
+        Integer turbineId = model.getTurbineId();
+        List<Pictures> picturesList = picturesMapper.selectList(new QueryWrapper<Pictures>().eq("algorithm_id", algorithmId));
+        List<PicturesVO> res = new ArrayList<>();
+        for(Pictures picture : picturesList){
+            PicturesVO picturesVO = new PicturesVO();
+            Integer flag = picture.getFlag();
+            if(flag == 0){
+                picturesVO = initPictureVO(picture, turbineId, startTime, endTime);
+            }else if(flag == 1){
+                String warningDescription = picture.getWarningDescription();
+                if(!warningDescription.equals(warning.getWarningDescription()))continue;
+                picturesVO = initPictureVO(picture, turbineId, startTime, endTime);
+            }
+            res.add(picturesVO);
+        }
+        return EwsResult.OK("查询成功", res);
+    }
+    public PicturesVO initPictureVO(Pictures picture, Integer turbineId, String startTime, String endTime){
+        PicturesVO picturesVO = new PicturesVO();
+        picturesVO.setPictureId(picture.getId());
+        picturesVO.setWarningDescription(picture.getWarningDescription());
+        picturesVO.setThreshold(picture.getThreshold());
+        picturesVO.setPicType(picture.getPicType());
+        List<StandPointDTO> standPointDTOList = new ArrayList<>();
+        pictureStandRelateMapper.selectList(new QueryWrapper<PictureStandRelate>().eq("picture_id", picture.getId())).forEach(pictureStandRelate -> {
+            StandPointDTO standPointDTO = new StandPointDTO();
+            standPointDTO.setPointId(pictureStandRelate.getStandPointId());
+            StandPoint standPoint = standPointService.getById(pictureStandRelate.getStandPointId());
+            standPointDTO.setPointDescription(standPoint.getPointDescription());
+            List<Integer> realPointIds = standRealRelateService.list(new QueryWrapper<StandRealRelate>().eq("stand_point_id", pictureStandRelate.getStandPointId())).stream().map(StandRealRelate::getRealPointId).collect(Collectors.toList());
+            RealPoint one = realPointService.getOne(new QueryWrapper<RealPoint>().in("point_id", realPointIds).eq("turbine_id", turbineId));
+            List<CommonData> commonData = commonDataService.selectDataByTime(one.getPointLabel().toLowerCase(), startTime, endTime);
+            standPointDTO.setPointValue(commonData);
+            standPointDTOList.add(standPointDTO);
+        });
+        picturesVO.setPoints(standPointDTOList);
+        return picturesVO;
     }
 }
