@@ -218,7 +218,7 @@ public class ModelsController {
                 majorVersion += 1;
                 minorVersion = 0;
             }
-            String newVersion = "v" + majorVersion + "." + minorVersion;
+            String newVersion = "V" + majorVersion + "." + minorVersion;
             //像版本号这种
             model.setModelVersion(newVersion);
             modelsList.add(model);
@@ -542,11 +542,15 @@ public class ModelsController {
                                   @RequestParam(value = "module_id", required = false) Integer moduleId,
                                   @RequestParam(value = "company_id", required = false) Integer companyId,
                                   @RequestParam(value = "windfarm_id", required = false) Integer windfarmId,
+                                  @RequestParam(value = "algorithm_id", required = false) Integer algorithmId,
                                   @RequestParam(value = "turbine_id", required = false) Integer turbineId) {
         Page<Models> modelsPage = new Page<>(page, pageSize);
         QueryWrapper<Models> queryWrapper = new QueryWrapper<>();
         if (moduleId != null) {
             queryWrapper.eq("module_id", moduleId);
+        }
+        if(algorithmId != null){
+            queryWrapper.eq("algorithm_id", algorithmId);
         }
         if (turbineId != null) {
             queryWrapper.eq("turbine_id", turbineId);
@@ -585,42 +589,42 @@ public class ModelsController {
             map.put("modelName", model.getModelName());
             map.put("modelVersion", model.getModelVersion());
             map.put("turbineId", model.getTurbineId());
-            map.put("turbineNumber", windTurbineMapper.selectById(model.getTurbineId()).getTurbineName());
+            map.put("turbineName", windTurbineMapper.selectById(model.getTurbineId()).getTurbineName());
             map.put("algorithmId", model.getAlgorithmId());
             map.put("algorithmName",algorithmsMapper.selectById(model.getAlgorithmId()).getAlgorithmName());
-//            map.put("moduleId", model.getModuleId());
+            map.put("moduleId", model.getModuleId());
 //            map.put("moduleName",moduleMapper.selectById(model.getModuleId()).getModuleName());
             map.put("modelStatus", model.getModelStatus());
             result.add(map);
         }
-        QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
-        windTurbineQueryWrapper.select("turbine_id", "turbine_type","turbine_name","wind_farm_id");  // 指定你需要的字段
-        List<WindTurbine> turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
-
-
-        QueryWrapper<WindFarm> windFarmQueryWrapper = new QueryWrapper<>();
-        windFarmQueryWrapper.select("wind_farm_id", "wind_farm_name,company_id");
-        List<WindFarm> windFarmList = windFarmMapper.selectList(windFarmQueryWrapper);
-
-        QueryWrapper<Company> companyQueryWrapper = new QueryWrapper<>();
-        companyQueryWrapper.select("company_id", "company_name");
-        List<Company> companyList = companyMapper.selectList(companyQueryWrapper);
-
-        QueryWrapper<Module> moduleQueryWrapper = new QueryWrapper<>();
-        moduleQueryWrapper.select("module_id", "module_name");
-        List<Module> moduleList = moduleMapper.selectList(moduleQueryWrapper);
-
-        QueryWrapper<Algorithms> algorithmsQueryWrapper = new QueryWrapper<>();
-        algorithmsQueryWrapper.select("algorithm_id","algorithm_name","algorithm_label");
-        List<Algorithms> algorithmsList = algorithmsMapper.selectList(algorithmsQueryWrapper);
-
-        QueryWrapper<StandPoint> standPointQueryWrapper = new QueryWrapper<>();
-        standPointQueryWrapper.select("point_id","point_label","point_description");
-        List<StandPoint> standPointList = standPointMapper.selectList(standPointQueryWrapper);
-
-        QueryWrapper<AlgorithmStandRelate> algorithmStandRelateQueryWrapper = new QueryWrapper<>();
-        algorithmStandRelateQueryWrapper.select("algorithm_id","stand_point_id");
-        List<AlgorithmStandRelate> algorithmStandRelateList = algorithmStandRelateMapper.selectList(algorithmStandRelateQueryWrapper);
+//        QueryWrapper<WindTurbine> windTurbineQueryWrapper = new QueryWrapper<>();
+//        windTurbineQueryWrapper.select("turbine_id", "turbine_type","turbine_name","wind_farm_id");  // 指定你需要的字段
+//        List<WindTurbine> turbineList = windTurbineMapper.selectList(windTurbineQueryWrapper);
+//
+//
+//        QueryWrapper<WindFarm> windFarmQueryWrapper = new QueryWrapper<>();
+//        windFarmQueryWrapper.select("wind_farm_id", "wind_farm_name,company_id");
+//        List<WindFarm> windFarmList = windFarmMapper.selectList(windFarmQueryWrapper);
+//
+//        QueryWrapper<Company> companyQueryWrapper = new QueryWrapper<>();
+//        companyQueryWrapper.select("company_id", "company_name");
+//        List<Company> companyList = companyMapper.selectList(companyQueryWrapper);
+//
+//        QueryWrapper<Module> moduleQueryWrapper = new QueryWrapper<>();
+//        moduleQueryWrapper.select("module_id", "module_name");
+//        List<Module> moduleList = moduleMapper.selectList(moduleQueryWrapper);
+//
+//        QueryWrapper<Algorithms> algorithmsQueryWrapper = new QueryWrapper<>();
+//        algorithmsQueryWrapper.select("algorithm_id","algorithm_name","algorithm_label");
+//        List<Algorithms> algorithmsList = algorithmsMapper.selectList(algorithmsQueryWrapper);
+//
+//        QueryWrapper<StandPoint> standPointQueryWrapper = new QueryWrapper<>();
+//        standPointQueryWrapper.select("point_id","point_label","point_description");
+//        List<StandPoint> standPointList = standPointMapper.selectList(standPointQueryWrapper);
+//
+//        QueryWrapper<AlgorithmStandRelate> algorithmStandRelateQueryWrapper = new QueryWrapper<>();
+//        algorithmStandRelateQueryWrapper.select("algorithm_id","stand_point_id");
+//        List<AlgorithmStandRelate> algorithmStandRelateList = algorithmStandRelateMapper.selectList(algorithmStandRelateQueryWrapper);
 
         Map<String,Object> response = new HashMap<>();
         response.put("total_count",page1.getTotal());
@@ -628,13 +632,13 @@ public class ModelsController {
         response.put("page_size",page1.getSize());
         response.put("total_pages",page1.getPages());
         response.put("modelList",result);
-        response.put("companyList",companyList);
-        response.put("windFarmList",windFarmList);
-        response.put("turbineList",turbineList);
-        response.put("moduleList",moduleList);
-        response.put("algorithmList",algorithmsList);
-        response.put("standPointList",standPointList);
-        response.put("algorithmStandRelateList",algorithmStandRelateList);
+//        response.put("companyList",companyList);
+//        response.put("windFarmList",windFarmList);
+//        response.put("turbineList",turbineList);
+//        response.put("moduleList",moduleList);
+//        response.put("algorithmList",algorithmsList);
+//        response.put("standPointList",standPointList);
+//        response.put("algorithmStandRelateList",algorithmStandRelateList);
         return EwsResult.OK("查询成功", response);
     }
 //    // 查询任务状态

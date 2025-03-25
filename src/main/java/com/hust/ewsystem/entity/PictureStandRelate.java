@@ -21,7 +21,7 @@ public class PictureStandRelate implements Serializable {
     @TableId(type = IdType.AUTO)
     private Integer id; // 记录id
 
-    private Integer reportId; // 通知id
+    private Integer pictureId; // 图片id
 
-    private Integer warningId; // 预警id
+    private Integer standPointId; // 标准测点id
 }
