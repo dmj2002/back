@@ -339,12 +339,18 @@ public class ModelsController {
         if(!remove1){
             throw new CrudException("删除模型失败");
         }
+        modelsService.listByIds(ModelIdList).forEach(model -> {
+            //删除模型文件夹
+            File modelDir = new File(String.format("%s/%s", pythonFilePath, model.getModelLabel()));
+            if (modelDir.exists()) {
+                deleteDirectory(modelDir);
+            }
+        });
         //删除model表
         boolean remove2 = modelsService.removeByIds(ModelIdList);
         if(!remove2){
             throw new CrudException("删除模型失败");
         }
-        //TODO：删除模型文件
         return EwsResult.OK("删除模型成功");
     }
 
