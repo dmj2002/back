@@ -807,6 +807,7 @@ public class ModelsController {
     public static void writeFileContent(File file, List<ThresholdVO> items) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             String content = JSON.toJSONString(items); // 转换为 JSON 字符串
+            content = content.replace("null","NaN");
             writer.write(content);  // 写入内容
         } catch (IOException e) {
             e.printStackTrace();
