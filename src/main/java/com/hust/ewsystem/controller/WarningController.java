@@ -578,6 +578,10 @@ public class WarningController {
         picturesVO.setWarningDescription(picture.getWarningDescription());
         picturesVO.setThreshold(picture.getThreshold());
         picturesVO.setPicType(picture.getPicType());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime startDateTime = LocalDateTime.parse(startTime, formatter);
+        LocalDateTime adjustedDateTime = startDateTime.minusSeconds(picture.getBias());
+        String adjustedStartTime = adjustedDateTime.format(formatter);
         List<StandPointDTO> standPointDTOList = new ArrayList<>();
         pictureStandRelateMapper.selectList(new QueryWrapper<PictureStandRelate>().eq("picture_id", picture.getId())).forEach(pictureStandRelate -> {
             StandPointDTO standPointDTO = new StandPointDTO();
@@ -586,7 +590,7 @@ public class WarningController {
             standPointDTO.setPointDescription(standPoint.getPointDescription());
             List<Integer> realPointIds = standRealRelateService.list(new QueryWrapper<StandRealRelate>().eq("stand_point_id", pictureStandRelate.getStandPointId())).stream().map(StandRealRelate::getRealPointId).collect(Collectors.toList());
             RealPoint one = realPointService.getOne(new QueryWrapper<RealPoint>().in("point_id", realPointIds).eq("turbine_id", turbineId));
-            List<CommonData> commonData = commonDataService.selectDataByTime(one.getPointLabel().toLowerCase(), startTime, endTime);
+            List<CommonData> commonData = commonDataService.selectDataByTime(one.getPointLabel().toLowerCase(), adjustedStartTime, endTime);
             standPointDTO.setPointValue(commonData);
             standPointDTOList.add(standPointDTO);
         });
