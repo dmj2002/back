@@ -23,7 +23,7 @@ public class Company implements Serializable {
 
     private String companyAddress; // 公司地址
 
-    private String companyNumber; // 公司电话
+    private String contactNumber; // 公司电话
 
     private String remarks; // 备注
 
