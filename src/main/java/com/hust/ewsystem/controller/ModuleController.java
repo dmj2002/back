@@ -31,7 +31,7 @@ public class ModuleController {
      * 查询系统分类列表
      * @return EwsResult<List<Module>>
      */
-    @RequestMapping(value = "/getModelList",method = RequestMethod.GET)
+    @RequestMapping(value = "/list",method = RequestMethod.GET)
     public EwsResult<List<Module>> getModelList(){
         List<Module> list = moduleService.list();
         return EwsResult.OK(list);
