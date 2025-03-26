@@ -338,7 +338,7 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     public List<ThresholdVO> showThreshold(String modelLabel){
         List<ThresholdVO> res = new ArrayList<>();
         try {
-            String resultFilePath = pythonFilePath + modelLabel + "/model.json";
+            String resultFilePath = pythonFilePath + "/" + modelLabel + "/model.json";
             // 强制使用 UTF-8 编码读取文件内容
             Path path = Paths.get(resultFilePath);
             if (Files.exists(path)) {
