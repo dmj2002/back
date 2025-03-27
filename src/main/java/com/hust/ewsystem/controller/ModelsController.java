@@ -331,23 +331,25 @@ public class ModelsController {
 
     @DeleteMapping("/delete")
     @Transactional
-    public EwsResult<?> deleteModel(@RequestBody List<Integer> ModelIdList){
+    public EwsResult<?> deleteModel(@RequestBody List<Integer> modelIdList){
+        //TODO 删除主键需要先删除对应外键，好像有点问题
         //删除model_real_relate表
         boolean remove1 = modelRealRelateService.remove(
-                new QueryWrapper<ModelRealRelate>().in("model_id", ModelIdList)
+                new QueryWrapper<ModelRealRelate>().in("model_id", modelIdList)
         );
         if(!remove1){
             throw new CrudException("删除模型失败");
         }
-        modelsService.listByIds(ModelIdList).forEach(model -> {
+        modelIdList.forEach(modelId -> {
             //删除模型文件夹
-            File modelDir = new File(String.format("%s/%s", pythonFilePath, model.getModelLabel()));
+            String modelLabel = "M" + String.format("%04d", modelId);
+            File modelDir = new File(String.format("%s/%s", pythonFilePath, modelLabel));
             if (modelDir.exists()) {
                 deleteDirectory(modelDir);
             }
         });
         //删除model表
-        boolean remove2 = modelsService.removeByIds(ModelIdList);
+        boolean remove2 = modelsService.removeByIds(modelIdList);
         if(!remove2){
             throw new CrudException("删除模型失败");
         }

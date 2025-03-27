@@ -105,7 +105,7 @@ public class WarningController {
                                        @RequestParam(value = "start_date") String startDate,
                                        @RequestParam(value = "end_date", required = false) String endDate,
                                        @RequestParam(value = "warning_level", required = false) Integer warningLevel,
-                                       @RequestParam(value = "company_id", required = false) Integer companyId,
+                                       @RequestParam(value = "company_id") Integer companyId,
                                        @RequestParam(value = "windfarm_id", required = false) Integer windfarmId,
                                        @RequestParam(value = "module_id", required = false) Integer moduleId,
                                        @RequestParam(value = "turbine_id", required = false) Integer turbineId) {
