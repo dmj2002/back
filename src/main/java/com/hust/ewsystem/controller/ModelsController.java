@@ -520,7 +520,7 @@ public class ModelsController {
         Integer modelId = thresholdDTO.getModelId();
         String modelLabel = modelsService.getById(modelId).getModelLabel();
         List<ThresholdVO> items = thresholdDTO.getItems();
-        File resultFile = new File(pythonFilePath + modelLabel + "/new_model.json");
+        File resultFile = new File(pythonFilePath + modelLabel + "/model.json");
         // 尝试创建文件或覆盖已有文件
         try {
             if (resultFile.exists()) {
