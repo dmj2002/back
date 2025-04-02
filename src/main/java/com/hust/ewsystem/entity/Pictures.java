@@ -19,6 +19,8 @@ public class Pictures implements Serializable {
 
     private String warningDescription; // 预警描述
 
+    private String picName; // 图片名称
+
     private Integer algorithmId; // 算法id
 
     private Double threshold; // 阈值

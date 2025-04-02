@@ -20,5 +20,7 @@ public class PicturesVO {
 
     private Integer picType;
 
+    private String picName;
+
     private List<StandPointDTO> points;
 }

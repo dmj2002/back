@@ -576,6 +576,7 @@ public class WarningController {
         PicturesVO picturesVO = new PicturesVO();
         picturesVO.setPictureId(picture.getId());
         picturesVO.setWarningDescription(picture.getWarningDescription());
+        picturesVO.setPicName(picture.getPicName());
         picturesVO.setThreshold(picture.getThreshold());
         picturesVO.setPicType(picture.getPicType());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
