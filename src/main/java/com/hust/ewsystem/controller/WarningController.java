@@ -564,9 +564,19 @@ public class WarningController {
             if(flag == 0){
                 picturesVO = initPictureVO(picture, turbineId, startTime, endTime);
             }else if(flag == 1){
-                String warningDescription = picture.getWarningDescription();
-                if(!warningDescription.equals(warning.getWarningDescription()))continue;
-                picturesVO = initPictureVO(picture, turbineId, startTime, endTime);
+                String pictureDescription = picture.getWarningDescription();
+                String warningDescription = warning.getWarningDescription();
+                if (warningDescription.startsWith("[") && warningDescription.endsWith("]")) {
+                    warningDescription = warningDescription.substring(1, warningDescription.length() - 1);
+                }
+                String[] desc = warningDescription.split(",");
+                for(String s : desc){
+                    if (s.startsWith("'") && s.endsWith("'")) {
+                        s = s.substring(1, s.length() - 1);
+                    }
+                    if(!pictureDescription.equals(s))continue;
+                    picturesVO = initPictureVO(picture, turbineId, startTime, endTime);
+                }
             }
             res.add(picturesVO);
         }
