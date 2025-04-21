@@ -324,15 +324,19 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
     public String killTask(String modelLabel) {
         // 终止ScheduledFuture任务
         ScheduledFuture<?> scheduledTask = taskMap.get(modelLabel + "_predict");
-        if (scheduledTask != null) {
-            scheduledTask.cancel(true);
-            taskMap.remove(modelLabel + "_predict");
-        }
-        // 检查任务和线程是否都已终止
+        // 检查任务是否存在
         if (scheduledTask == null) {
             return "任务不存在";
+        }
+        // 取消任务并移除
+        boolean isCancelled = scheduledTask.cancel(true);
+        taskMap.remove(modelLabel + "_predict");
+
+        // 检查任务是否已取消
+        if (isCancelled) {
+            return "任务已成功取消";
         } else {
-            return "任务已终止";
+            return "任务无法取消";
         }
     }
     public List<ThresholdVO> showThreshold(String modelLabel){

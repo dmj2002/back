@@ -4,8 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.RealPoint;
-import com.hust.ewsystem.mapper.RealPointMapper;
-import com.hust.ewsystem.service.RealPointService;
+import com.hust.ewsystem.entity.StandPoint;
+import com.hust.ewsystem.mapper.StandPointMapper;
+import com.hust.ewsystem.service.StandPointService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,29 +16,27 @@ import java.util.Map;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/realpoint")
-public class RealPointController {
+@RequestMapping("/standpoint")
+public class StandPointController {
 
     @Autowired
-    private RealPointMapper realPointMapper;
+    private StandPointMapper standPointMapper;
 
     @Autowired
-    private RealPointService realPointService;
+    private StandPointService standPointService;
 
 
 
     @PostMapping("/add")
-    public EwsResult<?> addRealPoint(@RequestBody RealPoint realPoint) {
-        int inserted = realPointMapper.insert(realPoint);
+    public EwsResult<?> addRealPoint(@RequestBody StandPoint standPoint) {
+        int inserted = standPointMapper.insert(standPoint);
         if(inserted != 0){
             Map<String,Object> result = new HashMap<>();
-            result.put("pointId", realPoint.getPointId());
-            result.put("pointLabel", realPoint.getPointLabel());
-            result.put("pointDescription", realPoint.getPointDescription());
-            result.put("module_id", realPoint.getModuleId());
-            result.put("pointType", realPoint.getPointType());
-            result.put("pointUnit", realPoint.getPointUnit());
-            result.put("turbine_id", realPoint.getTurbineId());
+            result.put("pointId", standPoint.getPointId());
+            result.put("pointLabel", standPoint.getPointLabel());
+            result.put("pointDescription", standPoint.getPointDescription());
+            result.put("pointType", standPoint.getPointType());
+            result.put("pointUnit", standPoint.getPointUnit());
             return EwsResult.OK("测点添加成功", result);
         }
         else{
@@ -46,17 +45,18 @@ public class RealPointController {
     }
     @GetMapping("/get/{pointId}")
     public EwsResult<?> getRealPoint(@PathVariable Integer pointId){
-        RealPoint realPoint = realPointMapper.selectById(pointId);
-        return Objects.isNull(realPoint) ? EwsResult.error("未找到该测点") : EwsResult.OK("测点查找成功",realPoint);
+        StandPoint standPoint = standPointMapper.selectById(pointId);
+        return Objects.isNull(standPoint) ? EwsResult.error("未找到该测点") : EwsResult.OK("测点查找成功",standPoint);
     }
     @GetMapping("/list")
     public EwsResult<?> listRealPoint(@RequestParam(value = "page") int page,
                                       @RequestParam(value = "page_size") int pageSize){
         Map<String,Object> response = new HashMap<>();
-        Page<RealPoint> modelsPage = new Page<>(page, pageSize);
-        QueryWrapper<RealPoint> queryWrapper = new QueryWrapper<>();
+        Page<StandPoint> modelsPage = new Page<>(page, pageSize);
+        QueryWrapper<StandPoint> queryWrapper = new QueryWrapper<>();
 
-        Page<RealPoint> page1 = realPointService.page(modelsPage, queryWrapper);
+
+        Page<StandPoint> page1 = standPointService.page(modelsPage, queryWrapper);
 
 
 
