@@ -3,15 +3,13 @@ package com.hust.ewsystem.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hust.ewsystem.common.result.EwsResult;
-import com.hust.ewsystem.entity.RealPoint;
 import com.hust.ewsystem.entity.StandPoint;
 import com.hust.ewsystem.mapper.StandPointMapper;
 import com.hust.ewsystem.service.StandPointService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.HashMap
 import java.util.Map;
 import java.util.Objects;
 
