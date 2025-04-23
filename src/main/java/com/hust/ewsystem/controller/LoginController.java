@@ -28,7 +28,7 @@ public class LoginController {
         String adminAccount = user + ":" + psw;
         accountRoles.put(adminAccount, "admin");
         String account = (String) params.get("account");
-        String password = (String) params.get("password");
+        String password = (String) params.get("pwd");
         String key = account + ":" + password;
         if (accountRoles.containsKey(key)) {
             Map<String, Object> res = new HashMap<>();
