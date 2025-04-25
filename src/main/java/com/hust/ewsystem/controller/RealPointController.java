@@ -38,6 +38,7 @@ public class RealPointController {
             result.put("pointType", realPoint.getPointType());
             result.put("pointUnit", realPoint.getPointUnit());
             result.put("turbine_id", realPoint.getTurbineId());
+            result.put("calculate", realPoint.getCalculate());
             return EwsResult.OK("测点添加成功", result);
         }
         else{
