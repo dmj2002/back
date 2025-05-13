@@ -17,5 +17,5 @@ public class ThresholdDTO implements Serializable {
 
     private Integer modelId;
 
-    private List<ThresholdVO> items;
+    private Object items;
 }

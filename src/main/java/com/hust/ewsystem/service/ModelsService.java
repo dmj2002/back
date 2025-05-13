@@ -17,7 +17,7 @@ public interface ModelsService extends IService<Models> {
 
     void testPredict(Integer alertInterval, String modelLabel, String algorithmLabel, Integer modelId, Integer alertWindowSize, String startTime, String endTime);
 
-    List<ThresholdVO> showThreshold(String modelLabel);
+    Object showThreshold(String modelLabel, Integer algorithmId);
 
     void zipPredict(String modelLabel,String algorithmLabel, File resultDir,File[] csvFile,String label);
 

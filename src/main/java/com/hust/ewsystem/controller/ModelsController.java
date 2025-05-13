@@ -2,6 +2,7 @@ package com.hust.ewsystem.controller;
 
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -27,6 +28,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -510,35 +515,77 @@ public class ModelsController {
     public EwsResult<?> showThreshold(@RequestParam("modelId") Integer modelId){
         Models model = modelsService.getById(modelId);
         String modelLabel = model.getModelLabel();
-        List<ThresholdVO> thresholdList = modelsService.showThreshold(modelLabel);
+        Integer algorithmId = model.getAlgorithmId();
+//        List<ThresholdVO> thresholdList = modelsService.showThreshold(modelLabel,algorithmId);
+        Object thresholdList = modelsService.showThreshold(modelLabel, algorithmId);
         return EwsResult.OK(thresholdList);
     }
 
     @PostMapping("/changeThreshold")
     public EwsResult<?> changeThreshold(@RequestBody ThresholdDTO thresholdDTO){
         Integer modelId = thresholdDTO.getModelId();
-        String modelLabel = modelsService.getById(modelId).getModelLabel();
-        List<ThresholdVO> items = thresholdDTO.getItems();
-        File resultFile = new File(pythonFilePath + "/" + modelLabel + "/model.json");
-        // 尝试创建文件或覆盖已有文件
-        try {
-            if (resultFile.exists()) {
-                boolean deleted = resultFile.delete();
-                if (!deleted) {
-                    return EwsResult.error("修改阈值失败"); // 如果无法删除文件，结束方法
+        Models model = modelsService.getById(modelId);
+        String modelLabel = model.getModelLabel();
+        Integer algorithmId = model.getAlgorithmId();
+        Object items = thresholdDTO.getItems();
+        if(algorithmId == 1 || algorithmId == 19 || algorithmId == 20){
+            File resultFile = new File(pythonFilePath + "/" + modelLabel + "/model.json");
+            // 尝试创建文件或覆盖已有文件
+            try {
+                if (resultFile.exists()) {
+                    boolean deleted = resultFile.delete();
+                    if (!deleted) {
+                        return EwsResult.error("修改阈值失败"); // 如果无法删除文件，结束方法
+                    }
                 }
+                // 创建新文件
+                boolean fileCreated = resultFile.createNewFile();
+                if (fileCreated) {
+                    System.out.println("文件创建成功: " + resultFile.getAbsolutePath());
+                    //写入结果到文件
+                    writeFileContent(resultFile.getAbsoluteFile(), (List<ThresholdVO>) items);
+                } else {
+                    return EwsResult.error("修改阈值失败");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            // 创建新文件
-            boolean fileCreated = resultFile.createNewFile();
-            if (fileCreated) {
-                System.out.println("文件创建成功: " + resultFile.getAbsolutePath());
-                //写入结果到文件
-                writeFileContent(resultFile.getAbsoluteFile(), items);
-            } else {
-                return EwsResult.error("修改阈值失败");
+        }else {
+            try {
+                String resultFilePath = pythonFilePath + "/" + modelLabel + "/model.json";
+                // 强制使用 UTF-8 编码读取文件内容
+                Path path = Paths.get(resultFilePath);
+                if (Files.exists(path)) {
+                    StringBuilder contentBuilder = new StringBuilder();
+                    try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            contentBuilder.append(line);
+                        }
+                    }
+                    String content = contentBuilder.toString();
+                    // 预处理：将 NaN 替换为 null
+                    content = content.replace("NaN", "null");
+                    List<Map<String, Object>> list = JSON.parseObject(content, new TypeReference<List<Map<String, Object>>>() {});
+                    Map<String,Object> item = (Map<String,Object>)items;
+                    for (int i = 0; i < list.size(); i++) {
+                        Map<String, Object> map = list.get(i);
+                        if (map.get("id").equals(item.get("id"))) {
+                            list.set(i, item);
+                            break;
+                        }
+                    }
+                    // 将修改后的内容写回文件
+                    try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+                        String jsonString = JSON.toJSONString(list);
+                        writer.write(jsonString);
+                    }
+                } else {
+                    System.out.println("文件不存在: " + resultFilePath);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return EwsResult.OK("修改阈值成功");
     }

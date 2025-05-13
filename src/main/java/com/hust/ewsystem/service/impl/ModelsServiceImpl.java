@@ -339,8 +339,8 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
             return "任务无法取消";
         }
     }
-    public List<ThresholdVO> showThreshold(String modelLabel){
-        List<ThresholdVO> res = new ArrayList<>();
+    public Object showThreshold(String modelLabel, Integer algorithmId){
+        String content = null;
         try {
             String resultFilePath = pythonFilePath + "/" + modelLabel + "/model.json";
             // 强制使用 UTF-8 编码读取文件内容
@@ -353,18 +353,9 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
                         contentBuilder.append(line);
                     }
                 }
-                String content = contentBuilder.toString();
+                content = contentBuilder.toString();
                 // 预处理：将 NaN 替换为 null
                 content = content.replace("NaN","null");
-                // 解析 JSON 内容
-                res = JSON.parseObject(content, new TypeReference<List<ThresholdVO>>() {});
-                // 输出解析后的数据
-//                for (ThresholdVO data : res) {
-//                    System.out.println("下限: " + data.getLowerLimit());
-//                    System.out.println("上限: " + data.getUpperLimit());
-//                    System.out.println("范围: " + data.getRange());
-//                    System.out.println("-----------");
-//                }
             }
             else{
                 System.out.println("文件不存在: " + resultFilePath);
@@ -372,7 +363,20 @@ public class ModelsServiceImpl extends ServiceImpl<ModelsMapper, Models> impleme
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return res;
+        if(algorithmId == 1 || algorithmId == 19 || algorithmId == 20){
+            // 解析 JSON 内容
+            List<ThresholdVO> res = JSON.parseObject(content, new TypeReference<List<ThresholdVO>>() {});
+            return res;
+        }
+        else{
+            List<Map<String, Object>> list = JSON.parseObject(content, new TypeReference<List<Map<String, Object>>>() {});
+            for (Map<String, Object> map : list) {
+                if (algorithmId.equals(map.get("id"))) {
+                    return map;
+                }
+            }
+        }
+        return null;
     }
 
     /**
