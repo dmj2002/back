@@ -23,4 +23,13 @@ public class PicturesVO {
     private String picName;
 
     private List<StandPointDTO> points;
+
+    public boolean isEmpty() {
+        return this.pictureId == null &&
+                this.warningDescription == null &&
+                this.picName == null &&
+                this.threshold == null &&
+                this.picType == null &&
+                (this.points == null || this.points.isEmpty());
+    }
 }

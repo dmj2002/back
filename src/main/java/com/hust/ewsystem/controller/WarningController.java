@@ -578,7 +578,9 @@ public class WarningController {
                     picturesVO = initPictureVO(picture, turbineId, startTime, endTime);
                 }
             }
-            res.add(picturesVO);
+            if(!picturesVO.isEmpty()){
+                res.add(picturesVO);
+            }
         }
         return EwsResult.OK("查询成功", res);
     }
