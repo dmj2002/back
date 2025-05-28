@@ -185,10 +185,15 @@ public class ModelsController {
      */
     private Integer findUniqueRealId(List<Integer> realPointIds, Integer turbineId) {
         // 查询 real_point 表，筛选出符合条件的唯一 realId
-        return realPointMapper.selectOne(new QueryWrapper<RealPoint>()
-                        .in("point_id", realPointIds) // 在 realPointIds 中查找
-                        .eq("turbine_id", turbineId)       // 匹配 turbineId
-        ).getPointId();
+        RealPoint realPoint = realPointMapper.selectOne(new QueryWrapper<RealPoint>()
+                .in("point_id", realPointIds) // 在 realPointIds 中查找
+                .eq("turbine_id", turbineId)  // 匹配 turbineId
+        );
+
+        // 如果未找到记录，返回 null，调用方可以跳过
+        return Optional.ofNullable(realPoint)
+                .map(RealPoint::getPointId)
+                .orElse(null);
     }
 
     /**
