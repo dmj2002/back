@@ -409,6 +409,10 @@ public class ModelsController {
     @PostMapping("/predict")
     public EwsResult<?> predict(@RequestBody List<Integer> modelList){
 //        List<Map<String,Object>> taskIdList = new ArrayList<>();
+        if(modelList.get(0) == 0){
+            //如果传入的modelId是0，表示所有模型都要预测
+            modelList = modelsService.list(new QueryWrapper<Models>().select("model_id")).stream().map(Models::getModelId).collect(Collectors.toList());
+        }
         for(Integer modelId : modelList) {
             //获取返回值
             Models model = modelsService.getById(modelId);
