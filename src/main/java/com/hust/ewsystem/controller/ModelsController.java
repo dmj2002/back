@@ -3,6 +3,8 @@ package com.hust.ewsystem.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.serializer.SerializeConfig;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -32,6 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -185,10 +188,15 @@ public class ModelsController {
      */
     private Integer findUniqueRealId(List<Integer> realPointIds, Integer turbineId) {
         // 查询 real_point 表，筛选出符合条件的唯一 realId
-        return realPointMapper.selectOne(new QueryWrapper<RealPoint>()
-                        .in("point_id", realPointIds) // 在 realPointIds 中查找
-                        .eq("turbine_id", turbineId)       // 匹配 turbineId
-        ).getPointId();
+        RealPoint realPoint = realPointMapper.selectOne(new QueryWrapper<RealPoint>()
+                .in("point_id", realPointIds) // 在 realPointIds 中查找
+                .eq("turbine_id", turbineId)  // 匹配 turbineId
+        );
+
+        // 如果未找到记录，返回 null，调用方可以跳过
+        return Optional.ofNullable(realPoint)
+                .map(RealPoint::getPointId)
+                .orElse(null);
     }
 
     /**
@@ -532,65 +540,139 @@ public class ModelsController {
         String modelLabel = model.getModelLabel();
         Integer algorithmId = model.getAlgorithmId();
         Object items = thresholdDTO.getItems();
-        if(algorithmId == 1 || algorithmId == 19 || algorithmId == 20){
+        if (algorithmId == 1 || algorithmId == 19 || algorithmId == 20) {
             File resultFile = new File(pythonFilePath + "/" + modelLabel + "/model.json");
-            // 尝试创建文件或覆盖已有文件
             try {
-                if (resultFile.exists()) {
-                    boolean deleted = resultFile.delete();
-                    if (!deleted) {
-                        return EwsResult.error("修改阈值失败"); // 如果无法删除文件，结束方法
+                // 使用 StringBuilder 和 BufferedReader 读取文件内容
+                StringBuilder contentBuilder = new StringBuilder();
+                try (BufferedReader reader = Files.newBufferedReader(resultFile.toPath(), StandardCharsets.UTF_8)) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        contentBuilder.append(line);
                     }
                 }
-                // 创建新文件
-                boolean fileCreated = resultFile.createNewFile();
-                if (fileCreated) {
-                    System.out.println("文件创建成功: " + resultFile.getAbsolutePath());
-                    //写入结果到文件
-                    writeFileContent(resultFile.getAbsoluteFile(), (List<ThresholdVO>) items);
-                } else {
-                    return EwsResult.error("修改阈值失败");
+
+                // 解析为 JSON 数组
+                List<Map<String, Object>> modelJsonArray = JSON.parseObject(contentBuilder.toString(), new TypeReference<List<Map<String, Object>>>() {});
+                // 遍历前端传入的 items
+                List<Map<String, Object>> itemList = (List<Map<String, Object>>) items;
+                for (Map<String, Object> item : itemList) {
+                    // 获取 range 字段并确保是 Double 类型
+                    List<?> rangeRaw = (List<?>) item.get("range");
+                    if (rangeRaw == null || rangeRaw.size() != 2) {
+                        continue; // range 字段无效，跳过
+                    }
+                    List<Double> range = new ArrayList<>();
+                    for (Object value : rangeRaw) {
+                        if (value instanceof Number) {
+                            range.add(((Number) value).doubleValue());
+                        } else {
+                            continue; // 如果包含非数字类型，跳过
+                        }
+                    }
+
+                    // 遍历 model.json 中的每个对象
+                    for (Map<String, Object> modelJson : modelJsonArray) {
+                        // 检查 model.json 中的范围是否匹配
+                        List<?> modelRangeRaw = (List<?>) modelJson.get("范围");
+                        if (modelRangeRaw != null && modelRangeRaw.size() == 2) {
+                            List<Double> modelRange = new ArrayList<>();
+                            for (Object value : modelRangeRaw) {
+                                if (value instanceof Number) {
+                                    modelRange.add(((Number) value).doubleValue());
+                                } else {
+                                    continue; // 如果包含非数字类型，跳过
+                                }
+                            }
+                            if (modelRange.get(0).equals(range.get(0)) && modelRange.get(1).equals(range.get(1))) {
+                                // 范围匹配，更新上下限
+                                modelJson.put("下限", item.get("lowerLimit"));
+                                modelJson.put("上限", item.get("upperLimit"));
+                                break; // 更新完成后退出循环
+                            }
+                        }
+                    }
                 }
+
+                // 将修改后的内容写回文件
+                String updatedContent = JSON.toJSONString(modelJsonArray, SerializerFeature.PrettyFormat);
+                Files.write(resultFile.toPath(), updatedContent.getBytes(StandardCharsets.UTF_8));
             } catch (IOException e) {
                 e.printStackTrace();
+                return EwsResult.error("修改阈值失败");
             }
-        }else {
+        }
+
+else {
             try {
+                // 拼接文件路径
                 String resultFilePath = pythonFilePath + "/" + modelLabel + "/model.json";
-                // 强制使用 UTF-8 编码读取文件内容
                 Path path = Paths.get(resultFilePath);
-                if (Files.exists(path)) {
-                    StringBuilder contentBuilder = new StringBuilder();
-                    try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            contentBuilder.append(line);
-                        }
-                    }
-                    String content = contentBuilder.toString();
-                    // 预处理：将 NaN 替换为 null
-                    content = content.replace("NaN", "null");
-                    List<Map<String, Object>> list = JSON.parseObject(content, new TypeReference<List<Map<String, Object>>>() {});
-                    Map<String,Object> item = (Map<String,Object>)items;
-                    for (int i = 0; i < list.size(); i++) {
-                        Map<String, Object> map = list.get(i);
-                        if (map.get("id").equals(item.get("id"))) {
-                            list.set(i, item);
-                            break;
-                        }
-                    }
-                    // 将修改后的内容写回文件
-                    try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
-                        String jsonString = JSON.toJSONString(list);
-                        writer.write(jsonString);
-                    }
-                } else {
+
+                // 检查文件是否存在
+                if (!Files.exists(path)) {
                     System.out.println("文件不存在: " + resultFilePath);
                 }
+
+                // 读取文件内容
+                StringBuilder contentBuilder = new StringBuilder();
+                try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        contentBuilder.append(line);
+                    }
+                }
+
+                // 预处理：将 NaN 替换为 null
+                String content = contentBuilder.toString().replace("NaN", "null");
+
+                // 解析 JSON 字符串为 List<Map<String, Object>>
+                List<Map<String, Object>> list = JSON.parseObject(content, new TypeReference<List<Map<String, Object>>>() {});
+
+                // 检查 items 是否为 List 类型
+                if (!(items instanceof List)) {
+                    System.out.println("items 不是一个有效的 List 对象");
+                }
+
+                List<Map<String, Object>> itemList = (List<Map<String, Object>>) items;
+
+                // 遍历 list，找到匹配的 id
+                boolean updated = false;
+                for (Map<String, Object> map : list) {
+                    // 检查 id 是否匹配
+                    if (algorithmId != null && algorithmId.equals(map.get("id"))) {
+                        // 找到匹配的 id，更新字段
+                        for (Map<String, Object> item : itemList) {
+                            for (Map.Entry<String, Object> entry : item.entrySet()) {
+                                String key = entry.getKey();
+                                Object value = entry.getValue();
+                                // 直接更新字段值，禁止引入引用
+                                map.put(key, value);
+                            }
+                        }
+                        updated = true;
+                        break; // 更新完成后退出循环
+                    }
+                }
+
+                if (!updated) {
+                    System.out.println("未找到匹配的 id: " + algorithmId);
+                } else {
+                    // 将修改后的内容写回文件
+                    try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+                        // 全局禁用引用生成
+                        SerializeConfig config = new SerializeConfig();
+                        config.setAsmEnable(false); // 禁用 ASM 优化
+                        String jsonString = JSON.toJSONString(list, config, SerializerFeature.DisableCircularReferenceDetect);
+                        writer.write(jsonString);
+                    }
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+
         return EwsResult.OK("修改阈值成功");
     }
 
