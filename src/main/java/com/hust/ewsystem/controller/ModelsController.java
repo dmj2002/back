@@ -660,7 +660,7 @@ else {
                         SerializeConfig config = new SerializeConfig();
                         config.setAsmEnable(false); // 禁用 ASM 优化
                         String jsonString = JSON.toJSONString(list, config, SerializerFeature.DisableCircularReferenceDetect);
-                        writer.write(jsonString);
+                         writer.write(jsonString);
                     }
                 }
 

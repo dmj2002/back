@@ -98,34 +98,33 @@ public class WarningController {
 
     @Resource
     private CommonDataService commonDataService;
-
     @GetMapping("/list")
-    public EwsResult<?> getWarningList(@RequestParam(value = "page") int page,
-                                       @RequestParam(value = "page_size") int pageSize,
-                                       @RequestParam(value = "start_date") String startDate,
-                                       @RequestParam(value = "end_date", required = false) String endDate,
-                                       @RequestParam(value = "warning_level", required = false) Integer warningLevel,
-                                       @RequestParam(value = "company_id") Integer companyId,
-                                       @RequestParam(value = "windfarm_id", required = false) Integer windfarmId,
-                                       @RequestParam(value = "module_id", required = false) Integer moduleId,
-                                       @RequestParam(value = "turbine_id", required = false) Integer turbineId) {
-        //先找modelId
+    public EwsResult<?> getWarningList(
+            @RequestParam(value = "page") int page,
+            @RequestParam(value = "page_size") int pageSize,
+            @RequestParam(value = "start_date") String startDate,
+            @RequestParam(value = "end_date", required = false) String endDate,
+            @RequestParam(value = "warning_level", required = false) Integer warningLevel,
+            @RequestParam(value = "company_id") Integer companyId,
+            @RequestParam(value = "windfarm_id", required = false) Integer windfarmId,
+            @RequestParam(value = "module_id", required = false) Integer moduleId,
+            @RequestParam(value = "turbine_id", required = false) Integer turbineId) {
+
+        // 先找 modelId
         QueryWrapper<Models> queryWrapper = new QueryWrapper<>();
         if (moduleId != null) {
             queryWrapper.eq("module_id", moduleId);
         }
         if (turbineId != null) {
             queryWrapper.eq("turbine_id", turbineId);
-        }
-        else{
+        } else {
             List<Integer> turbineList = new ArrayList<>();
             if (companyId != null) {
                 if (windfarmId != null) {
                     turbineList = windTurbineMapper.selectList(
                             new QueryWrapper<WindTurbine>().eq("wind_farm_id", windfarmId)
                     ).stream().map(WindTurbine::getTurbineId).collect(Collectors.toList());
-                }
-                else {
+                } else {
                     List<Integer> windfarmList = windFarmMapper.selectList(
                             new QueryWrapper<WindFarm>().eq("company_id", companyId)
                     ).stream().map(WindFarm::getWindFarmId).collect(Collectors.toList());
@@ -140,102 +139,146 @@ public class WarningController {
         }
         List<Integer> modelIdlist = modelsService.list(queryWrapper).stream().map(Models::getModelId).collect(Collectors.toList());
 
+        // 如果 modelIdlist 为空，直接返回空结果
+        if (modelIdlist.isEmpty()) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("warningList", new ArrayList<>());
+            result.put("total_count", 0);
+            result.put("page", page);
+            result.put("page_size", pageSize);
+            result.put("total_pages", 0);
+            return EwsResult.OK("查询成功", result);
+        }
+
+        // 查询警告信息
         Page<Warnings> warningsPage = new Page<>(page, pageSize);
         QueryWrapper<Warnings> queryWrapper2 = new QueryWrapper<>();
         queryWrapper2.in("model_id", modelIdlist);
-        if(endDate != null){
+
+        // 处理时间范围
+        String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        if (endDate != null) {
             queryWrapper2.ge("start_time", startDate).le("end_time", endDate);
+        } else {
+            queryWrapper2.ge("start_time", startDate).le("end_time", currentTime);
         }
-        else{
-            queryWrapper2.ge("start_time", startDate).le("end_time", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        }
-        if(warningLevel != null){
+
+        // 处理警告级别
+        if (warningLevel != null) {
             queryWrapper2.eq("warning_level", warningLevel);
         }
+
+        // 执行查询
         Page<Warnings> page1 = warningService.page(warningsPage, queryWrapper2);
-//        if (page1.getRecords().isEmpty()) {
-//            throw new CrudException("查询结果为空");
-//        }
-        Map<String,Object> result = new HashMap<>();
-        if(!page1.getRecords().isEmpty()){
+
+        // 构建返回结果
+        Map<String, Object> result = new HashMap<>();
+        if (!page1.getRecords().isEmpty()) {
             List<WarningsVO> WarningsListVO = warningMapper.getWarningsByModelId(page1.getRecords());
-            result.put("warningList",WarningsListVO);
-        }else {
-            result.put("warningList",new ArrayList<>());
+            result.put("warningList", WarningsListVO);
+        } else {
+            result.put("warningList", new ArrayList<>());
         }
-        result.put("total_count",page1.getTotal());
-        result.put("page",page1.getCurrent());
-        result.put("page_size",page1.getSize());
-        result.put("total_pages",page1.getPages());
+        result.put("total_count", page1.getTotal());
+        result.put("page", page1.getCurrent());
+        result.put("page_size", page1.getSize());
+        result.put("total_pages", page1.getPages());
         return EwsResult.OK("查询成功", result);
     }
-    
+
+
     @GetMapping("/nowList")
-    public EwsResult<?> getNowWarningList(@RequestParam(value = "page") int page,
-                                       @RequestParam(value = "page_size") int pageSize,
-                                       @RequestParam(value = "warning_level", required = false) Integer warningLevel,
-                                       @RequestParam(value = "company_id", required = false) Integer companyId,
-                                       @RequestParam(value = "windfarm_id", required = false) Integer windfarmId,
-                                       @RequestParam(value = "module_id", required = false) Integer moduleId,
-                                       @RequestParam(value = "turbine_id", required = false) Integer turbineId) {
-        //先找modelId
+    public EwsResult<?> getNowWarningList(
+            @RequestParam(value = "page") int page,
+            @RequestParam(value = "page_size") int pageSize,
+            @RequestParam(value = "warning_level", required = false) Integer warningLevel,
+            @RequestParam(value = "company_id", required = false) Integer companyId,
+            @RequestParam(value = "windfarm_id", required = false) Integer windfarmId,
+            @RequestParam(value = "module_id", required = false) Integer moduleId,
+            @RequestParam(value = "turbine_id", required = false) Integer turbineId) {
+
+        // 先找 modelId
         QueryWrapper<Models> queryWrapper = new QueryWrapper<>();
         if (moduleId != null) {
             queryWrapper.eq("module_id", moduleId);
         }
         if (turbineId != null) {
             queryWrapper.eq("turbine_id", turbineId);
-        }
-        else{
-            List<Integer> turbineList = new ArrayList<>();
-            if (companyId != null) {
-                if (windfarmId != null) {
-                    turbineList = windTurbineMapper.selectList(
-                            new QueryWrapper<WindTurbine>().eq("wind_farm_id", windfarmId)
-                    ).stream().map(WindTurbine::getTurbineId).collect(Collectors.toList());
-                }
-                else {
-                    List<Integer> windfarmList = windFarmMapper.selectList(
-                            new QueryWrapper<WindFarm>().eq("company_id", companyId)
-                    ).stream().map(WindFarm::getWindFarmId).collect(Collectors.toList());
-                    turbineList = windTurbineMapper.selectList(
-                            new QueryWrapper<WindTurbine>().in("wind_farm_id", windfarmList)
-                    ).stream().map(WindTurbine::getTurbineId).collect(Collectors.toList());
-                }
-            }
+        } else {
+            List<Integer> turbineList = getTurbineIds(companyId, windfarmId);
             if (!turbineList.isEmpty()) {
                 queryWrapper.in("turbine_id", turbineList);
             }
         }
         List<Integer> modelIdlist = modelsService.list(queryWrapper).stream().map(Models::getModelId).collect(Collectors.toList());
 
+        // 如果 modelIdlist 为空，直接返回空结果
+        if (modelIdlist.isEmpty()) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("warningList", new ArrayList<>());
+            result.put("total_count", 0);
+            result.put("page", page);
+            result.put("page_size", pageSize);
+            result.put("total_pages", 0);
+            return EwsResult.OK("查询成功", result);
+        }
+
+        // 查询警告信息
         Page<Warnings> warningsPage = new Page<>(page, pageSize);
         QueryWrapper<Warnings> queryWrapper2 = new QueryWrapper<>();
         queryWrapper2.in("model_id", modelIdlist);
+
+        // 处理时间范围
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String endDate = LocalDateTime.now().format(formatter);
         String startDate = LocalDateTime.now().minusHours(1).format(formatter);
         queryWrapper2.ge("end_time", startDate).le("end_time", endDate);
-        if(warningLevel != null){
+
+        // 处理警告级别
+        if (warningLevel != null) {
             queryWrapper2.eq("warning_level", warningLevel);
         }
+
+        // 执行查询
         Page<Warnings> page1 = warningService.page(warningsPage, queryWrapper2);
-//        if (page1.getRecords().isEmpty()) {
-//            throw new CrudException("查询结果为空");
-//        }
-        Map<String,Object> result = new HashMap<>();
-        if(!page1.getRecords().isEmpty()){
+
+        // 构建返回结果
+        Map<String, Object> result = new HashMap<>();
+        if (!page1.getRecords().isEmpty()) {
             List<WarningsVO> WarningsListVO = warningMapper.getWarningsByModelId(page1.getRecords());
-            result.put("warningList",WarningsListVO);
-        }else {
-            result.put("warningList",new ArrayList<>());
+            result.put("warningList", WarningsListVO);
+        } else {
+            result.put("warningList", new ArrayList<>());
         }
-        result.put("total_count",page1.getTotal());
-        result.put("page",page1.getCurrent());
-        result.put("page_size",page1.getSize());
-        result.put("total_pages",page1.getPages());
+        result.put("total_count", page1.getTotal());
+        result.put("page", page1.getCurrent());
+        result.put("page_size", page1.getSize());
+        result.put("total_pages", page1.getPages());
         return EwsResult.OK("查询成功", result);
     }
+
+    /**
+     * 获取 turbineId 列表
+     */
+    private List<Integer> getTurbineIds(Integer companyId, Integer windfarmId) {
+        List<Integer> turbineList = new ArrayList<>();
+        if (companyId != null) {
+            if (windfarmId != null) {
+                turbineList = windTurbineMapper.selectList(
+                        new QueryWrapper<WindTurbine>().eq("wind_farm_id", windfarmId)
+                ).stream().map(WindTurbine::getTurbineId).collect(Collectors.toList());
+            } else {
+                List<Integer> windfarmList = windFarmMapper.selectList(
+                        new QueryWrapper<WindFarm>().eq("company_id", companyId)
+                ).stream().map(WindFarm::getWindFarmId).collect(Collectors.toList());
+                turbineList = windTurbineMapper.selectList(
+                        new QueryWrapper<WindTurbine>().in("wind_farm_id", windfarmList)
+                ).stream().map(WindTurbine::getTurbineId).collect(Collectors.toList());
+            }
+        }
+        return turbineList;
+    }
+
     /**
      * 查询预警详情趋势数据
      * @param queryWarnDetailsDTO queryWarnDetailsDTO
