@@ -446,8 +446,8 @@ public class WarningController {
      * @param queryTurbineWarnMatrixDTO queryWarnDetailsDTO
      * @return EwsResult<List<TurbineWarnMatrixDTO>>
      */
-    @RequestMapping(value = "/queryTurbineWarnMatrix",method = RequestMethod.POST)
-    public EwsResult<List<TurbineWarnMatrixDTO>> queryTurbineWarnMatrix(@Valid @RequestBody QueryTurbineWarnMatrixDTO queryTurbineWarnMatrixDTO){
+    @RequestMapping(value = "/queryTurbineWarnMatrix", method = RequestMethod.POST)
+    public EwsResult<List<TurbineWarnMatrixDTO>> queryTurbineWarnMatrix(@Valid @RequestBody QueryTurbineWarnMatrixDTO queryTurbineWarnMatrixDTO) {
         List<WindFarm> list = getWindFarmList(queryTurbineWarnMatrixDTO.getWindFarmId());
         List<TurbineWarnMatrixDTO> result = new ArrayList<>();
         WarnCountDTO warnCountDTO;
@@ -456,15 +456,18 @@ public class WarningController {
             turbineWarnMatrixDTO = new TurbineWarnMatrixDTO();
             turbineWarnMatrixDTO.setWindFarmName(windFarm.getWindFarmName());
             Integer windFarmId = windFarm.getWindFarmId();
+            // 获取风场下的风机列表
             LambdaQueryWrapper<WindTurbine> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(WindTurbine::getWindFarmId,windFarmId);
+            queryWrapper.eq(WindTurbine::getWindFarmId, windFarmId);
             List<WindTurbine> windTurbines = windTurbineService.list(queryWrapper);
             List<WarnCountDTO> warnCounts = new ArrayList<>();
             for (WindTurbine windTurbine : windTurbines) {
                 warnCountDTO = new WarnCountDTO();
                 warnCountDTO.setTurbineId(windTurbine.getTurbineId());
+                // 解析风机编号
                 String turbineNumber = getTurbineNumber(windTurbine.getTurbineName());
                 warnCountDTO.setTurbineNumber(Integer.parseInt(turbineNumber));
+                // 获取警告数量
                 int warnCount = getWarnCount(windTurbine.getTurbineId(), queryTurbineWarnMatrixDTO);
                 warnCountDTO.setWarnCount(warnCount);
                 warnCounts.add(warnCountDTO);
@@ -517,20 +520,36 @@ public class WarningController {
      * @param turbineId 风机id
      * @return String 风机预警总数量
      */
-    public int getWarnCount(Integer turbineId,QueryTurbineWarnMatrixDTO queryTurbineWarnMatrixDTO){
+    public int getWarnCount(Integer turbineId, QueryTurbineWarnMatrixDTO queryTurbineWarnMatrixDTO) {
         int warnCount = 0;
+
+        // 获取 modelIds
         LambdaQueryWrapper<Models> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Models::getTurbineId, turbineId);
-        List<Integer> modelIds = modelsService.list(queryWrapper).stream().map(Models::getModelId).collect(Collectors.toList());
+        List<Integer> modelIds = modelsService.list(queryWrapper).stream()
+                .map(Models::getModelId)
+                .collect(Collectors.toList());
+
+        // 如果 modelIds 为空，直接返回 0
+        if (CollectionUtils.isEmpty(modelIds)) {
+            return warnCount;
+        }
+
+        // 构建警告查询条件
         LambdaQueryWrapper<Warnings> warningsWrapper = new LambdaQueryWrapper<>();
-        warningsWrapper.in(Warnings::getModelId,modelIds)
-                .ge(Warnings::getStartTime,queryTurbineWarnMatrixDTO.getStartDate()).le(Warnings::getEndTime,queryTurbineWarnMatrixDTO.getEndDate());
+        warningsWrapper.in(Warnings::getModelId, modelIds)
+                .ge(Warnings::getStartTime, queryTurbineWarnMatrixDTO.getStartDate())
+                .le(Warnings::getEndTime, queryTurbineWarnMatrixDTO.getEndDate());
+
+        // 查询警告数量
         List<Warnings> warnings = warningService.list(warningsWrapper);
-        if (!CollectionUtils.isEmpty(warnings)){
+        if (!CollectionUtils.isEmpty(warnings)) {
             warnCount += warnings.size();
         }
+
         return warnCount;
     }
+
 
     /**
      * 概览-预警列表
