@@ -72,6 +72,16 @@ public class ReportsServiceImpl extends ServiceImpl<ReportsMapper, Reports> impl
         Page<Reports> page = new Page<>(queryReportsDTO.getPageNo(), queryReportsDTO.getPageSize());
         QueryWrapper<Reports> queryWrapper = new QueryWrapper<>();
         List<Integer> turbineIds = new ArrayList<>();
+        if (queryReportsDTO.getCompanyId() != null){
+            List<Integer> windFarmList = windFarmService.list(new QueryWrapper<WindFarm>().eq("company_id", queryReportsDTO.getCompanyId()))
+                    .stream()
+                    .map(WindFarm::getWindFarmId)
+                    .collect(Collectors.toList());
+            turbineIds = windTurbineService.list(new QueryWrapper<WindTurbine>().in("wind_farm_id", windFarmList))
+                    .stream()
+                    .map(WindTurbine::getTurbineId)
+                    .collect(Collectors.toList());
+        }
         if(queryReportsDTO.getWindFarmId() != null){
             turbineIds = windTurbineService.list(new QueryWrapper<WindTurbine>().eq("wind_farm_id", queryReportsDTO.getWindFarmId()))
                                         .stream()

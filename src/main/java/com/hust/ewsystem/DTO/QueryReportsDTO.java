@@ -48,6 +48,11 @@ public class QueryReportsDTO implements Serializable {
     private Integer windFarmId;
 
     /**
+     * 公司ID
+     */
+    private Integer companyId;
+
+    /**
      * 开始时间
      */
     @NotNull(message = "开始时间不能为空")
