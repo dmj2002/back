@@ -566,8 +566,6 @@ public class ModelsController {
                     for (Object value : rangeRaw) {
                         if (value instanceof Number) {
                             range.add(((Number) value).doubleValue());
-                        } else {
-                            continue; // 如果包含非数字类型，跳过
                         }
                     }
 
@@ -602,8 +600,7 @@ public class ModelsController {
                 return EwsResult.error("修改阈值失败");
             }
         }
-
-else {
+        else {
             try {
                 // 拼接文件路径
                 String resultFilePath = pythonFilePath + "/" + modelLabel + "/model.json";
