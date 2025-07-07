@@ -23,6 +23,8 @@ public interface WarningMapper extends BaseMapper<Warnings> {
 
     ModulePointVO getModuleIdByWarningId(@Param("warningId")Integer warningId);
 
+    String getRealDescByStandId(@Param("standPointId") Integer standPointId, @Param("turbineId") Integer turbineId);
+
     List<WarningsVO> getWarningsByModelId(@Param("records") List<Warnings> records);
 
     Integer getTurbineIdByWarningId(@Param("warningId") Integer warningId);

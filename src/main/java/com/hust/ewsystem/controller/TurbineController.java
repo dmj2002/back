@@ -7,16 +7,12 @@ import com.hust.ewsystem.DTO.TurbineDetailsInfoDTO;
 import com.hust.ewsystem.VO.ModulePointVO;
 import com.hust.ewsystem.VO.StandPointUsedVO;
 import com.hust.ewsystem.common.result.EwsResult;
-import com.hust.ewsystem.entity.Module;
-import com.hust.ewsystem.entity.ModuleStandRelate;
-import com.hust.ewsystem.entity.StandPoint;
-import com.hust.ewsystem.entity.WindTurbine;
+import com.hust.ewsystem.entity.*;
 import com.hust.ewsystem.mapper.ModuleStandRelateMapper;
 import com.hust.ewsystem.mapper.WarningMapper;
 import com.hust.ewsystem.mapper.WindFarmMapper;
-import com.hust.ewsystem.service.ModuleService;
-import com.hust.ewsystem.service.StandPointService;
-import com.hust.ewsystem.service.WindTurbineService;
+import com.hust.ewsystem.service.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -60,6 +56,12 @@ public class TurbineController {
     @Resource
     private WarningMapper warningMapper;
 
+    @Resource
+    private StandRealRelateService standRealRelateService;
+
+    @Resource
+    private ModelsService modelsService;
+
     /**
      * 查询模块信息
      * @param
@@ -67,11 +69,13 @@ public class TurbineController {
      */
     @RequestMapping(value = "/getTurbineInfo",method = RequestMethod.GET)
     public EwsResult<List<TurbineDetailsInfoDTO>> getTurbineInfo(@RequestParam(value = "warningId") Integer warningId){
+        Integer modelId = warningMapper.selectOne(new QueryWrapper<Warnings>().lambda().eq(Warnings::getWarningId, warningId)).getModelId();
+        Integer turbineId = modelsService.getOne(new QueryWrapper<Models>().eq("model_id", modelId)).getTurbineId();
         List<Module> list = moduleService.list();
         if (CollectionUtils.isEmpty(list)) {
             return EwsResult.error(String.format("获取模块信息为空"));
         }
-        List<TurbineDetailsInfoDTO> turbineDetailsInfoDTOS = initResult(list);
+        List<TurbineDetailsInfoDTO> turbineDetailsInfoDTOS = initResult(list,turbineId);
         if(warningId != null){
             ModulePointVO StandPointIds = warningMapper.getModuleIdByWarningId(warningId);
             for (TurbineDetailsInfoDTO turbineDetailsInfoDTO : turbineDetailsInfoDTOS) {
@@ -106,7 +110,7 @@ public class TurbineController {
      * @param moduleList 风机信息结果
      * @return TurbineInfoDTO
      */
-    public List<TurbineDetailsInfoDTO> initResult(List<Module> moduleList){
+    public List<TurbineDetailsInfoDTO> initResult(List<Module> moduleList,Integer turbineId){
         List<TurbineDetailsInfoDTO> detailsInfoList =  new ArrayList<>(moduleList.size());
         TurbineDetailsInfoDTO turbineDetailsInfoDTO;
         QueryWrapper<ModuleStandRelate> queryWrapper;
@@ -120,10 +124,12 @@ public class TurbineController {
             List<StandPoint> standPoints = standPointService.listByIds(StandPointIds);
             List<StandPointUsedVO> list = standPoints.stream()
                     .map(standPoint -> {
+                        // 初始化StandPointUsedVO对象
+                        String realDescByStandId = warningMapper.getRealDescByStandId(standPoint.getPointId(), turbineId);
                         StandPointUsedVO vo = new StandPointUsedVO();
                         vo.setPointId(standPoint.getPointId());
                         vo.setPointLabel(standPoint.getPointLabel());
-                        vo.setPointDescription(standPoint.getPointDescription());
+                        vo.setPointDescription(realDescByStandId);
                         vo.setUsed(0);
                         return vo;
                     })
