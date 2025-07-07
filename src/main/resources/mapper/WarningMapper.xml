@@ -165,10 +165,10 @@
         JOIN algorithm_stand_relate asr ON a.algorithm_id = asr.algorithm_id
         WHERE w.warning_id = #{warningId}
     </select>
-    <select id="getRealDescByStand" resultType="java.lang.String">
+    <select id="getRealDescByStandId" resultType="java.lang.String">
         SELECT r.point_description
         FROM stand_point sp
-        JOIN stand_real_relate srr ON stand_point.point_id = srr.stand_point_id
+        JOIN stand_real_relate srr ON sp.point_id = srr.stand_point_id
         JOIN real_point r ON srr.real_point_id = r.point_id
         WHERE sp.point_id = #{standPointId} and r.turbine_id = #{turbineId}
     </select>
