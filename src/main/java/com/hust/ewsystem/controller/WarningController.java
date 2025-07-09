@@ -30,11 +30,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -659,16 +655,37 @@ public class WarningController {
         String adjustedStartTime = adjustedDateTime.format(formatter);
         List<StandPointDTO> standPointDTOList = new ArrayList<>();
         pictureStandRelateMapper.selectList(new QueryWrapper<PictureStandRelate>().eq("picture_id", picture.getId())).forEach(pictureStandRelate -> {
-            StandPointDTO standPointDTO = new StandPointDTO();
-            standPointDTO.setPointId(pictureStandRelate.getStandPointId());
-            StandPoint standPoint = standPointService.getById(pictureStandRelate.getStandPointId());
-            standPointDTO.setPointDescription(standPoint.getPointDescription());
-            List<Integer> realPointIds = standRealRelateService.list(new QueryWrapper<StandRealRelate>().eq("stand_point_id", pictureStandRelate.getStandPointId())).stream().map(StandRealRelate::getRealPointId).collect(Collectors.toList());
-            RealPoint one = realPointService.getOne(new QueryWrapper<RealPoint>().in("point_id", realPointIds).eq("turbine_id", turbineId));
-            List<CommonData> commonData = commonDataService.selectDataByTime(one.getPointLabel().toLowerCase(), adjustedStartTime, endTime);
-            standPointDTO.setPointValue(commonData);
-            standPointDTOList.add(standPointDTO);
+            try {
+                StandPointDTO standPointDTO = new StandPointDTO();
+                standPointDTO.setPointId(pictureStandRelate.getStandPointId());
+                StandPoint standPoint = standPointService.getById(pictureStandRelate.getStandPointId());
+                standPointDTO.setPointDescription(standPoint.getPointDescription());
+
+                List<Integer> realPointIds = standRealRelateService.list(new QueryWrapper<StandRealRelate>().eq("stand_point_id", pictureStandRelate.getStandPointId()))
+                        .stream()
+                        .map(StandRealRelate::getRealPointId)
+                        .collect(Collectors.toList());
+
+                // 使用 Optional 避免空指针
+                Optional<RealPoint> optionalRealPoint = Optional.ofNullable(
+                        realPointService.getOne(new QueryWrapper<RealPoint>().in("point_id", realPointIds).eq("turbine_id", turbineId))
+                );
+
+                if (optionalRealPoint.isPresent()) {
+                    RealPoint one = optionalRealPoint.get();
+                    List<CommonData> commonData = commonDataService.selectDataByTime(one.getPointLabel().toLowerCase(), adjustedStartTime, endTime);
+                    standPointDTO.setPointValue(commonData);
+                    standPointDTOList.add(standPointDTO);
+                } else {
+                    // 如果 one 为空，跳过当前循环，不添加 standPointDTO
+                    System.out.println("RealPoint is null, skipping this picture.");
+                }
+            } catch (Exception e) {
+                // 捕获异常，避免程序中断
+                System.err.println("Error processing pictureStandRelate: " + e.getMessage());
+            }
         });
+
         picturesVO.setPoints(standPointDTOList);
         return picturesVO;
     }
