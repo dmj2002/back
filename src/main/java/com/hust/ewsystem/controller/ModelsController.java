@@ -540,7 +540,7 @@ public class ModelsController {
         String modelLabel = model.getModelLabel();
         Integer algorithmId = model.getAlgorithmId();
         Object items = thresholdDTO.getItems();
-        if (algorithmId == 1 || algorithmId == 19 || algorithmId == 20) {
+        if (algorithmId == 1 || algorithmId == 19 || algorithmId == 20 || algorithmId==23 || algorithmId==42 || algorithmId==45 || algorithmId==64) {
             File resultFile = new File(pythonFilePath + "/" + modelLabel + "/model.json");
             try {
                 // 使用 StringBuilder 和 BufferedReader 读取文件内容
