@@ -31,7 +31,7 @@ public class WarningsVO {
 
     private Integer transferredToWorkOrder; // 是否转入工单
 
-    private Integer taskId; // 任务id
+    private Long taskId; // 任务id
 
     private String turbineName; // 风机名称
 

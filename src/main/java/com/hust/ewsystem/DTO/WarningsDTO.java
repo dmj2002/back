@@ -76,7 +76,7 @@ public class WarningsDTO implements Serializable {
     /**
      * 任务 id
      */
-    private Integer taskId;
+    private Long taskId;
 
     /**
      * 风机风场名称

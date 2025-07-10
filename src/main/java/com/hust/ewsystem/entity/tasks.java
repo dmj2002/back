@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class tasks {
 
     @TableId(type = IdType.AUTO)
-    private Integer taskId;
+    private Long taskId;
 
     private String taskLabel;
 

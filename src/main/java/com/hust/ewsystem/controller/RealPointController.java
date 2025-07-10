@@ -59,8 +59,6 @@ public class RealPointController {
 
         Page<RealPoint> page1 = realPointService.page(modelsPage, queryWrapper);
 
-
-
         response.put("total_count",page1.getTotal());
         response.put("page",page1.getCurrent());
         response.put("page_size",page1.getSize());
