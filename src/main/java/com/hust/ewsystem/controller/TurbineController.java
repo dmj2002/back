@@ -8,6 +8,7 @@ import com.hust.ewsystem.VO.ModulePointVO;
 import com.hust.ewsystem.VO.StandPointUsedVO;
 import com.hust.ewsystem.common.result.EwsResult;
 import com.hust.ewsystem.entity.*;
+import com.hust.ewsystem.entity.Module;
 import com.hust.ewsystem.mapper.ModuleStandRelateMapper;
 import com.hust.ewsystem.mapper.WarningMapper;
 import com.hust.ewsystem.mapper.WindFarmMapper;
@@ -110,7 +111,7 @@ public class TurbineController {
      * @param moduleList 风机信息结果
      * @return TurbineInfoDTO
      */
-    public List<TurbineDetailsInfoDTO> initResult(List<Module> moduleList,Integer turbineId){
+    public List<TurbineDetailsInfoDTO> initResult(List<Module> moduleList, Integer turbineId){
         List<TurbineDetailsInfoDTO> detailsInfoList =  new ArrayList<>(moduleList.size());
         TurbineDetailsInfoDTO turbineDetailsInfoDTO;
         QueryWrapper<ModuleStandRelate> queryWrapper;
