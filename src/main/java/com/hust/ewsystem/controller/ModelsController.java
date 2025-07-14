@@ -420,6 +420,12 @@ public class ModelsController {
         if(modelList.get(0) == 0){
             //如果传入的modelId是0，表示所有模型都要预测
             modelList = modelsService.list(new QueryWrapper<Models>().select("model_id")).stream().map(Models::getModelId).collect(Collectors.toList());
+        }else if(modelList.get(0) == -1){
+            List<Integer> turbineIds = windTurbineMapper.selectList(new QueryWrapper<WindTurbine>().in("wind_farm_id", 1, 2)).stream().map(WindTurbine::getTurbineId).collect(Collectors.toList());
+            modelList = modelsService.list(new QueryWrapper<Models>().in("turbine_id", turbineIds).select("model_id")).stream().map(Models::getModelId).collect(Collectors.toList());
+        }else if(modelList.get(0) == -2){
+            List<Integer> turbineIds = windTurbineMapper.selectList(new QueryWrapper<WindTurbine>().in("wind_farm_id", 3, 4)).stream().map(WindTurbine::getTurbineId).collect(Collectors.toList());
+            modelList = modelsService.list(new QueryWrapper<Models>().in("turbine_id", turbineIds).select("model_id")).stream().map(Models::getModelId).collect(Collectors.toList());
         }
         for(Integer modelId : modelList) {
             //获取返回值
